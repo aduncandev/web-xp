@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" type="text/css" href="main.css">
+    <link rel="stylesheet" type="text/css" href="animate.css">
+    <link rel="shortcut icon" href="favicon.co">
+    <title>Voltorb Flip</title>
+</head>
+
+<body>
+
+    <audio id="background-music" src="voltorbflipsounds/gamecorner.mp3" autoplay loop></audio>
+
+    <div class="score-container">
+        <div class="level-container">Level: <span id="level">1</span></div>
+        <div class="total-coins">Total Coins: <span id="total-coins">00000</span></div>
+        <div class="current-coins">Coins collected this level: <span id="current-coins">00000</span></div>
+    </div>
+    <div class="game-container">
+        <div class="game-row">
+            <div class="board-container">
+                <div class="board-row">
+                    <div class="tile">
+                        <div class="tile_face tile_front"></div>
+                        <div class="tile_face tile_back"></div>
+                    </div>
+                    <div class="tile">
+                        <div class="tile_face tile_front"></div>
+                        <div class="tile_face tile_back"></div>
+                    </div>
+                    <div class="tile">
+                        <div class="tile_face tile_front"></div>
+                        <div class="tile_face tile_back"></div>
+                    </div>
+                    <div class="tile">
+                        <div class="tile_face tile_front"></div>
+                        <div class="tile_face tile_back"></div>
+                    </div>
+                    <div class="tile">
+                        <div class="tile_face tile_front"></div>
+                        <div class="tile_face tile_back"></div>
+                    </div>
+                </div>
+                <div class="board-row">
+                    <div class="tile">
+                        <div class="tile_face tile_front"></div>
+                        <div class="tile_face tile_back"></div>
+                    </div>
+                    <div class="tile">
+                        <div class="tile_face tile_front"></div>
+                        <div class="tile_face tile_back"></div>
+                    </div>
+                    <div class="tile">
+                        <div class="tile_face tile_front"></div>
+                        <div class="tile_face tile_back"></div>
+                    </div>
+                    <div class="tile">
+                        <div class="tile_face tile_front"></div>
+                        <div class="tile_face tile_back"></div>
+                    </div>
+                    <div class="tile">
+                        <div class="tile_face tile_front"></div>
+                        <div class="tile_face tile_back"></div>
+                    </div>
+                </div>
+                <div class="board-row">
+                    <div class="tile">
+                        <div class="tile_face tile_front"></div>
+                        <div class="tile_face tile_back"></div>
+                    </div>
+                    <div class="tile">
+                        <div class="tile_face tile_front"></div>
+                        <div class="tile_face tile_back"></div>
+                    </div>
+                    <div class="tile">
+                        <div class="tile_face tile_front"></div>
+                        <div class="tile_face tile_back"></div>
+                    </div>
+                    <div class="tile">
+                        <div class="tile_face tile_front"></div>
+                        <div class="tile_face tile_back"></div>
+                    </div>
+                    <div class="tile">
+                        <div class="tile_face tile_front"></div>
+                        <div class="tile_face tile_back"></div>
+                    </div>
+                </div>
+                <div class="board-row">
+                    <div class="tile">
+                        <div class="tile_face tile_front"></div>
+                        <div class="tile_face tile_back"></div>
+                    </div>
+                    <div class="tile">
+                        <div class="tile_face tile_front"></div>
+                        <div class="tile_face tile_back"></div>
+                    </div>
+                    <div class="tile">
+                        <div class="tile_face tile_front"></div>
+                        <div class="tile_face tile_back"></div>
+                    </div>
+                    <div class="tile">
+                        <div class="tile_face tile_front"></div>
+                        <div class="tile_face tile_back"></div>
+                    </div>
+                    <div class="tile">
+                        <div class="tile_face tile_front"></div>
+                        <div class="tile_face tile_back"></div>
+                    </div>
+                </div>
+                <div class="board-row">
+                    <div class="tile">
+                        <div class="tile_face tile_front"></div>
+                        <div class="tile_face tile_back"></div>
+                    </div>
+                    <div class="tile">
+                        <div class="tile_face tile_front"></div>
+                        <div class="tile_face tile_back"></div>
+                    </div>
+                    <div class="tile">
+                        <div class="tile_face tile_front"></div>
+                        <div class="tile_face tile_back"></div>
+                    </div>
+                    <div class="tile">
+                        <div class="tile_face tile_front"></div>
+                        <div class="tile_face tile_back"></div>
+                    </div>
+                    <div class="tile">
+                        <div class="tile_face tile_front"></div>
+                        <div class="tile_face tile_back"></div>
+                    </div>
+                </div>
+                <div class="game-message hidden"></div>
+            </div>
+
+            <div class="info_container info_rows">
+                <div class="info info-1">
+                    <div class="info_points"></div>
+                    <div class="info_bombs"></div>
+                </div>
+                <div class="info info-2">
+                    <div class="info_points"></div>
+                    <div class="info_bombs"></div>
+                </div>
+                <div class="info info-3">
+                    <div class="info_points"></div>
+                    <div class="info_bombs"></div>
+                </div>
+                <div class="info info-4">
+                    <div class="info_points"></div>
+                    <div class="info_bombs"></div>
+                </div>
+                <div class="info info-5">
+                    <div class="info_points"></div>
+                    <div class="info_bombs"></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="game-row">
+            <div class="info_container info_cols">
+                <div class="info info-1">
+                    <div class="info_points"></div>
+                    <div class="info_bombs"></div>
+                </div>
+                <div class="info info-2">
+                    <div class="info_points"></div>
+                    <div class="info_bombs"></div>
+                </div>
+                <div class="info info-3">
+                    <div class="info_points"></div>
+                    <div class="info_bombs"></div>
+                </div>
+                <div class="info info-4">
+                    <div class="info_points"></div>
+                    <div class="info_bombs"></div>
+                </div>
+                <div class="info info-5">
+                    <div class="info_points"></div>
+                    <div class="info_bombs"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="code/jquery-3.3.1.min.js"></script>
+    <script src="code/chance.min.js"></script>
+    <script src="code/levels.js"></script>
+    <script src="code/info.js"></script>
+    <script src="code/tile.js"></script>
+    <script src="code/board.js"></script>
+    <script src="code/htmlManager.js"></script>
+    <script src="code/gameManager.js"></script>
+    <script src="code/application.js"></script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const backgroundMusic = document.getElementById('background-music');
+            let fadeInterval = null;
+            const FADE_TIME_MS = 300; // Duration of the fade in milliseconds
+            const FADE_INTERVAL_MS = 5; // How often to update volume during fade
+            const MAX_VOLUME = 0.4; // Max volume for the music (0.0 to 1.0)
+            let currentExpectedParentOrigin = '*';
+            let isInitialFocus = true; // Flag to track the first focus event
+
+            if (!backgroundMusic) {
+                console.error("Voltorb Flip Iframe: Background music element with ID 'background-music' not found!");
+                return;
+            }
+
+            backgroundMusic.volume = 0; // Start silent
+
+            // Attempt to determine the parent origin for secure postMessage
+            if (document.referrer && document.referrer !== "") {
+                try {
+                    currentExpectedParentOrigin = new URL(document.referrer).origin;
+                    // console.log("Voltorb Flip Iframe: Determined parent origin from document.referrer:", currentExpectedParentOrigin);
+                } catch (e) {
+                    // console.warn("Voltorb Flip Iframe: Could not parse document.referrer. Using '*' for parent origin. Referrer:", document.referrer, "Error:", e);
+                    currentExpectedParentOrigin = '*';
+                }
+            } else if (window.location.ancestorOrigins && window.location.ancestorOrigins.length > 0) {
+                currentExpectedParentOrigin = window.location.ancestorOrigins[0];
+                // console.log("Voltorb Flip Iframe: Determined parent origin from ancestorOrigins:", currentExpectedParentOrigin);
+            } else {
+                // console.warn("Voltorb Flip Iframe: Cannot determine parent origin securely. Using '*' for message sending/receiving.");
+                currentExpectedParentOrigin = '*';
+            }
+
+            function fadeAudio(targetVolume, onComplete) {
+                if (fadeInterval) {
+                    clearInterval(fadeInterval);
+                    fadeInterval = null;
+                }
+                const currentVolume = backgroundMusic.volume;
+                const volumeChange = targetVolume - currentVolume;
+
+                if (Math.abs(volumeChange) < 0.01 && backgroundMusic.volume.toFixed(2) === targetVolume.toFixed(2)) {
+                    if (targetVolume === 0 && !backgroundMusic.paused) backgroundMusic.pause();
+                    else if (targetVolume > 0 && backgroundMusic.paused) {
+                        backgroundMusic.play().catch(e => console.warn("Voltorb Flip Iframe: Play attempt during fade (already at target) failed:", e));
+                    }
+                    if (onComplete) onComplete();
+                    return;
+                }
+                const numSteps = Math.max(1, FADE_TIME_MS / FADE_INTERVAL_MS);
+                const volumeStep = volumeChange / numSteps;
+                let currentStep = 0;
+
+                if (targetVolume > 0 && backgroundMusic.paused) {
+                    backgroundMusic.play().catch(error => {
+                        // console.warn("Voltorb Flip Iframe: Music play() failed at start of fadeAudio. Error:", error);
+                    });
+                }
+                fadeInterval = setInterval(() => {
+                    currentStep++;
+                    let newVolume = currentVolume + (volumeStep * currentStep);
+                    if (volumeStep > 0) { newVolume = Math.min(newVolume, targetVolume); }
+                    else { newVolume = Math.max(newVolume, targetVolume); }
+                    newVolume = Math.max(0, Math.min(1, newVolume));
+                    backgroundMusic.volume = newVolume;
+                    if (currentStep >= numSteps) {
+                        backgroundMusic.volume = targetVolume;
+                        clearInterval(fadeInterval);
+                        fadeInterval = null;
+                        if (targetVolume === 0 && !backgroundMusic.paused) backgroundMusic.pause();
+                        if (onComplete) onComplete();
+                    }
+                }, FADE_INTERVAL_MS);
+            }
+
+            function handleFocusChange(focused) {
+                // console.log(`Voltorb Flip Iframe: handleFocusChange called - focused: ${focused}, isInitialFocus: ${isInitialFocus}`);
+                if (focused) {
+                    backgroundMusic.play().then(() => {
+                        if (isInitialFocus) {
+                            // console.log("Voltorb Flip Iframe: Initial focus, setting volume directly to MAX_VOLUME.");
+                            backgroundMusic.volume = MAX_VOLUME;
+                            isInitialFocus = false;
+                        } else {
+                            // console.log("Voltorb Flip Iframe: Re-focused, fading in to MAX_VOLUME.");
+                            fadeAudio(MAX_VOLUME);
+                        }
+                    }).catch(error => {
+                        // console.warn("Voltorb Flip Iframe: Playback on focus failed. Error:", error);
+                        if (isInitialFocus) {
+                            backgroundMusic.volume = MAX_VOLUME;
+                            isInitialFocus = false;
+                        } else {
+                            fadeAudio(MAX_VOLUME);
+                        }
+                    });
+                } else {
+                    // console.log("Voltorb Flip Iframe: Fading out and pausing music.");
+                    isInitialFocus = false; // Once blurred, subsequent focus will fade
+                    fadeAudio(0);
+                }
+            }
+
+            window.addEventListener('message', (event) => {
+                if (currentExpectedParentOrigin !== '*' && event.origin !== currentExpectedParentOrigin) {
+                    // console.warn(`Voltorb Flip Iframe: Message from unexpected origin '${event.origin}' rejected. Expected '${currentExpectedParentOrigin}'.`);
+                    return;
+                }
+                const messageData = event.data;
+                if (messageData && typeof event.data === 'object' && event.data.type === 'VOLTORB_FLIP_FOCUS_CHANGE') {
+                    if (typeof event.data.focused === 'boolean') {
+                        handleFocusChange(event.data.focused);
+                    } else {
+                        // console.warn("Voltorb Flip Iframe: Received VOLTORB_FLIP_FOCUS_CHANGE but 'focused' is not boolean.", event.data);
+                    }
+                }
+            });
+
+            if (window.parent && window.parent !== window) {
+                // console.log(`Voltorb Flip Iframe: DOMContentLoaded. Sending IFRAME_READY to parent at determined origin: ${currentExpectedParentOrigin}`);
+                window.parent.postMessage({ type: 'VOLTORB_FLIP_IFRAME_READY' }, currentExpectedParentOrigin);
+            } else {
+                // console.log("Voltorb Flip Iframe: No parent window. Setting up local focus/blur handlers.");
+                if (document.hasFocus()) {
+                    handleFocusChange(true);
+                }
+                window.addEventListener('focus', () => handleFocusChange(true));
+                window.addEventListener('blur', () => handleFocusChange(false));
+            }
+        });
+    </script>
+</body>
+
+</html>
