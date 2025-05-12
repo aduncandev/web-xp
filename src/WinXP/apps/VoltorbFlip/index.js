@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useCallback, useState } from 'react';
 import styled from 'styled-components';
 
 function VoltorbFlip({ isFocus }) {
-  const gameUrl = `https://aduncan.dev/voltorb_flip/index.html`;
+  const gameUrl = `https://aduncan.dev/voltorb_flip/`;
   const iframeRef = useRef(null);
   const [iframeReady, setIframeReady] = useState(false);
 
