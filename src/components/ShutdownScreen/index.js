@@ -33,15 +33,15 @@ const ShutdownScreen = ({ finalMessage = 'Windows is shutting down...' }) => {
       position: fixed;
       top: 0;
       left: 0;
-      z-index: 9996; /* Ensure it's above desktop but potentially below other modals if any */
+      z-index: 9996;
       overflow: hidden;
-      background-color: #084DA3; /* Fallback base color */
+      background-color: #00309C; /* Updated background color */
     }
 
     .shutdown-header-bar {
-      min-height: 112px; /* Consistent with login */
+      min-height: 112px;
       width: 100%;
-      background-color: #084DA3;
+      background-color: #00309C; /* Updated background color */
       position: relative;
       z-index: 1;
       flex-shrink: 0;
@@ -53,38 +53,37 @@ const ShutdownScreen = ({ finalMessage = 'Windows is shutting down...' }) => {
       position: absolute;
       bottom: -2px;
       left: 0;
-      background: linear-gradient(270deg, #084DA3 -33.4%, #084DA3 6.07%, #FFFFFF 49.56%, #084DA3 82.59%, #084DA3 121.25%);
+      background: linear-gradient(270deg, #00309C -33.4%, #00309C 6.07%, #FFFFFF 49.56%, #00309C 82.59%, #00309C 121.25%); /* Updated gradient */
     }
 
     .shutdown-main-content {
       flex-grow: 1;
       width: 100%;
-      background: radial-gradient(19.48% 42.48% at 10% 22.48%, #9CC0E9 0%, #508FD9 100%);
-      display: flex; /* Use flex to center content */
-      flex-direction: column; /* Stack logo and text */
-      align-items: center; /* Center horizontally */
-      justify-content: center; /* Center vertically */
+      background: radial-gradient(19.48% 42.48% at 10% 22.48%, #9CC0E9 0%, #5A7EDC 100%); /* Updated background gradient */
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
       padding: 20px;
       color: white;
       position: relative;
       z-index: 0;
       text-align: center;
     }
-     /* Top Shine Effect for the main gradient area */
     .shutdown-main-content::before {
         content: '';
         position: absolute;
         top: 0;
         left: 0;
         width: 100%;
-        height: 60%; /* Adjust height of shine */
+        height: 60%;
         background: linear-gradient(to bottom, rgba(255, 255, 255, 0.12), rgba(255, 255, 255, 0));
         pointer-events: none;
     }
 
 
     .shutdown-logo {
-      width: 150px; /* Size for the logo on this screen */
+      width: 170px;
       height: auto;
       margin-bottom: 25px;
       filter: drop-shadow(1px 1px 2px rgba(0,0,0,0.3));
@@ -92,15 +91,15 @@ const ShutdownScreen = ({ finalMessage = 'Windows is shutting down...' }) => {
 
     .shutdown-status-message {
       font-family: 'Source Sans Pro', 'Tahoma', sans-serif;
-      font-weight: 400; /* Not too bold */
-      font-size: 1.4em; /* Prominent message */
+      font-weight: 400;
+      font-size: 1.4em;
       text-shadow: 1px 1px 1px rgba(0,0,0,0.2);
     }
 
     .shutdown-footer-bar {
-      min-height: 60px; /* Consistent with login */
+      min-height: 112px; /* Updated min-height */
       width: 100%;
-      background-color: #084DA3;
+      background-color: #00309C; /* Updated background color */
       position: relative;
       z-index: 1;
       flex-shrink: 0;
@@ -112,8 +111,7 @@ const ShutdownScreen = ({ finalMessage = 'Windows is shutting down...' }) => {
       position: absolute;
       top: -2px;
       left: 0;
-      /* Orange line for footer, consistent with login screen's turn off button area */
-      background: linear-gradient(270deg, #084DA3 -33.4%, #084DA3 6.07%, #FF9933 49.56%, #084DA3 82.59%, #084DA3 121.25%);
+      background: linear-gradient(270deg, #00309C -33.4%, #00309C 6.07%, #FF9933 49.56%, #00309C 82.59%, #00309C 121.25%); /* Updated gradient */
     }
   `;
 

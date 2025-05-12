@@ -1,6 +1,7 @@
 // src/components/BootScreen/index.js
 import React from 'react';
 import winLogo from 'assets/windowsIcons/xplogo.png';
+import MicrosoftLogo from 'assets/windowsIcons/microsoft-logo.png';
 
 const BootScreen = () => {
   // --- Further Refined Styles for Boot Screen ---
@@ -24,13 +25,13 @@ const BootScreen = () => {
       padding-bottom: 60px;
     }
     .boot-logo {
-      width: 220px;
+      width: 300px;
       height: auto;
       margin-bottom: 40px;
     }
     /* Loading Bar Styles */
     .loading-bar-container {
-      width: 130px;
+      width: 160px;
       height: 10px;
       background-color: #1a1a1a;
       border: 1px solid #6a6a6a;
@@ -67,7 +68,7 @@ const BootScreen = () => {
     /* Copyright and Bottom Logo Styles */
     .copyright-text {
         position: absolute;
-        bottom: 15px;
+        bottom: 20px;
         left: 25px;
         font-size: 0.75em;
         color: #cccccc;
@@ -75,7 +76,7 @@ const BootScreen = () => {
     }
     .microsoft-logo-bottom {
         position: absolute;
-        bottom: 10px;
+        bottom: 20px;
         right: 25px;
         width: 90px;
         height: auto;
@@ -113,7 +114,7 @@ const BootScreen = () => {
         </div>
         <div className="copyright-text">Copyright © Microsoft Corporation</div>
         <img
-          src="/ms_logo.png"
+          src={MicrosoftLogo}
           alt="Microsoft"
           className="microsoft-logo-bottom"
           onError={e =>

@@ -8,14 +8,14 @@ const WelcomeScreen = () => {
 
   const style = `
     @import url('https://fonts.googleapis.com/css2?family=Tahoma&family=Franklin+Gothic+Medium&display=swap');
-    .welcome-screen-body { height: 100vh; width: 100vw; display: flex; flex-direction: column; font-family: 'Franklin Gothic Medium', 'Tahoma', sans-serif; position: fixed; top: 0; left: 0; z-index: 9997; overflow: hidden; background-color: #084DA3; }
-    .welcome-header-bar { min-height: 112px; width: 100%; background-color: #084DA3; position: relative; flex-shrink: 0; }
-    .welcome-header-bar::before { content: ""; width: 100%; height: 7px; position: absolute; bottom: -2px; left: 0; background: linear-gradient(270deg, #084DA3 -33.4%, #084DA3 6.07%, #FFFFFF 49.56%, #084DA3 82.59%, #084DA3 121.25%); }
-    .welcome-main-area { flex-grow: 1; width: 100%; display: flex; align-items: center; justify-content: center; background: linear-gradient(to bottom, #3A7BD5, #2A5ABC); position: relative; color: white; }
+    .welcome-screen-body { height: 100vh; width: 100vw; display: flex; flex-direction: column; font-family: 'Franklin Gothic Medium', 'Tahoma', sans-serif; position: fixed; top: 0; left: 0; z-index: 9997; overflow: hidden; background-color: #00309C; } /* Updated background color */
+    .welcome-header-bar { min-height: 112px; width: 100%; background-color: #00309C; position: relative; flex-shrink: 0; } /* Updated background color */
+    .welcome-header-bar::before { content: ""; width: 100%; height: 7px; position: absolute; bottom: -2px; left: 0; background: linear-gradient(270deg, #00309C -33.4%, #00309C 6.07%, #FFFFFF 49.56%, #00309C 82.59%, #00309C 121.25%); } /* Updated gradient */
+    .welcome-main-area { flex-grow: 1; width: 100%; display: flex; align-items: center; justify-content: center; background: radial-gradient(19.48% 42.48% at 10% 22.48%, #9CC0E9 0%, #5A7EDC 100%); position: relative; color: white; } /* Updated background gradient */
     .welcome-main-area::before { content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 30%; background: linear-gradient(to bottom, rgba(255, 255, 255, 0.15), rgba(255, 255, 255, 0)); pointer-events: none; }
-    .welcome-text-content { font-size: 3.5em; font-weight: normal; text-shadow: 1px 1px 0px rgba(0, 0, 0, 0.2); position: relative; z-index: 1; }
-    .welcome-footer-bar { min-height: 60px; width: 100%; background-color: #084DA3; position: relative; flex-shrink: 0; }
-    .welcome-footer-bar::before { content: ""; width: 100%; height: 7px; position: absolute; top: -2px; left: 0; background: linear-gradient(270deg, #084DA3 -33.4%, #084DA3 6.07%, #FF9933 49.56%, #084DA3 82.59%, #084DA3 121.25%); }
+    .welcome-text-content { font-size: 3.5em; font-weight: normal; text-shadow: 3px 3px 0px #2B47AB; position: relative; z-index: 1; }
+    .welcome-footer-bar { min-height: 112px; width: 100%; background-color: #00309C; position: relative; flex-shrink: 0; } /* Updated min-height and background color */
+    .welcome-footer-bar::before { content: ""; width: 100%; height: 7px; position: absolute; top: -2px; left: 0; background: linear-gradient(270deg, #00309C -33.4%, #00309C 6.07%, #FF9933 49.56%, #00309C 82.59%, #00309C 121.25%); } /* Updated gradient */
   `;
   return (
     <>

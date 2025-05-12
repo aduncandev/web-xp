@@ -1,8 +1,7 @@
 import React, { useState } from 'react';
 import styled from 'styled-components';
 
-// Placeholder image for the left panel - replace with your desired image URL or import
-const placeholderLeftImage = 'https://aduncan.dev/img/windowsxp.png';
+import placeholderLeftImage from 'assets/windowsIcons/tourimage.png';
 
 // Main component for the About Me application
 function AboutMe({ onClose }) {
@@ -18,10 +17,8 @@ function AboutMe({ onClose }) {
         <>
           <p>Here's a list of my skills:</p>
           <ul>
-            <li>React & JavaScript</li>
-            <li>HTML & CSS</li>
-            <li>Problem Solving</li>
-            <li>Team Collaboration</li>
+            <li>uhh...</li>
+            <li>i dont really know yet</li>
             {/* Add more skills */}
           </ul>
         </>
@@ -36,11 +33,8 @@ function AboutMe({ onClose }) {
           <p>Check out some of my projects:</p>
           <ul>
             <li>
-              <strong>WinXP Recreation:</strong> A web-based Windows XP desktop.
-            </li>
-            <li>
-              <strong>Project B:</strong> A brief description of another cool
-              project.
+              <strong>Something or another:</strong> Maybe I'm working on
+              something...
             </li>
             {/* Add more projects */}
           </ul>
@@ -55,9 +49,9 @@ function AboutMe({ onClose }) {
         <>
           <p>You can reach me through the following channels:</p>
           <ul>
-            <li>Email: your.email@example.com</li>
-            <li>LinkedIn: linkedin.com/in/yourprofile</li>
-            <li>GitHub: github.com/yourusername</li>
+            <li>Email: skillzdevs@proton.me</li>
+            <li>Discord: skillzdev</li>
+            <li>GitHub: github.com/skillz808</li>
             {/* Add more contact methods */}
           </ul>
         </>
