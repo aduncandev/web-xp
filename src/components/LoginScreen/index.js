@@ -4,7 +4,7 @@ import winLoginLogo from 'assets/windowsIcons/xplogo.png';
 import offIcon from 'assets/windowsIcons/310(32x32).png';
 import adminAvatar from 'assets/userIcons/dog.bmp';
 import arrowIcon from 'assets/windowsIcons/290.ico';
-import skillzAvatar from 'assets/userIcons/skillz.bmp'; // Corrected this based on your file
+import skillzAvatar from 'assets/userIcons/skillz.bmp'; // Corrected based on user file
 
 const LoginScreen = ({ onLogin, userStatus, onInitiateShutdown }) => {
   const [selectedUser, setSelectedUser] = useState(null);
@@ -102,15 +102,13 @@ const LoginScreen = ({ onLogin, userStatus, onInitiateShutdown }) => {
       align-items: center;
       cursor: pointer;
       position: relative;
-      /* border: 1px solid transparent; /* Removed as per previous cleanup */
       transition: background 0.15s ease-out, box-shadow 0.15s ease-out, padding-bottom 0.15s ease-out;
     }
 
     .user-account-container.selected,
     .user-account-container:hover {
-      /* This is the gradient from the user's file */
+      /* Gradient from user's file */
       background: linear-gradient(to right, #00309C 30%, #5A7EDC 90%, #5A7EDC 100%);
-      /* box-shadow: 0 0 5px rgba(77, 141, 239, 0.3); /* Removed box-shadow from user's file */
       padding-bottom: 8px;
     }
 
@@ -132,7 +130,7 @@ const LoginScreen = ({ onLogin, userStatus, onInitiateShutdown }) => {
     .user-avatar-icon {
       width: 52px;
       height: 52px;
-      border: 3px solid rgb(195, 195, 195); /* Default to white */
+      border: 3px solid rgba(222, 222, 222, 0.8); /* Default white */
       border-radius: 4px;
       margin-right: 12px;
       background-color: #ddd;
@@ -141,10 +139,9 @@ const LoginScreen = ({ onLogin, userStatus, onInitiateShutdown }) => {
       justify-content: center;
       flex-shrink: 0;
       overflow: hidden;
-      transition: border-color 0.15s ease-out; /* Added transition */
+      transition: border-color 0.15s ease-out;
     }
 
-    /* New rule for selected/hover state */
     .user-account-container.selected .user-avatar-icon,
     .user-account-container:hover .user-avatar-icon {
       border-color: #FFCC00; /* Yellow on hover/select */
@@ -160,7 +157,7 @@ const LoginScreen = ({ onLogin, userStatus, onInitiateShutdown }) => {
     }
 
     .user-details {
-        color: #fff;
+        color: #fff; /* Default color for h3 */
         flex-grow: 1;
         display: flex;
         flex-direction: column;
@@ -175,7 +172,24 @@ const LoginScreen = ({ onLogin, userStatus, onInitiateShutdown }) => {
         line-height: 1.2;
         padding-bottom: 2px;
     }
-    .user-details p.user-status-text { font-family: 'Tahoma', sans-serif; font-size: 0.8em; margin-top: 2px; opacity: 0.9; color:rgb(255, 255, 255); line-height: 1; font-weight: 400; }
+
+    /* --- Modified user-status-text style --- */
+    .user-details p.user-status-text {
+      font-family: 'Tahoma', sans-serif;
+      font-size: 0.8em;
+      margin-top: 2px;
+      opacity: 1; /* Make fully opaque */
+      color: #00309C; /* Default color dark blue */
+      line-height: 1;
+      font-weight: 600; /* Slightly bolder */
+      transition: color 0.15s ease-out; /* Add transition */
+    }
+
+    /* --- Added rule for user-status-text on hover/select --- */
+    .user-account-container.selected .user-status-text,
+    .user-account-container:hover .user-status-text {
+      color: #FFFFFF; /* Change to white */
+    }
 
     .admin-password-section {
         margin-top: 4px;
@@ -246,23 +260,23 @@ const LoginScreen = ({ onLogin, userStatus, onInitiateShutdown }) => {
     @media (max-width: 768px) {
       .login-header-bar { min-height: 50px; }
       .login-main-content { grid-template-columns: 1fr; align-content: center; justify-items: center; padding: 15px; gap: 20px; }
-      .login-main-branding { padding-right: 0; padding-top: 0; align-items: center; text-align: center; } /* These were aligned from file */
-      .login-main-branding img { width: 150px; margin-bottom: 8px; margin-right: 0; } /* These were aligned from file */
+      .login-main-branding { padding-right: 0; padding-top: 0; align-items: center; text-align: center; }
+      .login-main-branding img { width: 150px; margin-bottom: 8px; margin-right: 0; }
       .login-main-branding h1 { font-size: 1.0em; }
       .login-vertical-line { display: none; }
       .login-users-area { padding-left: 0; align-items: center; margin-bottom: 0; width: 100%; gap: 15px; }
-      .user-account-container { min-width: 290px; width: auto; max-width: 90%; padding: 10px 15px; } /* These were aligned from file */
-      .user-account-container.selected.admin-password-active { padding-bottom: 18px; } /* These were aligned from file */
+      .user-account-container { min-width: 290px; width: auto; max-width: 90%; padding: 10px 15px; }
+      .user-account-container.selected.admin-password-active { padding-bottom: 18px; }
       .user-avatar-icon { width: 48px; height: 48px; margin-right: 10px; }
       .user-details h3 { font-size: 1.05em; }
-      .admin-password-section { margin-top: 6px; } /* These were aligned from file */
-      .admin-password-prompt-container input[type="password"] { width: 180px; height: 28px; font-size: 1em; } /* These were aligned from file */
-      .login-footer-bar { flex-direction: row; justify-content: center; min-height: 55px; padding: 8px 10px; gap: 10px; } /* These were aligned from file */
+      .admin-password-section { margin-top: 6px; }
+      .admin-password-prompt-container input[type="password"] { width: 180px; height: 28px; font-size: 1em; }
+      .login-footer-bar { flex-direction: row; justify-content: center; min-height: 55px; padding: 8px 10px; gap: 10px; }
       .login-footer-btn-container { order: 0; margin-bottom: 0; }
-      .login-footer-btn-container p { font-size: 1.2em; } /* These were aligned from file */
-      .login-footer-btn-container button { width: 45px; height: 45px; } /* These were aligned from file */
-      .login-footer-btn-container button img { width: 30px; height: 30px; } /* These were aligned from file */
-      .login-footer-info { display: none; } /* These were aligned from file */
+      .login-footer-btn-container p { font-size: 1.2em; }
+      .login-footer-btn-container button { width: 45px; height: 45px; }
+      .login-footer-btn-container button img { width: 30px; height: 30px; }
+      .login-footer-info { display: none; }
     }
   `;
 
