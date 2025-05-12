@@ -82,66 +82,75 @@ function InternetExplorer({ onClose }) {
     };
   }, []);
 
-  const navigateToUrl = useCallback((url, addToHistory = true) => {
-    setIsLoading(true);
-    setShowCustomErrorPage(false); // Reset error page on new navigation
+  const navigateToUrl = useCallback(
+    (url, addToHistory = true) => {
+      setIsLoading(true);
+      setShowCustomErrorPage(false); // Reset error page on new navigation
 
-    if (loadTimeoutRef.current) {
-      clearTimeout(loadTimeoutRef.current);
-    }
+      if (loadTimeoutRef.current) {
+        clearTimeout(loadTimeoutRef.current);
+      }
 
-    let finalUrl = url.trim();
-    if (finalUrl === '') {
-      finalUrl = DEFAULT_HOME_PAGE; // Or about:blank
-    } else if (!/^https?:\/\//i.test(finalUrl) && !finalUrl.startsWith('about:')) {
-      finalUrl = `http://${finalUrl}`;
-    }
+      let finalUrl = url.trim();
+      if (finalUrl === '') {
+        finalUrl = DEFAULT_HOME_PAGE; // Or about:blank
+      } else if (
+        !/^https?:\/\//i.test(finalUrl) &&
+        !finalUrl.startsWith('about:')
+      ) {
+        finalUrl = `http://${finalUrl}`;
+      }
 
-    // Set a timeout to detect if loading fails or gets stuck (e.g. X-Frame-Options)
-    loadTimeoutRef.current = setTimeout(() => {
-      setIsLoading(false);
-      // Check if iframe src is still what we set it to, or if it's blank,
-      // and if the iframe contentWindow is accessible and its location is about:blank
-      // This check is not perfectly reliable due to cross-origin restrictions
-      if (iframeRef.current) {
-        try {
+      // Set a timeout to detect if loading fails or gets stuck (e.g. X-Frame-Options)
+      loadTimeoutRef.current = setTimeout(() => {
+        setIsLoading(false);
+        // Check if iframe src is still what we set it to, or if it's blank,
+        // and if the iframe contentWindow is accessible and its location is about:blank
+        // This check is not perfectly reliable due to cross-origin restrictions
+        if (iframeRef.current) {
+          try {
             // If contentWindow is null or its location is about:blank when it shouldn't be
-            if (!iframeRef.current.contentWindow || iframeRef.current.contentWindow.location.href === 'about:blank') {
-                 if (finalUrl !== 'about:blank') {
-                    setShowCustomErrorPage(true);
-                 }
+            if (
+              !iframeRef.current.contentWindow ||
+              iframeRef.current.contentWindow.location.href === 'about:blank'
+            ) {
+              if (finalUrl !== 'about:blank') {
+                setShowCustomErrorPage(true);
+              }
             }
-        } catch (e) {
+          } catch (e) {
             // Accessing contentWindow.location.href might throw a cross-origin error
             // which itself can be an indicator of a problem or a successful cross-origin load.
             // If it throws and we are here via timeout, likely it's blocked.
             setShowCustomErrorPage(true);
+          }
+        } else {
+          setShowCustomErrorPage(true);
         }
-      } else {
-        setShowCustomErrorPage(true);
+      }, IFRAME_LOAD_TIMEOUT);
+
+      setCurrentUrl(finalUrl); // This will trigger iframe src change
+
+      if (addToHistory) {
+        const newHistory = historyStack.slice(0, historyIndex + 1);
+        // Avoid adding duplicate consecutive entries
+        if (newHistory[newHistory.length - 1] !== finalUrl) {
+          newHistory.push(finalUrl);
+          setHistoryStack(newHistory);
+          setHistoryIndex(newHistory.length - 1);
+        } else if (newHistory.length === 0) {
+          // If history was empty
+          newHistory.push(finalUrl);
+          setHistoryStack(newHistory);
+          setHistoryIndex(newHistory.length - 1);
+        }
       }
-    }, IFRAME_LOAD_TIMEOUT);
-
-    setCurrentUrl(finalUrl); // This will trigger iframe src change
-
-    if (addToHistory) {
-      const newHistory = historyStack.slice(0, historyIndex + 1);
-      // Avoid adding duplicate consecutive entries
-      if (newHistory[newHistory.length -1] !== finalUrl) {
-        newHistory.push(finalUrl);
-        setHistoryStack(newHistory);
-        setHistoryIndex(newHistory.length - 1);
-      } else if (newHistory.length === 0) { // If history was empty
-        newHistory.push(finalUrl);
-        setHistoryStack(newHistory);
-        setHistoryIndex(newHistory.length - 1);
-      }
-    }
-    // Force iframe to re-render if the src is the same but we want to reload (e.g. for refresh)
-    // or if it helps with certain load issues.
-    // setIframeKey(Date.now());
-  }, [historyStack, historyIndex]);
-
+      // Force iframe to re-render if the src is the same but we want to reload (e.g. for refresh)
+      // or if it helps with certain load issues.
+      // setIframeKey(Date.now());
+    },
+    [historyStack, historyIndex],
+  );
 
   const handleLoadUrl = () => {
     navigateToUrl(addressBarInput);
@@ -204,20 +213,25 @@ function InternetExplorer({ onClose }) {
     // it might indicate an issue (e.g. blocked by X-Frame-Options, browser shows its own blank error).
     // This is a heuristic and might not always be accurate.
     if (iframeRef.current) {
-        try {
-            if (iframeRef.current.contentWindow && iframeRef.current.contentWindow.location.href === 'about:blank' && currentUrl !== 'about:blank' && currentUrl !== '') {
-                // It loaded 'about:blank' when it shouldn't have.
-                // This may happen if the site blocks iframe loading.
-                setShowCustomErrorPage(true);
-            } else {
-                setShowCustomErrorPage(false); // Explicitly hide error page on successful load
-            }
-        } catch (e) {
-            // Cross-origin error trying to access contentWindow.location.href.
-            // This usually means the page HAS loaded something (either the page or a browser error page for it)
-            // but we can't inspect it. If our timeout didn't fire, we assume it's okay or browser handled.
-            setShowCustomErrorPage(false);
+      try {
+        if (
+          iframeRef.current.contentWindow &&
+          iframeRef.current.contentWindow.location.href === 'about:blank' &&
+          currentUrl !== 'about:blank' &&
+          currentUrl !== ''
+        ) {
+          // It loaded 'about:blank' when it shouldn't have.
+          // This may happen if the site blocks iframe loading.
+          setShowCustomErrorPage(true);
+        } else {
+          setShowCustomErrorPage(false); // Explicitly hide error page on successful load
         }
+      } catch (e) {
+        // Cross-origin error trying to access contentWindow.location.href.
+        // This usually means the page HAS loaded something (either the page or a browser error page for it)
+        // but we can't inspect it. If our timeout didn't fire, we assume it's okay or browser handled.
+        setShowCustomErrorPage(false);
+      }
     }
   };
 
@@ -279,24 +293,44 @@ function InternetExplorer({ onClose }) {
         <div
           onClick={goForward}
           className={`ie__function_bar__button${
-            historyIndex >= historyStack.length - 1 || isLoading ? '--disable' : ''
+            historyIndex >= historyStack.length - 1 || isLoading
+              ? '--disable'
+              : ''
           }`}
         >
-          <img className="ie__function_bar__icon" src={forwardIcon} alt="Forward" />
+          <img
+            className="ie__function_bar__icon"
+            src={forwardIcon}
+            alt="Forward"
+          />
           <div className="ie__function_bar__arrow" />
         </div>
         <div className="ie__function_bar__button" onClick={handleStop}>
-          <img className="ie__function_bar__icon--margin-1" src={stopIcon} alt="Stop" />
+          <img
+            className="ie__function_bar__icon--margin-1"
+            src={stopIcon}
+            alt="Stop"
+          />
         </div>
-        <div className={`ie__function_bar__button${isLoading ? '--disable' : ''}`} onClick={!isLoading ? handleRefresh : undefined}>
+        <div
+          className={`ie__function_bar__button${isLoading ? '--disable' : ''}`}
+          onClick={!isLoading ? handleRefresh : undefined}
+        >
           <img
             className="ie__function_bar__icon--margin-1"
             src={refreshIcon}
             alt="Refresh"
           />
         </div>
-        <div className={`ie__function_bar__button${isLoading ? '--disable' : ''}`} onClick={!isLoading ? goHome : undefined}>
-          <img className="ie__function_bar__icon--margin-1" src={homeIcon} alt="Home" />
+        <div
+          className={`ie__function_bar__button${isLoading ? '--disable' : ''}`}
+          onClick={!isLoading ? goHome : undefined}
+        >
+          <img
+            className="ie__function_bar__icon--margin-1"
+            src={homeIcon}
+            alt="Home"
+          />
         </div>
         <div className="ie__function_bar__separate" />
         <div className="ie__function_bar__button">
@@ -316,11 +350,19 @@ function InternetExplorer({ onClose }) {
           <span className="ie__function_bar__text">Favorites</span>
         </div>
         <div className="ie__function_bar__button">
-          <img className="ie__function_bar__icon" src={historyIcon} alt="History" />
+          <img
+            className="ie__function_bar__icon"
+            src={historyIcon}
+            alt="History"
+          />
         </div>
         <div className="ie__function_bar__separate" />
         <div className="ie__function_bar__button">
-          <img className="ie__function_bar__icon--margin-1" src={mail} alt="Mail" />
+          <img
+            className="ie__function_bar__icon--margin-1"
+            src={mail}
+            alt="Mail"
+          />
           <div className="ie__function_bar__arrow--margin-11" />
         </div>
         <div className="ie__function_bar__button">
@@ -334,7 +376,11 @@ function InternetExplorer({ onClose }) {
           <img className="ie__function_bar__icon" src={edit} alt="Edit" />
         </div>
         <div className="ie__function_bar__button">
-          <img className="ie__function_bar__icon--margin12" src={msn} alt="MSN" />
+          <img
+            className="ie__function_bar__icon--margin12"
+            src={msn}
+            alt="MSN"
+          />
         </div>
       </section>
       <section className="ie__address_bar">
@@ -345,8 +391,8 @@ function InternetExplorer({ onClose }) {
             type="text"
             className="ie__address_bar__content__input"
             value={addressBarInput}
-            onChange={(e) => setAddressBarInput(e.target.value)}
-            onKeyDown={(e) => {
+            onChange={e => setAddressBarInput(e.target.value)}
+            onKeyDown={e => {
               if (e.key === 'Enter' && !isLoading) {
                 handleLoadUrl();
               }
@@ -359,7 +405,12 @@ function InternetExplorer({ onClose }) {
             className="ie__address_bar__content__dropdown-img"
           />
         </div>
-        <div className={`ie__address_bar__go ${isLoading ? 'ie__address_bar__go--disabled' : ''}`} onClick={!isLoading ? handleLoadUrl : undefined}>
+        <div
+          className={`ie__address_bar__go ${
+            isLoading ? 'ie__address_bar__go--disabled' : ''
+          }`}
+          onClick={!isLoading ? handleLoadUrl : undefined}
+        >
           <img className="ie__address_bar__go__img" src={go} alt="go" />
           <span className="ie__address_bar__go__text">Go</span>
         </div>
@@ -380,8 +431,14 @@ function InternetExplorer({ onClose }) {
             <p>The website could not be displayed in the application.</p>
             <p>This might be because:</p>
             <ul>
-              <li>The website does not allow itself to be embedded in other pages (e.g., due to X-Frame-Options).</li>
-              <li>The address is incorrect or the website is temporarily unavailable.</li>
+              <li>
+                The website does not allow itself to be embedded in other pages
+                (e.g., due to X-Frame-Options).
+              </li>
+              <li>
+                The address is incorrect or the website is temporarily
+                unavailable.
+              </li>
               <li>A network connection issue occurred.</li>
             </ul>
             <p>Please try a different URL or check your internet connection.</p>
@@ -403,7 +460,11 @@ function InternetExplorer({ onClose }) {
         <div className="ie__footer__status">
           <img className="ie__footer__status__img" src={ie} alt="" />
           <span className="ie__footer__status__text">
-            {isLoading ? 'Loading...' : (showCustomErrorPage ? 'Navigation Canceled' : 'Done')}
+            {isLoading
+              ? 'Loading...'
+              : showCustomErrorPage
+              ? 'Navigation Canceled'
+              : 'Done'}
           </span>
         </div>
         <div className="ie__footer__block" />
@@ -581,7 +642,7 @@ const Div = styled.div`
       outline: none;
       padding: 0 2px;
       font-size: 11px;
-      width: 100%; 
+      width: 100%;
       &:disabled {
         background-color: #f0f0f0; // Slightly different background when disabled
         color: #a0a0a0;
@@ -641,16 +702,16 @@ const Div = styled.div`
   }
   .ie__content {
     flex: 1;
-    overflow: hidden; 
+    overflow: hidden;
     padding-left: 1px;
     border-left: 1px solid #6f6f6f;
-    background-color: #f1f1f1; 
+    background-color: #f1f1f1;
     position: relative;
   }
-  .ie__content__iframe { 
+  .ie__content__iframe {
     width: 100%;
     height: 100%;
-    border: none; 
+    border: none;
   }
   .ie__footer {
     height: 20px;

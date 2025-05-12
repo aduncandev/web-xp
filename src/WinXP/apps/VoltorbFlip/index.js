@@ -7,7 +7,8 @@ function VoltorbFlip({ isFocus }) {
   const [iframeReady, setIframeReady] = useState(false);
 
   const sendFocusMessage = useCallback(
-    focusState => { // Prettier: Removed parentheses for single arg
+    focusState => {
+      // Prettier: Removed parentheses for single arg
       const iframe = iframeRef.current;
       if (iframe && iframe.contentWindow) {
         let targetOrigin;
@@ -41,7 +42,8 @@ function VoltorbFlip({ isFocus }) {
   }, [isFocus, iframeReady, sendFocusMessage]);
 
   useEffect(() => {
-    const handleIframeMessage = event => { // Prettier: Removed parentheses for single arg
+    const handleIframeMessage = event => {
+      // Prettier: Removed parentheses for single arg
       let expectedIframeOrigin;
       try {
         expectedIframeOrigin = new URL(gameUrl, window.location.origin).origin;

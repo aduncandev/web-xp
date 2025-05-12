@@ -31,7 +31,7 @@ function MyComputer({ onClose }) {
         onClose();
         break;
       default:
-        // No default action
+      // No default action
     }
   }
   return (
@@ -52,11 +52,19 @@ function MyComputer({ onClose }) {
           <div className="com__function_bar__arrow" />
         </div>
         <div className="com__function_bar__button--disable">
-          <img className="com__function_bar__icon" src={forward} alt="Forward" />
+          <img
+            className="com__function_bar__icon"
+            src={forward}
+            alt="Forward"
+          />
           <div className="com__function_bar__arrow" />
         </div>
         <div className="com__function_bar__button">
-          <img className="com__function_bar__icon--normalize" src={up} alt="Up" />
+          <img
+            className="com__function_bar__icon--normalize"
+            src={up}
+            alt="Up"
+          />
         </div>
         <div className="com__function_bar__separate" />
         <div className="com__function_bar__button">
@@ -155,7 +163,8 @@ function MyComputer({ onClose }) {
             <div className="com__content__left__card">
               <div className="com__content__left__card__header">
                 <div className="com__content__left__card__header__text">
-                  Other Places {/* Kept original name as per user not wanting this changed */}
+                  Other Places{' '}
+                  {/* Kept original name as per user not wanting this changed */}
                 </div>
                 <img
                   src={pullup} // Assuming Other Places also has this icon
@@ -304,9 +313,7 @@ function MyComputer({ onClose }) {
             </div>
             {/* This card is now "Other" and has no animation */}
             <div className="com__content__right__card">
-              <div className="com__content__right__card__header">
-                Other
-              </div>
+              <div className="com__content__right__card__header">Other</div>
               <div className="com__content__right__card__content">
                 {/* Content for "Other" can be added here if needed */}
               </div>
@@ -530,21 +537,21 @@ const Div = styled.div`
   .com__content__inner {
     display: flex;
     height: 100%;
-    overflow: auto; 
+    overflow: auto;
   }
   .com__content__left {
     width: 180px;
     background: linear-gradient(to bottom, #748aff 0%, #4057d3 100%);
-    overflow-y: auto; 
+    overflow-y: auto;
     padding: 10px;
-    flex-shrink: 0; 
+    flex-shrink: 0;
   }
 
   .com__content__left__card {
     border-top-left-radius: 3px;
     border-top-right-radius: 3px;
     width: 100%;
-    overflow: hidden; 
+    overflow: hidden;
   }
   .com__content__left__card:not(:last-child) {
     margin-bottom: 12px;
@@ -573,7 +580,7 @@ const Div = styled.div`
     color: #0c327d;
     flex: 1;
   }
-  .com__content__left__card__header__img { 
+  .com__content__left__card__header__img {
     width: 18px;
     height: 18px;
     filter: drop-shadow(1px 1px 3px rgba(0, 0, 0, 0.3));
@@ -601,7 +608,8 @@ const Div = styled.div`
     font-size: 10px;
     line-height: 14px;
     color: #0c327d; /* Default color for links in left panel */
-    &.black { /* Class for black text, like in Details */
+    &.black {
+      /* Class for black text, like in Details */
       color: #000;
     }
     &.bold {
@@ -614,10 +622,10 @@ const Div = styled.div`
     }
   }
   .com__content__right {
-    overflow-y: auto; 
+    overflow-y: auto;
     background-color: #fff;
     flex: 1;
-    padding: 5px; 
+    padding: 5px;
   }
   .com__content__right__card__header {
     font-weight: 700;
@@ -630,9 +638,9 @@ const Div = styled.div`
       background: linear-gradient(to right, #70bfff 0, #fff 100%);
       position: absolute;
       bottom: 0;
-      left: 0; 
+      left: 0;
       height: 1px;
-      width: calc(100% - 12px); 
+      width: calc(100% - 12px);
       /* No transition for the underline */
     }
   }
@@ -640,15 +648,15 @@ const Div = styled.div`
     display: flex;
     padding-right: 0;
     flex-wrap: wrap;
-    padding: 15px 0 0 12px; 
+    padding: 15px 0 0 12px;
   }
   .com__content__right__card__item {
     display: flex;
     align-items: center;
-    width: 200px; 
+    width: 200px;
     margin-bottom: 15px;
-    height: auto; 
-    margin-right: 10px; 
+    height: auto;
+    margin-right: 10px;
     /* No transitions for items by default */
   }
   .com__content__right__card__img {
@@ -657,7 +665,7 @@ const Div = styled.div`
     margin-right: 5px;
   }
   .com__content__right__card__text {
-    white-space: nowrap; 
+    white-space: nowrap;
   }
   /* Removed .com__content__right__card--me and its hover effects */
 `;

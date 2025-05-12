@@ -17,7 +17,7 @@ function Balloon({ startAfter = 3000, duration = 15000 }) {
       try {
         audioRef.current = new Audio(balloonSoundSrc);
       } catch (error) {
-        console.error("Failed to load balloon sound:", error);
+        console.error('Failed to load balloon sound:', error);
       }
     }
 
@@ -25,7 +25,7 @@ function Balloon({ startAfter = 3000, duration = 15000 }) {
       // 4. Play the sound when the balloon is triggered to start
       if (audioRef.current) {
         audioRef.current.play().catch(error => {
-          console.error("Error playing balloon sound:", error);
+          console.error('Error playing balloon sound:', error);
         });
       }
       setStart(true); // Then show the balloon
@@ -41,10 +41,10 @@ function Balloon({ startAfter = 3000, duration = 15000 }) {
       clearTimeout(openTimer);
       clearTimeout(fadeTimer);
       clearTimeout(closeTimer);
-       // Optional: Stop sound if component unmounts while balloon is showing/sound playing
+      // Optional: Stop sound if component unmounts while balloon is showing/sound playing
       if (audioRef.current) {
-         audioRef.current.pause();
-         audioRef.current.currentTime = 0; // Reset to beginning
+        audioRef.current.pause();
+        audioRef.current.currentTime = 0; // Reset to beginning
       }
     };
   }, [startAfter, duration]);

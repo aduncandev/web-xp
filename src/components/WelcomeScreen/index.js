@@ -18,12 +18,18 @@ const WelcomeScreen = () => {
     .welcome-footer-bar::before { content: ""; width: 100%; height: 7px; position: absolute; top: -2px; left: 0; background: linear-gradient(270deg, #084DA3 -33.4%, #084DA3 6.07%, #FF9933 49.56%, #084DA3 82.59%, #084DA3 121.25%); }
   `;
   return (
-    <> <style>{style}</style>
+    <>
+      {' '}
+      <style>{style}</style>
       <div className="welcome-screen-body">
         <div className="welcome-header-bar"></div>
-        <div className="welcome-main-area"> <div className="welcome-text-content"> welcome </div> </div>
+        <div className="welcome-main-area">
+          {' '}
+          <div className="welcome-text-content"> welcome </div>{' '}
+        </div>
         <div className="welcome-footer-bar"></div>
-      </div> </>
+      </div>{' '}
+    </>
   );
 };
 export default WelcomeScreen;

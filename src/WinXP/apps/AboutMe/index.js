@@ -2,8 +2,7 @@ import React, { useState } from 'react';
 import styled from 'styled-components';
 
 // Placeholder image for the left panel - replace with your desired image URL or import
-const placeholderLeftImage =
-  'https://aduncan.dev/img/windowsxp.png';
+const placeholderLeftImage = 'https://aduncan.dev/img/windowsxp.png';
 
 // Main component for the About Me application
 function AboutMe({ onClose }) {
@@ -169,7 +168,7 @@ const MainContentArea = styled.div`
 `;
 
 const LeftPanel = styled.div`
-  width: 170px; 
+  width: 170px;
   background-color: #f0f0f0; /* Fallback if image doesn't load or for transparency */
   /* Removed padding: 10px; */
   display: flex; /* Helps with image sizing if needed, though width/height 100% on img is key */
@@ -326,8 +325,7 @@ const DialogButton = styled.button`
   align-items: center;
   border: 1px solid #000;
   background-color: #f0f0f0;
-  box-shadow: inset 1px 1px 0px #ffffff,
-    inset -1px -1px 0px #808080;
+  box-shadow: inset 1px 1px 0px #ffffff, inset -1px -1px 0px #808080;
   color: #000;
   cursor: pointer;
   user-select: none;
@@ -338,16 +336,14 @@ const DialogButton = styled.button`
 
   &:active {
     background-color: #e0e0e0;
-    box-shadow: inset -1px -1px 0px #ffffff,
-      inset 1px 1px 0px #808080;
+    box-shadow: inset -1px -1px 0px #ffffff, inset 1px 1px 0px #808080;
     padding-top: 1px;
     padding-bottom: -1px; /* This will effectively be 0 due to box model */
   }
 
   &:disabled {
     color: #808080;
-    box-shadow: inset 1px 1px 0px #ffffff,
-      inset -1px -1px 0px #b0b0b0;
+    box-shadow: inset 1px 1px 0px #ffffff, inset -1px -1px 0px #b0b0b0;
     cursor: default;
     border-color: #a0a0a0;
   }

@@ -1,44 +1,46 @@
 // src/components/LoginScreen/index.js
 import React, { useState, useEffect } from 'react';
 // Assuming your assets folder is at src/assets and jsconfig.json has baseUrl: "src"
-import winLoginLogo from 'assets/windowsIcons/xplogo.png'; 
-import offIcon from 'assets/windowsIcons/310(32x32).png'; 
-import adminAvatar from 'assets/userIcons/dog.bmp'; 
+import winLoginLogo from 'assets/windowsIcons/xplogo.png';
+import offIcon from 'assets/windowsIcons/310(32x32).png';
+import adminAvatar from 'assets/userIcons/dog.bmp';
 import arrowIcon from 'assets/windowsIcons/290.ico';
-import skillzAvatar from 'assets/userIcons/chess.bmp'; 
+import skillzAvatar from 'assets/userIcons/chess.bmp';
 
 const LoginScreen = ({ onLogin, userStatus, onInitiateShutdown }) => {
-  const [selectedUser, setSelectedUser] = useState(null); 
+  const [selectedUser, setSelectedUser] = useState(null);
   const [showAdminPasswordPrompt, setShowAdminPasswordPrompt] = useState(false);
   const [adminPassword, setAdminPassword] = useState('');
 
   const handleAdminClick = () => {
     setSelectedUser('administrator');
     setShowAdminPasswordPrompt(true);
-    setAdminPassword(''); 
+    setAdminPassword('');
   };
 
   const handleSkillzClick = () => {
     setSelectedUser('skillz');
-    setShowAdminPasswordPrompt(false); 
+    setShowAdminPasswordPrompt(false);
     if (onLogin) {
-      onLogin(); 
+      onLogin();
     }
   };
 
-  const handleAdminPasswordSubmit = (e) => {
-    e.preventDefault(); 
-    console.log("Admin password submitted (no validation):", adminPassword);
-    setAdminPassword(''); 
+  const handleAdminPasswordSubmit = e => {
+    e.preventDefault();
+    console.log('Admin password submitted (no validation):', adminPassword);
+    setAdminPassword('');
   };
-  
+
   useEffect(() => {
     function handleClickOutside(event) {
       if (showAdminPasswordPrompt && selectedUser === 'administrator') {
-        const adminOuterWrapper = event.target.closest('.user-account-outer-wrapper[data-user="administrator"]');
+        const adminOuterWrapper = event.target.closest(
+          '.user-account-outer-wrapper[data-user="administrator"]',
+        );
         if (!adminOuterWrapper) {
           setShowAdminPasswordPrompt(false);
-          setSelectedUser(null); 
+          setSelectedUser(null);
         }
       }
     }
@@ -328,35 +330,60 @@ const LoginScreen = ({ onLogin, userStatus, onInitiateShutdown }) => {
         <div className="login-header-bar"></div>
         <div className="login-main-content">
           <div className="login-main-branding">
-            <img src={winLoginLogo} alt="Windows Logo" onError={(e) => e.target.src='https://placehold.co/150x60/transparent/FFFFFF?text=WindowsXP'} />
+            <img
+              src={winLoginLogo}
+              alt="Windows Logo"
+              onError={e =>
+                (e.target.src =
+                  'https://placehold.co/150x60/transparent/FFFFFF?text=WindowsXP')
+              }
+            />
             <h1>To begin, click your user name</h1>
           </div>
           <div className="login-vertical-line"></div>
           <div className="login-users-area">
             {/* Administrator User Section */}
-            <div className="user-account-outer-wrapper" data-user="administrator"> 
-              <div 
-                className={`user-account-container ${selectedUser === 'administrator' ? 'selected admin-password-active' : ''}`}
-                onClick={handleAdminClick} 
+            <div
+              className="user-account-outer-wrapper"
+              data-user="administrator"
+            >
+              <div
+                className={`user-account-container ${
+                  selectedUser === 'administrator'
+                    ? 'selected admin-password-active'
+                    : ''
+                }`}
+                onClick={handleAdminClick}
                 title="Administrator"
               >
                 <div className="user-avatar-icon">
-                  <img src={adminAvatar} alt="Admin" onError={(e) => e.target.innerHTML = '<span>A</span>'} />
+                  <img
+                    src={adminAvatar}
+                    alt="Admin"
+                    onError={e => (e.target.innerHTML = '<span>A</span>')}
+                  />
                 </div>
                 <div className="user-details">
                   <h3>Administrator</h3>
                   {showAdminPasswordPrompt && selectedUser === 'administrator' && (
                     <div className="admin-password-section">
                       <p className="password-instruction">Type your password</p>
-                      <form onSubmit={handleAdminPasswordSubmit} className="admin-password-prompt-container">
-                        <input 
-                          type="password" 
+                      <form
+                        onSubmit={handleAdminPasswordSubmit}
+                        className="admin-password-prompt-container"
+                      >
+                        <input
+                          type="password"
                           value={adminPassword}
-                          onChange={(e) => setAdminPassword(e.target.value)}
+                          onChange={e => setAdminPassword(e.target.value)}
                           autoFocus
                         />
                         <button type="submit" title="OK">
-                          <img src={arrowIcon} alt="OK" onError={(e) => e.target.style.display='none'}/>
+                          <img
+                            src={arrowIcon}
+                            alt="OK"
+                            onError={e => (e.target.style.display = 'none')}
+                          />
                         </button>
                       </form>
                     </div>
@@ -367,13 +394,19 @@ const LoginScreen = ({ onLogin, userStatus, onInitiateShutdown }) => {
 
             {/* Skillz User Section */}
             <div className="user-account-outer-wrapper" data-user="skillz">
-              <div 
-                className={`user-account-container ${selectedUser === 'skillz' ? 'selected' : ''}`}
-                onClick={handleSkillzClick} 
+              <div
+                className={`user-account-container ${
+                  selectedUser === 'skillz' ? 'selected' : ''
+                }`}
+                onClick={handleSkillzClick}
                 title="Click to log in as skillz"
               >
                 <div className="user-avatar-icon">
-                  <img src={skillzAvatar} alt="Skillz" onError={(e) => e.target.innerHTML = '<span>S</span>'} />
+                  <img
+                    src={skillzAvatar}
+                    alt="Skillz"
+                    onError={e => (e.target.innerHTML = '<span>S</span>')}
+                  />
                 </div>
                 <div className="user-details">
                   <h3>Skillz</h3> {/* Capitalized Skillz */}
@@ -383,13 +416,18 @@ const LoginScreen = ({ onLogin, userStatus, onInitiateShutdown }) => {
                 </div>
               </div>
             </div>
-            
           </div>
         </div>
         <div className="login-footer-bar">
           <div className="login-footer-btn-container">
             <button onClick={onInitiateShutdown} title="Turn off computer">
-              <img src={offIcon} alt="Turn off" onError={(e) => { e.target.style.display='none'; }} />
+              <img
+                src={offIcon}
+                alt="Turn off"
+                onError={e => {
+                  e.target.style.display = 'none';
+                }}
+              />
             </button>
             <p>Turn off computer</p>
           </div>

@@ -99,22 +99,28 @@ const BootScreen = () => {
       <div className="boot-screen">
         {/* --- PLACEHOLDER LOGOS --- */}
         <img
-            src={winLogo}
-            alt="Windows XP Logo"
-            className="boot-logo"
-            onError={(e) => e.target.src='https://placehold.co/220x80/000000/FFFFFF?text=Windows+XP+Logo'}
-         />
+          src={winLogo}
+          alt="Windows XP Logo"
+          className="boot-logo"
+          onError={e =>
+            (e.target.src =
+              'https://placehold.co/220x80/000000/FFFFFF?text=Windows+XP+Logo')
+          }
+        />
         <div className="loading-bar-container">
           {/* The progress div is now the moving block */}
           <div className="loading-bar-progress"></div>
         </div>
         <div className="copyright-text">Copyright © Microsoft Corporation</div>
-         <img
-            src="/ms_logo.png"
-            alt="Microsoft"
-            className="microsoft-logo-bottom"
-            onError={(e) => e.target.src='https://placehold.co/90x20/000000/CCCCCC?text=Microsoft'}
-         />
+        <img
+          src="/ms_logo.png"
+          alt="Microsoft"
+          className="microsoft-logo-bottom"
+          onError={e =>
+            (e.target.src =
+              'https://placehold.co/90x20/000000/CCCCCC?text=Microsoft')
+          }
+        />
       </div>
     </>
   );

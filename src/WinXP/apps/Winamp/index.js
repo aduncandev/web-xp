@@ -5,7 +5,7 @@ import { initialTracks } from './config';
 function Winamp({ onClose, onMinimize }) {
   const ref = useRef(null);
   const webamp = useRef(null);
-useEffect(() => {
+  useEffect(() => {
     const target = ref.current;
     if (!target) {
       return;
@@ -15,7 +15,7 @@ useEffect(() => {
     });
 
     // Render Webamp directly into the target container
-    webamp.current.renderWhenReady(target); 
+    webamp.current.renderWhenReady(target);
 
     // Cleanup function remains the same
     return () => {

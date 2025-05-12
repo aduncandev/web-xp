@@ -221,7 +221,8 @@ function MineSweeperView({
           <div className="mine__face__outer">
             <button ref={face} className="mine__face" onClick={() => onReset()}>
               {statusFace()}
-              <img alt="smile" src={smile} /> {/* This is the "up" face, shown when not active */}
+              <img alt="smile" src={smile} />{' '}
+              {/* This is the "up" face, shown when not active */}
             </button>
           </div>
           <div className="mine__digits__outer">{renderDigits(seconds)}</div>
@@ -367,7 +368,7 @@ export default styled(MineSweeperView)`
     border-right: rgb(245, 245, 245) solid 1px;
     border-bottom: rgb(245, 245, 245) solid 1px;
     background-color: black; /* Background for the digit display */
-    
+
     display: flex; /* ADDED: This is the key fix for horizontal layout */
     justify-content: flex-start; /* Aligns digits to the start (left) of the container */
     align-items: center; /* Vertically centers the digits */
@@ -377,7 +378,7 @@ export default styled(MineSweeperView)`
 
   .mine__digits__outer img {
     height: 23px; /* Standard height for Minesweeper digit sprites */
-    width: 13px;  /* Standard width for Minesweeper digit sprites */
+    width: 13px; /* Standard width for Minesweeper digit sprites */
     display: block; /* Or inline-block, flex items will align anyway */
   }
   /* --- END MODIFIED --- */
@@ -403,20 +404,25 @@ export default styled(MineSweeperView)`
     border-color: rgb(245, 245, 245) rgb(128, 128, 128) rgb(128, 128, 128)
       rgb(245, 245, 245);
     outline: none;
-    &:active:hover { /* Style for when the face button is pressed */
+    &:active:hover {
+      /* Style for when the face button is pressed */
       border-width: 1px;
       border-color: rgb(128, 128, 128);
-      img { /* Move the image slightly to simulate being pressed */
+      img {
+        /* Move the image slightly to simulate being pressed */
         transform: translate(1px, 1px);
       }
-      img:nth-child(1) { /* Current face (e.g. smile, dead, win) */
+      img:nth-child(1) {
+        /* Current face (e.g. smile, dead, win) */
         display: none; /* Hide the dynamic face */
       }
-      img:nth-child(2) { /* Base smile face */
+      img:nth-child(2) {
+        /* Base smile face */
         display: block; /* Show the base smile face (or 'ohh' if that's intended for active) */
       }
     }
-    img:nth-child(2) { /* The second image (base smile) is hidden by default */
+    img:nth-child(2) {
+      /* The second image (base smile) is hidden by default */
       display: none;
     }
   }
@@ -436,7 +442,8 @@ export default styled(MineSweeperView)`
     display: flex; /* To center content like flag, mine, etc. */
     align-items: center;
     justify-content: center;
-    img { /* Images like flag, mine, numbers */
+    img {
+      /* Images like flag, mine, numbers */
       position: absolute; /* Position them within the 16x16 cell */
       width: 16px; /* Ensure they fill the cell if needed */
       height: 16px;

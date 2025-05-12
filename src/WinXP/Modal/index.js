@@ -50,10 +50,10 @@ const Menu = ({ mode, onClose, onClickButton }) => {
       return 'Log Off Windows';
     } else if (mode === POWER_STATE.TURN_OFF) {
       // This mode is used for both "Turn Off Computer" and "Restart"
-      return 'Turn Off Windows'; 
+      return 'Turn Off Windows';
     }
     // Fallback, though ideally 'mode' should always be one of the above
-    return 'System Action'; 
+    return 'System Action';
   }
   // --- MODIFICATION END ---
 
@@ -84,7 +84,7 @@ const Menu = ({ mode, onClose, onClickButton }) => {
           // To make it visually disabled like "Stand By", you would use <ButtonDisabled ... />
           // and ensure the `disable` class in your CSS handles the appearance.
           // For now, keeping it as a clickable Button as per your original structure.
-          onClick={onClickButton} 
+          onClick={onClickButton}
         />
         <Button img={lockIcon} text="Log Off" onClick={onClickButton} />
       </>
@@ -120,7 +120,7 @@ const Button = ({ style, img, text, onClick }) => {
   function _onClick() {
     // Pass the button's text to the onClickButton handler from WinXP component
     if (onClick) {
-      onClick(text); 
+      onClick(text);
     }
   }
   return (

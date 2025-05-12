@@ -3,10 +3,10 @@ import React, { useState, useEffect } from 'react';
 // Optional: If you want to use the same logo as the login screen, import it.
 import winLogo from 'assets/windowsIcons/xplogo.png';
 
-const ShutdownScreen = ({ finalMessage = "Windows is shutting down..." }) => {
+const ShutdownScreen = ({ finalMessage = 'Windows is shutting down...' }) => {
   const messages = [
-    "Logging out...",
-    "Saving your settings...",
+    'Logging out...',
+    'Saving your settings...',
     finalMessage, // The message passed via props will be the last one
   ];
   const [currentMessageIndex, setCurrentMessageIndex] = useState(0);
@@ -128,7 +128,10 @@ const ShutdownScreen = ({ finalMessage = "Windows is shutting down..." }) => {
             src={winLogo} // Or a generic placeholder / public path
             alt="Windows XP"
             className="shutdown-logo"
-            onError={(e) => e.target.src='https://placehold.co/150x60/transparent/FFFFFF?text=Windows+XP'}
+            onError={e =>
+              (e.target.src =
+                'https://placehold.co/150x60/transparent/FFFFFF?text=Windows+XP')
+            }
           />
           <div className="shutdown-status-message">
             {messages[currentMessageIndex]}
