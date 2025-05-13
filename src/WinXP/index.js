@@ -319,6 +319,9 @@ function WinXP({ onLogoff, onShutdown, onRestart, onSwitchUser }) {
       case 'Pinball':
         dispatch({ type: ADD_APP, payload: appSettings.Pinball });
         break;
+      case 'PictoChat':
+        dispatch({ type: ADD_APP, payload: appSettings.PictoChat });
+        break;
       case 'Log Off':
         dispatch({ type: POWER_OFF, payload: POWER_STATE.LOG_OFF });
         break;

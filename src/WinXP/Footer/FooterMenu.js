@@ -7,7 +7,7 @@ import mine from 'assets/minesweeper/mine-icon.png';
 import setAccess from 'assets/windowsIcons/227(32x32).png';
 import outlook from 'assets/windowsIcons/887(32x32).png';
 import mediaPlayer from 'assets/windowsIcons/846(32x32).png';
-import messenger from 'assets/windowsIcons/msn.png';
+import messenger from 'assets/windowsIcons/pictochat.png';
 import documents from 'assets/windowsIcons/308(32x32).png';
 import recentDocuments from 'assets/windowsIcons/301(32x32).png';
 import pictures from 'assets/windowsIcons/307(32x32).png';
@@ -61,7 +61,7 @@ function FooterMenu({ className, onClick }) {
               { icon: winamp, text: 'Winamp' },
               { icon: paint, text: 'Paint' },
               { icon: mediaPlayer, text: 'Windows Media Player' },
-              { icon: messenger, text: 'Windows Messenger' },
+              { icon: messenger, text: 'PictoChat' },
             ]}
           />
           <div style={{ flex: 1 }} />

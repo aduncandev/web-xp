@@ -8,6 +8,7 @@ import Paint from './Paint';
 import AboutMe from './AboutMe';
 import VoltorbFlip from './VoltorbFlip';
 import Pinball from './Pinball';
+import PictoChat from './PictoChat';
 
 // --- Icon Imports ---
 import iePaper from 'assets/windowsIcons/ie-paper.png';
@@ -27,6 +28,8 @@ import voltorbFlipIcon from 'assets/windowsIcons/voltorb.png';
 import voltorbFlipIconLarge from 'assets/windowsIcons/voltorb.png';
 import pinballIcon16 from 'assets/windowsIcons/pinball.png';
 import pinballIcon32 from 'assets/windowsIcons/pinball.png';
+import pictoChatIcon from 'assets/windowsIcons/pictochat.png';
+import pictoChatIconLarge from 'assets/windowsIcons/pictochat.png';
 
 const gen = () => {
   let id = -1;
@@ -114,6 +117,14 @@ export const defaultIconState = [
     component: Pinball,
     isFocus: false,
     appName: 'Pinball',
+  },
+  {
+    id: genId(),
+    icon: pictoChatIconLarge,
+    title: 'PictoChat',
+    component: PictoChat,
+    isFocus: false,
+    appName: 'PictoChat',
   },
 ];
 
@@ -322,6 +333,26 @@ export const appSettings = {
     maximized: false,
     multiInstance: false,
   },
+  PictoChat: {
+    name: 'PictoChat',
+    header: {
+      icon: pictoChatIcon,
+      title: 'PictoChat',
+    },
+    component: PictoChat,
+    defaultSize: {
+      width: 400,
+      height: 600,
+    },
+    defaultOffset: {
+      x: 150,
+      y: 100,
+    },
+    resizable: true,
+    minimized: false,
+    maximized: true,
+    multiInstance: false,
+  },
 };
 
 export {
@@ -335,4 +366,5 @@ export {
   AboutMe,
   VoltorbFlip,
   Pinball,
+  PictoChat,
 };

@@ -5,18 +5,14 @@ import { Pinball } from '..';
 // This component will embed your Voltorb Flip game using an iframe.
 // It's similar to how the Paint application is handled.
 
-function PinBall({ isFocus }) {
+function PictoChat({ isFocus }) {
   // The src for the iframe will point to the index.html of your game
   // located in the public/voltorb_flip/ directory.
-  const gameUrl = `https://98.js.org/programs/pinball/space-cadet.html`;
+  const gameUrl = `https://chat.aduncan.dev`;
 
   return (
     <AppContainer>
-      <StyledIframe
-        src={gameUrl}
-        frameBorder="0"
-        title="3D Pinball for Windows - Space Cadet"
-      />
+      <StyledIframe src={gameUrl} frameBorder="0" title="PictoChat" />
       {/*
         The div below is a common trick for iframes.
         When the main window isn't focused, this overlay div can capture mouse events
@@ -53,4 +49,4 @@ const Overlay = styled.div`
   background-color: transparent; /* Make it invisible */
 `;
 
-export default PinBall;
+export default PictoChat;
