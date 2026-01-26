@@ -74,8 +74,6 @@ const isMobile = () => {
   );
 };
 
-
-
 // Accept onSwitchUser prop
 function WinXP({ onLogoff, onShutdown, onRestart, onSwitchUser }) {
   const [state, dispatch] = useReducer(reducer, initState);
@@ -86,9 +84,12 @@ function WinXP({ onLogoff, onShutdown, onRestart, onSwitchUser }) {
   const { applyVolume } = useVolume();
 
   // --- VOLUME FIX: Create a memoized playSound function ---
-  const playSoundWithVolume = useCallback((soundSrc) => {
-    playSound(soundSrc, applyVolume);
-  }, [applyVolume]);
+  const playSoundWithVolume = useCallback(
+    soundSrc => {
+      playSound(soundSrc, applyVolume);
+    },
+    [applyVolume],
+  );
   // --------------------------------------------------
 
   const getFocusedAppId = useCallback(() => {

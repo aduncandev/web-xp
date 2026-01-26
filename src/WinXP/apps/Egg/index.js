@@ -22,37 +22,39 @@ const FontStyles = createGlobalStyle`
 `;
 
 const AppContainer = styled.div`
-  width: 100%;
-  height: 100%;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  background-color: #000000;
-  overflow: hidden;
-  position: relative;
+   width: 100%;
+   height: 100%;
+   display: flex;
+   justify-content: center;
+   align-items: center;
+   background-color: #000000;
+   overflow: hidden;
+   position: relative;
 `;
 
 const CenteredContent = styled.div`
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  width: 100%;
-  height: 100%;
-  position: relative;
-  overflow: hidden; /* NO SCROLLBARS */
+   display: flex;
+   flex-direction: column;
+   justify-content: center;
+   align-items: center;
+   width: 100%;
+   height: 100%;
+   position: relative;
+   overflow: hidden; /* NO SCROLLBARS */
 `;
 
 const StyledGif = styled.img`
-  max-width: 100%;
-  max-height: 100%;
-  object-fit: contain;
-  cursor: pointer;
-  user-select: none;
-  position: relative;
-  z-index: 5;
-  /* Move tree up slightly to make more room for eggs */
-  transform: translateY(-10%);
+   max-width: 100%;
+   max-height: 100%;
+   object-fit: contain;
+   cursor: pointer;
+   user-select: none;
+   position: relative;
+   z-index: 5;
+   /* Move tree up slightly to make more room for eggs */
+  transform: translateY(
+    -10%
+  );
 `;
 
 const float = keyframes`
@@ -62,47 +64,47 @@ const float = keyframes`
 `;
 
 const StyledEgg = styled.img`
-  max-width: 80px; /* This is our key number */
-  height: auto;
-  animation: ${float} 3s ease-in-out infinite;
-  user-select: none;
-  position: absolute;
-  z-index: 4;
+   max-width: 80px; /* This is our key number */
+   height: auto;
+   animation: ${float} 3s ease-in-out infinite;
+   user-select: none;
+   position: absolute;
+   z-index: 4;
 `;
 
 const DialogueContainer = styled.div`
-  position: absolute;
-  bottom: 10px;
-  left: 10px;
-  right: 10px;
-  z-index: 10;
+   position: absolute;
+   bottom: 10px;
+   left: 10px;
+   right: 10px;
+   z-index: 10;
 
-  background-color: #000;
-  border: 3px solid #fff;
-  padding: 15px;
-  color: white;
+   background-color: #000;
+   border: 3px solid #fff;
+   padding: 15px;
+   color: white;
 
-  font-family: 'DeterminationMono', monospace;
+   font-family: 'DeterminationMono', monospace;
 
-  font-size: 1.2rem;
-  line-height: 1.4;
-  user-select: none;
+   font-size: 1.2rem;
+   line-height: 1.4;
+   user-select: none;
 
-  -webkit-font-smoothing: none;
-  font-smoothing: none;
-  image-rendering: pixelated;
+   -webkit-font-smoothing: none;
+   font-smoothing: none;
+   image-rendering: pixelated;
 `;
 
 const DialogueText = styled.p`
-  margin: 0;
+   margin: 0;
 `;
 
 const OptionsContainer = styled.div`
-  margin: 0;
-  display: flex;
-  flex-direction: row;
-  justify-content: center;
-  gap: 30px;
+   margin: 0;
+   display: flex;
+   flex-direction: row;
+   justify-content: center;
+   gap: 30px;
 `;
 
 const Option = styled.div`
@@ -172,7 +174,8 @@ function Egg() {
       const now = Date.now();
       const oneDay = 24 * 60 * 60 * 1000; // 24 hours
 
-      if (now - lastEggTime < oneDay) { // Set to < 1 for testing
+      if (now - lastEggTime < oneDay) {
+        // Set to < 1 for testing
         setDialogueStep(7); // Show "no man here" message
       } else {
         setDialogueStep(1); // Start the normal dialogue

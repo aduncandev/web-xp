@@ -31,32 +31,43 @@ function AppLogic() {
   /**
    * Plays a sound file, applying the global volume and mute settings.
    */
-  const playSound = useCallback((soundSrc) => {
-    if (!soundSrc) {
-      console.warn('playSound called with no soundSrc in App.js');
-      return;
-    }
-    try {
-      const audio = new Audio(soundSrc);
-
-      // Apply global volume settings
-      if (typeof applyVolume !== 'function') {
-        console.error('applyVolume is not a function! Check VolumeContext.js');
-        // Still try to play, just without volume control
-      } else {
-        applyVolume(audio); // This should no longer be an error
+  const playSound = useCallback(
+    soundSrc => {
+      if (!soundSrc) {
+        console.warn('playSound called with no soundSrc in App.js');
+        return;
       }
+      try {
+        const audio = new Audio(soundSrc);
 
-      audio.play().catch(error => {
-        // Ignore errors caused by user not interacting with the page yet
-        if (error.name !== 'NotAllowedError') {
-          console.warn(`Audio playback failed for ${soundSrc} in App.js:`, error);
+        // Apply global volume settings
+        if (typeof applyVolume !== 'function') {
+          console.error(
+            'applyVolume is not a function! Check VolumeContext.js',
+          );
+          // Still try to play, just without volume control
+        } else {
+          applyVolume(audio); // This should no longer be an error
         }
-      });
-    } catch (error) {
-      console.error(`Error loading/playing audio ${soundSrc} in App.js:`, error);
-    }
-  }, [applyVolume]); // Re-create this function if applyVolume changes
+
+        audio.play().catch(error => {
+          // Ignore errors caused by user not interacting with the page yet
+          if (error.name !== 'NotAllowedError') {
+            console.warn(
+              `Audio playback failed for ${soundSrc} in App.js:`,
+              error,
+            );
+          }
+        });
+      } catch (error) {
+        console.error(
+          `Error loading/playing audio ${soundSrc} in App.js:`,
+          error,
+        );
+      }
+    },
+    [applyVolume],
+  ); // Re-create this function if applyVolume changes
 
   useEffect(() => {
     let timer;
@@ -178,4 +189,3 @@ function App() {
 }
 
 export default App;
-

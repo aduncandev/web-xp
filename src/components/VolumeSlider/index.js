@@ -39,7 +39,7 @@ const MuteContainer = styled.label`
   align-items: center;
   margin-top: 8px;
   cursor: pointer;
-  
+
   input {
     margin-right: 5px;
     /* Basic XP-style checkbox */
@@ -67,38 +67,38 @@ const MuteContainer = styled.label`
 `;
 
 function VolumeSlider({ volume, onVolumeChange, isMuted, onMuteChange }) {
-    const handleSliderChange = (e) => {
-        onVolumeChange(Number(e.target.value));
-        // If the user drags the slider, automatically unmute
-        if (isMuted) {
-            onMuteChange(false);
-        }
-    };
+  const handleSliderChange = e => {
+    onVolumeChange(Number(e.target.value));
+    // If the user drags the slider, automatically unmute
+    if (isMuted) {
+      onMuteChange(false);
+    }
+  };
 
-    const handleCheckboxChange = (e) => {
-        onMuteChange(e.target.checked);
-    };
+  const handleCheckboxChange = e => {
+    onMuteChange(e.target.checked);
+  };
 
-    return (
-        <SliderWrapper>
-            <Title>Volume</Title>
-            <Slider
-                type="range"
-                min="0"
-                max="100"
-                value={isMuted ? 0 : volume} // Show 0 if muted
-                onChange={handleSliderChange}
-            />
-            <MuteContainer>
-                <input
-                    type="checkbox"
-                    checked={isMuted}
-                    onChange={handleCheckboxChange}
-                />
-                Mute
-            </MuteContainer>
-        </SliderWrapper>
-    );
+  return (
+    <SliderWrapper>
+      <Title>Volume</Title>
+      <Slider
+        type="range"
+        min="0"
+        max="100"
+        value={isMuted ? 0 : volume} // Show 0 if muted
+        onChange={handleSliderChange}
+      />
+      <MuteContainer>
+        <input
+          type="checkbox"
+          checked={isMuted}
+          onChange={handleCheckboxChange}
+        />
+        Mute
+      </MuteContainer>
+    </SliderWrapper>
+  );
 }
 
 export default VolumeSlider;

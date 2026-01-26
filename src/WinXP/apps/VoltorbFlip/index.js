@@ -99,7 +99,15 @@ function VoltorbFlip({ isFocus }) {
     return () => {
       window.removeEventListener('message', handleIframeMessage);
     };
-  }, [gameUrl, isFocus, sendFocusMessage, getTargetOrigin, volume, isMuted, sendVolumeMessage]);
+  }, [
+    gameUrl,
+    isFocus,
+    sendFocusMessage,
+    getTargetOrigin,
+    volume,
+    isMuted,
+    sendVolumeMessage,
+  ]);
 
   return (
     <AppContainer>
@@ -141,4 +149,3 @@ const Overlay = styled.div`
 `;
 
 export default VoltorbFlip;
-

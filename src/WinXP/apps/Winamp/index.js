@@ -32,12 +32,7 @@ function Winamp({ onClose, onMinimize }) {
       webamp.current.onMinimize(onMinimize);
     }
   });
-  return (
-    <div
-      style={{ width: '100%', height: '100%' }}
-      ref={ref}
-    />
-  );
+  return <div style={{ width: '100%', height: '100%' }} ref={ref} />;
 }
 
 export default Winamp;

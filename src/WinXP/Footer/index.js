@@ -83,7 +83,6 @@ function Footer({
     return () => window.removeEventListener('mousedown', onMouseDown);
   }, [menuOn]);
 
-
   // === NEW CODE START ===
 
   // Effect to close the volume slider when clicking outside

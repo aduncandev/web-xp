@@ -128,7 +128,8 @@ export const defaultIconState = [
     isFocus: false,
     appName: 'PictoChat',
   },
-  { // Changed from GifPlayer Icon Entry to Egg
+  {
+    // Changed from GifPlayer Icon Entry to Egg
     id: genId(),
     icon: eggIconLarge, // Using your large icon for the desktop
     title: '???', // Title displayed on the desktop icon
