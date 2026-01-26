@@ -1,18 +1,27 @@
-import React, { useState, useEffect, useRef } from 'react'; // Import useRef
+import React, { useState, useEffect, useRef } from 'react';
 import styled, { keyframes } from 'styled-components';
 
 import risk from 'assets/windowsIcons/229(16x16).png';
-// 1. Import your desired sound effect file
-import balloonSoundSrc from 'assets/sounds/xp_balloon.wav'; // <--- Adjust this path/filename
+import balloonSoundSrc from 'assets/sounds/xp_balloon.wav';
+
+// 1. Import the hook
+import { useVolume } from '../../context/VolumeContext'; // Adjust path if needed
 
 function Balloon({ startAfter = 3000, duration = 15000 }) {
   const [show, setShow] = useState(true);
   const [start, setStart] = useState(false);
-  // 2. Create a ref to hold the Audio object
   const audioRef = useRef(null);
 
+  // 2. Get the applyVolume function
+  const { applyVolume } = useVolume();
+
+  // 3. Store applyVolume in a ref to prevent the effect from re-running
+  const applyVolumeRef = useRef(applyVolume);
   useEffect(() => {
-    // 3. Initialize the Audio object once when the component mounts
+    applyVolumeRef.current = applyVolume;
+  }, [applyVolume]);
+
+  useEffect(() => {
     if (!audioRef.current) {
       try {
         audioRef.current = new Audio(balloonSoundSrc);
@@ -22,13 +31,17 @@ function Balloon({ startAfter = 3000, duration = 15000 }) {
     }
 
     const openTimer = setTimeout(() => {
-      // 4. Play the sound when the balloon is triggered to start
       if (audioRef.current) {
+        // 4. Use the ref's current value to apply volume
+        applyVolumeRef.current(audioRef.current);
         audioRef.current.play().catch(error => {
-          console.error('Error playing balloon sound:', error);
+          // Ignore errors from no user interaction
+          if (error.name !== 'NotAllowedError') {
+            console.error('Error playing balloon sound:', error);
+          }
         });
       }
-      setStart(true); // Then show the balloon
+      setStart(true);
     }, startAfter);
 
     const fadeTimer = setTimeout(() => setShow(false), startAfter + duration);
@@ -41,15 +54,14 @@ function Balloon({ startAfter = 3000, duration = 15000 }) {
       clearTimeout(openTimer);
       clearTimeout(fadeTimer);
       clearTimeout(closeTimer);
-      // Optional: Stop sound if component unmounts while balloon is showing/sound playing
       if (audioRef.current) {
         audioRef.current.pause();
-        audioRef.current.currentTime = 0; // Reset to beginning
+        audioRef.current.currentTime = 0;
       }
     };
+    // 5. Removed applyVolume from dependency array to run only once
   }, [startAfter, duration]);
 
-  // The component's return statement (JSX)
   return (
     start && (
       <Div show={show}>
@@ -71,7 +83,7 @@ function Balloon({ startAfter = 3000, duration = 15000 }) {
       </Div>
     )
   );
-} // End of Balloon function
+}
 
 // Styled components (keyframes, Div) remain unchanged...
 const fadein = keyframes`
@@ -192,7 +204,7 @@ const Div = styled.div`
   .balloon__text__first {
     margin: 5px 0 10px;
   }
-`; // End of styled component Div
+`;
 
 export default Balloon;
-// NO EXTRA BRACE HERE
+

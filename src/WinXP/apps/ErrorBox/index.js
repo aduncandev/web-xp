@@ -4,6 +4,9 @@ import styled from 'styled-components';
 import errorSoundSrc from 'assets/sounds/error.wav';
 import error from 'assets/windowsIcons/897(32x32).png';
 
+// 1. Import the hook
+import { useVolume } from '../../../context/VolumeContext'; // Adjust path if needed
+
 function lineBreak(str) {
   return str.split('\n').map((s, i) => (
     <p key={i} className="error__message">
@@ -13,13 +16,26 @@ function lineBreak(str) {
 }
 
 function Error({ onClose, message = "Something's wrong!" }) {
+  // 2. Get the applyVolume function
+  const { applyVolume } = useVolume();
+
   useEffect(() => {
     try {
-      new Audio(errorSoundSrc).play();
+      // 3. Apply volume before playing
+      const audio = new Audio(errorSoundSrc);
+      applyVolume(audio);
+      audio.play().catch(e => {
+        // Handle autoplay errors silently
+        if (e.name !== 'NotAllowedError') {
+          console.log(e);
+        }
+      });
     } catch (e) {
       console.log(e);
     }
-  }, []);
+    // 4. Add applyVolume to dependency array
+  }, [applyVolume]);
+
   return (
     <Div>
       <div className="error__top">

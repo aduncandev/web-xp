@@ -8,6 +8,10 @@ import sound from 'assets/windowsIcons/690(16x16).png';
 import usb from 'assets/windowsIcons/394(16x16).png';
 import risk from 'assets/windowsIcons/229(16x16).png';
 
+// Import the new components
+import { useVolume } from '../../context/VolumeContext'; // Corrected path
+import VolumeSlider from '../../components/VolumeSlider'; // Corrected path
+
 const getTime = () => {
   const date = new Date();
   let hour = date.getHours();
@@ -36,6 +40,21 @@ function Footer({
   const [time, setTime] = useState(getTime);
   const [menuOn, setMenuOn] = useState(false);
   const menu = useRef(null);
+
+  // === NEW CODE START ===
+
+  // State to control the visibility of the volume slider
+  const [showVolume, setShowVolume] = useState(false);
+
+  // Get global volume state and setters from our context
+  const { volume, setVolume, isMuted, setIsMuted } = useVolume();
+
+  // Refs to detect clicks outside the slider/icon
+  const sliderRef = useRef(null);
+  const soundIconRef = useRef(null);
+
+  // === NEW CODE END ===
+
   function toggleMenu() {
     setMenuOn(on => !on);
   }
@@ -63,6 +82,31 @@ function Footer({
     window.addEventListener('mousedown', onMouseDown);
     return () => window.removeEventListener('mousedown', onMouseDown);
   }, [menuOn]);
+
+
+  // === NEW CODE START ===
+
+  // Effect to close the volume slider when clicking outside
+  useEffect(() => {
+    function handleClickOutside(event) {
+      // Close if clicking outside the slider AND outside the sound icon
+      if (
+        showVolume &&
+        sliderRef.current &&
+        !sliderRef.current.contains(event.target) &&
+        soundIconRef.current &&
+        !soundIconRef.current.contains(event.target)
+      ) {
+        setShowVolume(false);
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [showVolume]); // Only re-run if showVolume changes
+
+  // === NEW CODE END ===
 
   return (
     <Container onMouseDown={_onMouseDown}>
@@ -92,7 +136,16 @@ function Footer({
       </div>
 
       <div className="footer__items right">
-        <img className="footer__icon" src={sound} alt="" />
+        {/* === MODIFIED CODE START === */}
+        <img
+          ref={soundIconRef}
+          className="footer__icon"
+          src={sound}
+          alt="Volume"
+          onClick={() => setShowVolume(v => !v)} // Toggle slider on click
+          style={{ cursor: 'pointer' }}
+        />
+        {/* === MODIFIED CODE END === */}
         <img className="footer__icon" src={usb} alt="" />
         <img className="footer__icon" src={risk} alt="" />
         <div style={{ position: 'relative', width: 0, height: 0 }}>
@@ -100,6 +153,20 @@ function Footer({
         </div>
         <div className="footer__time">{time}</div>
       </div>
+
+      {/* === NEW CODE START === */}
+      {/* Conditionally render the volume slider */}
+      <div ref={sliderRef}>
+        {showVolume && (
+          <VolumeSlider
+            volume={volume}
+            onVolumeChange={setVolume}
+            isMuted={isMuted}
+            onMuteChange={setIsMuted}
+          />
+        )}
+      </div>
+      {/* === NEW CODE END === */}
     </Container>
   );
 }
@@ -153,6 +220,7 @@ const Container = styled.footer`
   .footer__items.right {
     background-color: #0b77e9;
     flex-shrink: 0;
+    /* === STYLING FIX: Restored original gradient with correct hex code === */
     background: linear-gradient(
       to bottom,
       #0c59b9 1%,

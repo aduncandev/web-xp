@@ -14,6 +14,7 @@
 
     <audio id="background-music" src="voltorbflipsounds/gamecorner.mp3" autoplay loop></audio>
 
+    <!-- ... (rest of your game HTML, unchanged) ... -->
     <div class="score-container">
         <div class="level-container">Level: <span id="level">1</span></div>
         <div class="total-coins">Total Coins: <span id="total-coins">00000</span></div>
@@ -201,7 +202,15 @@
             let fadeInterval = null;
             const FADE_TIME_MS = 300; // Duration of the fade in milliseconds
             const FADE_INTERVAL_MS = 5; // How often to update volume during fade
-            const MAX_VOLUME = 0.4; // Max volume for the music (0.0 to 1.0)
+            
+            // --- NEW: Quieter max volume ---
+            const MAX_GAME_VOLUME = 0.25; // NEW, QUIETER MAX (was 0.4 hardcoded)
+            
+            // --- NEW: Global state variables ---
+            let globalVolume = 0.5 * MAX_GAME_VOLUME; // Default to 50% of the new max
+            let globalMuted = false;
+            let isCurrentlyFocused = false; // To apply volume changes live
+
             let currentExpectedParentOrigin = '*';
             let isInitialFocus = true; // Flag to track the first focus event
 
@@ -212,20 +221,16 @@
 
             backgroundMusic.volume = 0; // Start silent
 
-            // Attempt to determine the parent origin for secure postMessage
+            // ... (Origin detection logic is unchanged) ...
             if (document.referrer && document.referrer !== "") {
                 try {
                     currentExpectedParentOrigin = new URL(document.referrer).origin;
-                    // console.log("Voltorb Flip Iframe: Determined parent origin from document.referrer:", currentExpectedParentOrigin);
                 } catch (e) {
-                    // console.warn("Voltorb Flip Iframe: Could not parse document.referrer. Using '*' for parent origin. Referrer:", document.referrer, "Error:", e);
                     currentExpectedParentOrigin = '*';
                 }
             } else if (window.location.ancestorOrigins && window.location.ancestorOrigins.length > 0) {
                 currentExpectedParentOrigin = window.location.ancestorOrigins[0];
-                // console.log("Voltorb Flip Iframe: Determined parent origin from ancestorOrigins:", currentExpectedParentOrigin);
             } else {
-                // console.warn("Voltorb Flip Iframe: Cannot determine parent origin securely. Using '*' for message sending/receiving.");
                 currentExpectedParentOrigin = '*';
             }
 
@@ -272,28 +277,32 @@
             }
 
             function handleFocusChange(focused) {
-                // console.log(`Voltorb Flip Iframe: handleFocusChange called - focused: ${focused}, isInitialFocus: ${isInitialFocus}`);
+                // --- MODIFIED: Use global state ---
+                isCurrentlyFocused = focused;
+                const targetVolume = globalMuted ? 0 : globalVolume;
+                // --- END MODIFICATION ---
+
                 if (focused) {
                     backgroundMusic.play().then(() => {
                         if (isInitialFocus) {
-                            // console.log("Voltorb Flip Iframe: Initial focus, setting volume directly to MAX_VOLUME.");
-                            backgroundMusic.volume = MAX_VOLUME;
+                            // --- MODIFIED: Use targetVolume ---
+                            backgroundMusic.volume = targetVolume;
                             isInitialFocus = false;
                         } else {
-                            // console.log("Voltorb Flip Iframe: Re-focused, fading in to MAX_VOLUME.");
-                            fadeAudio(MAX_VOLUME);
+                            // --- MODIFIED: Use targetVolume ---
+                            fadeAudio(targetVolume);
                         }
                     }).catch(error => {
-                        // console.warn("Voltorb Flip Iframe: Playback on focus failed. Error:", error);
                         if (isInitialFocus) {
-                            backgroundMusic.volume = MAX_VOLUME;
+                             // --- MODIFIED: Use targetVolume ---
+                            backgroundMusic.volume = targetVolume;
                             isInitialFocus = false;
                         } else {
-                            fadeAudio(MAX_VOLUME);
+                             // --- MODIFIED: Use targetVolume ---
+                            fadeAudio(targetVolume);
                         }
                     });
                 } else {
-                    // console.log("Voltorb Flip Iframe: Fading out and pausing music.");
                     isInitialFocus = false; // Once blurred, subsequent focus will fade
                     fadeAudio(0);
                 }
@@ -301,24 +310,44 @@
 
             window.addEventListener('message', (event) => {
                 if (currentExpectedParentOrigin !== '*' && event.origin !== currentExpectedParentOrigin) {
-                    // console.warn(`Voltorb Flip Iframe: Message from unexpected origin '${event.origin}' rejected. Expected '${currentExpectedParentOrigin}'.`);
                     return;
                 }
                 const messageData = event.data;
-                if (messageData && typeof event.data === 'object' && event.data.type === 'VOLTORB_FLIP_FOCUS_CHANGE') {
-                    if (typeof event.data.focused === 'boolean') {
-                        handleFocusChange(event.data.focused);
-                    } else {
-                        // console.warn("Voltorb Flip Iframe: Received VOLTORB_FLIP_FOCUS_CHANGE but 'focused' is not boolean.", event.data);
+
+                // --- MODIFIED: Handle multiple message types ---
+                if (messageData && typeof event.data === 'object') {
+                    
+                    if (event.data.type === 'VOLTORB_FLIP_FOCUS_CHANGE') {
+                        if (typeof event.data.focused === 'boolean') {
+                            handleFocusChange(event.data.focused);
+                        } else {
+                            // console.warn("Voltorb Flip Iframe: Received VOLTORB_FLIP_FOCUS_CHANGE but 'focused' is not boolean.", event.data);
+                        }
+                    } 
+                    // --- NEW: Handle volume messages ---
+                    else if (event.data.type === 'VOLTORB_FLIP_VOLUME_CHANGE') {
+                        if (typeof event.data.volume === 'number') {
+                            // Scale incoming 0.0-1.0 to 0.0-MAX_GAME_VOLUME
+                            globalVolume = event.data.volume * MAX_GAME_VOLUME; 
+                        }
+                        if (typeof event.data.muted === 'boolean') {
+                            globalMuted = event.data.muted;
+                        }
+
+                        // If we are currently focused, apply the new volume
+                        if (isCurrentlyFocused) {
+                            const newTargetVolume = globalMuted ? 0 : globalVolume;
+                            fadeAudio(newTargetVolume);
+                        }
                     }
+                    // --- END NEW BLOCK ---
                 }
             });
 
             if (window.parent && window.parent !== window) {
-                // console.log(`Voltorb Flip Iframe: DOMContentLoaded. Sending IFRAME_READY to parent at determined origin: ${currentExpectedParentOrigin}`);
                 window.parent.postMessage({ type: 'VOLTORB_FLIP_IFRAME_READY' }, currentExpectedParentOrigin);
             } else {
-                // console.log("Voltorb Flip Iframe: No parent window. Setting up local focus/blur handlers.");
+                // Local fallback
                 if (document.hasFocus()) {
                     handleFocusChange(true);
                 }
@@ -330,3 +359,4 @@
 </body>
 
 </html>
+

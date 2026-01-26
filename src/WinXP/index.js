@@ -17,7 +17,8 @@ import {
   CANCEL_POWER_OFF,
 } from './constants/actions';
 import { FOCUSING, POWER_STATE } from './constants';
-import { defaultIconState, defaultAppState, appSettings } from './apps';
+import { appSettings } from './apps';
+import { reducer, initState } from './reducer';
 import Modal from './Modal';
 import Footer from './Footer';
 import Windows from './Windows';
@@ -25,19 +26,40 @@ import Icons from './Icons';
 import { DashedBox } from 'components';
 
 // --- Sound Imports ---
-// Assuming sounds are in src/assets/sounds/ and jsconfig.json has baseUrl: "src"
 import xpLogoffSoundSrc from 'assets/sounds/xp_logoff.wav';
-import xpShutdownSoundSrc from 'assets/sounds/xp_shutdown.wav'; // Assuming restart uses the same sound
+import xpShutdownSoundSrc from 'assets/sounds/xp_shutdown.wav';
+import wallpaper from 'assets/windowsIcons/wallpaper.jpeg';
 
-const playSound = soundSrc => {
+// --- Volume Import ---
+import { useVolume } from '../context/VolumeContext'; // Correct path from src/WinXP/
+
+/**
+ * Plays a sound file.
+ * We've added applyVolume as an argument.
+ * @param {string} soundSrc - The imported sound source.
+ * @param {function} applyVolume - The function from our context to apply volume.
+ */
+const playSound = (soundSrc, applyVolume) => {
   if (!soundSrc) {
     console.warn('playSound called with no soundSrc in WinXP');
     return;
   }
   try {
     const audio = new Audio(soundSrc);
+
+    // --- APPLY VOLUME FIX ---
+    if (typeof applyVolume === 'function') {
+      applyVolume(audio);
+    } else {
+      console.warn('applyVolume function not provided to playSound in WinXP');
+    }
+    // -------------------------
+
     audio.play().catch(error => {
-      console.warn(`Audio playback failed for ${soundSrc} in WinXP:`, error);
+      // Ignore errors caused by user not interacting with the page yet
+      if (error.name !== 'NotAllowedError') {
+        console.warn(`Audio playback failed for ${soundSrc} in WinXP:`, error);
+      }
     });
   } catch (error) {
     console.error(`Error loading/playing audio ${soundSrc} in WinXP:`, error);
@@ -52,173 +74,22 @@ const isMobile = () => {
   );
 };
 
-const initState = {
-  apps: defaultAppState,
-  nextAppID: defaultAppState.length,
-  nextZIndex: defaultAppState.length,
-  focusing: FOCUSING.WINDOW,
-  icons: defaultIconState,
-  selecting: null,
-  powerState: POWER_STATE.START,
-};
 
-const reducer = (state, action = { type: '' }) => {
-  // Reducer logic (remains unchanged from your provided version)
-  switch (action.type) {
-    case ADD_APP: {
-      const existingApp = state.apps.find(
-        _app =>
-          _app.component === action.payload.component && !_app.multiInstance,
-      );
-      if (action.payload.multiInstance || !existingApp) {
-        return {
-          ...state,
-          apps: [
-            ...state.apps,
-            {
-              ...action.payload,
-              id: state.nextAppID,
-              zIndex: state.nextZIndex,
-              minimized: false,
-            },
-          ],
-          nextAppID: state.nextAppID + 1,
-          nextZIndex: state.nextZIndex + 1,
-          focusing: FOCUSING.WINDOW,
-        };
-      }
-      const appsWithFocus = state.apps.map(app =>
-        app.component === action.payload.component
-          ? { ...app, zIndex: state.nextZIndex, minimized: false }
-          : app,
-      );
-      return {
-        ...state,
-        apps: appsWithFocus,
-        nextZIndex: state.nextZIndex + 1,
-        focusing: FOCUSING.WINDOW,
-      };
-    }
-    case DEL_APP: {
-      const remainingApps = state.apps.filter(app => app.id !== action.payload);
-      let nextFocusing = FOCUSING.DESKTOP;
-      if (remainingApps.length > 0) {
-        nextFocusing = FOCUSING.WINDOW;
-      } else if (state.icons.find(icon => icon.isFocus)) {
-        nextFocusing = FOCUSING.ICON;
-      }
-      return {
-        ...state,
-        apps: remainingApps,
-        focusing: nextFocusing,
-      };
-    }
-    case FOCUS_APP: {
-      const apps = state.apps.map(app =>
-        app.id === action.payload
-          ? { ...app, zIndex: state.nextZIndex, minimized: false }
-          : app,
-      );
-      return {
-        ...state,
-        apps,
-        nextZIndex: state.nextZIndex + 1,
-        focusing: FOCUSING.WINDOW,
-      };
-    }
-    case MINIMIZE_APP: {
-      const apps = state.apps.map(app =>
-        app.id === action.payload ? { ...app, minimized: true } : app,
-      );
-      const openWindows = apps.filter(app => !app.minimized);
-      let nextFocusing = FOCUSING.DESKTOP;
-      if (openWindows.length > 0) {
-        nextFocusing = FOCUSING.WINDOW;
-      } else if (state.icons.find(icon => icon.isFocus)) {
-        nextFocusing = FOCUSING.ICON;
-      }
-      return {
-        ...state,
-        apps,
-        focusing: nextFocusing,
-      };
-    }
-    case TOGGLE_MAXIMIZE_APP: {
-      const apps = state.apps.map(app =>
-        app.id === action.payload ? { ...app, maximized: !app.maximized } : app,
-      );
-      return {
-        ...state,
-        apps,
-        focusing: FOCUSING.WINDOW,
-      };
-    }
-    case FOCUS_ICON: {
-      const icons = state.icons.map(icon => ({
-        ...icon,
-        isFocus: icon.id === action.payload,
-      }));
-      return {
-        ...state,
-        focusing: FOCUSING.ICON,
-        icons,
-      };
-    }
-    case SELECT_ICONS: {
-      const icons = state.icons.map(icon => ({
-        ...icon,
-        isFocus: action.payload.includes(icon.id),
-      }));
-      return {
-        ...state,
-        icons,
-        focusing: FOCUSING.ICON,
-      };
-    }
-    case FOCUS_DESKTOP:
-      return {
-        ...state,
-        focusing: FOCUSING.DESKTOP,
-        icons: state.icons.map(icon => ({
-          ...icon,
-          isFocus: false,
-        })),
-      };
-    case START_SELECT:
-      return {
-        ...state,
-        focusing: FOCUSING.DESKTOP,
-        icons: state.icons.map(icon => ({
-          ...icon,
-          isFocus: false,
-        })),
-        selecting: action.payload,
-      };
-    case END_SELECT:
-      return {
-        ...state,
-        selecting: null,
-      };
-    case POWER_OFF:
-      return {
-        ...state,
-        powerState: action.payload,
-      };
-    case CANCEL_POWER_OFF:
-      return {
-        ...state,
-        powerState: POWER_STATE.START,
-      };
-    default:
-      return state;
-  }
-};
 
 // Accept onSwitchUser prop
 function WinXP({ onLogoff, onShutdown, onRestart, onSwitchUser }) {
   const [state, dispatch] = useReducer(reducer, initState);
   const ref = useRef(null);
   const mouse = useMouse(ref);
+
+  // --- VOLUME FIX: Get applyVolume from hook ---
+  const { applyVolume } = useVolume();
+
+  // --- VOLUME FIX: Create a memoized playSound function ---
+  const playSoundWithVolume = useCallback((soundSrc) => {
+    playSound(soundSrc, applyVolume);
+  }, [applyVolume]);
+  // --------------------------------------------------
 
   const getFocusedAppId = useCallback(() => {
     if (state.focusing !== FOCUSING.WINDOW) return -1;
@@ -363,11 +234,13 @@ function WinXP({ onLogoff, onShutdown, onRestart, onSwitchUser }) {
   function onClickModalButton(buttonText) {
     if (state.powerState === POWER_STATE.LOG_OFF) {
       if (buttonText === 'Log Off') {
-        playSound(xpLogoffSoundSrc); // Play logoff sound
+        // --- VOLUME FIX: Use new function ---
+        playSoundWithVolume(xpLogoffSoundSrc);
         if (onLogoff) onLogoff();
         dispatch({ type: CANCEL_POWER_OFF });
       } else if (buttonText === 'Switch User') {
-        playSound(xpLogoffSoundSrc); // MODIFIED: Play logoff sound for Switch User as well
+        // --- VOLUME FIX: Use new function ---
+        playSoundWithVolume(xpLogoffSoundSrc);
         if (onSwitchUser) onSwitchUser();
         dispatch({ type: CANCEL_POWER_OFF });
       } else {
@@ -376,11 +249,13 @@ function WinXP({ onLogoff, onShutdown, onRestart, onSwitchUser }) {
       }
     } else if (state.powerState === POWER_STATE.TURN_OFF) {
       if (buttonText === 'Turn Off') {
-        playSound(xpShutdownSoundSrc);
+        // --- VOLUME FIX: Use new function ---
+        playSoundWithVolume(xpShutdownSoundSrc);
         if (onShutdown) onShutdown();
         // No CANCEL_POWER_OFF here, App.js handles screen change
       } else if (buttonText === 'Restart') {
-        playSound(xpShutdownSoundSrc);
+        // --- VOLUME FIX: Use new function ---
+        playSoundWithVolume(xpShutdownSoundSrc);
         if (onRestart) onRestart();
         // No CANCEL_POWER_OFF here
       } else {
@@ -453,7 +328,7 @@ const Container = styled.div`
   width: 100vw;
   overflow: hidden;
   position: relative;
-  background: url(https://i.imgur.com/Zk6TR5k.jpg) no-repeat center center fixed;
+  background: url(${wallpaper}) no-repeat center center fixed;
   background-size: cover;
   animation: ${({ state }) => animation[state]} 5s forwards;
   *:not(input):not(textarea) {

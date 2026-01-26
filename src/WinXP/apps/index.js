@@ -9,6 +9,7 @@ import AboutMe from './AboutMe';
 import VoltorbFlip from './VoltorbFlip';
 import Pinball from './Pinball';
 import PictoChat from './PictoChat';
+import Egg from './Egg'; // Changed from GifPlayer to Egg
 
 // --- Icon Imports ---
 import iePaper from 'assets/windowsIcons/ie-paper.png';
@@ -30,6 +31,8 @@ import pinballIcon16 from 'assets/windowsIcons/pinball.png';
 import pinballIcon32 from 'assets/windowsIcons/pinball.png';
 import pictoChatIcon from 'assets/windowsIcons/pictochat.png';
 import pictoChatIconLarge from 'assets/windowsIcons/pictochat.png';
+import eggIcon from 'assets/windowsIcons/tree.gif';
+import eggIconLarge from 'assets/windowsIcons/tree.gif';
 
 const gen = () => {
   let id = -1;
@@ -39,7 +42,6 @@ const gen = () => {
   };
 };
 const genId = gen();
-// const genIndex = gen(); // This was unused
 
 export const defaultAppState = [
   // No apps open by default
@@ -80,7 +82,7 @@ export const defaultIconState = [
   },
   {
     id: genId(),
-    icon: winampIcon, // Using the renamed import
+    icon: winampIcon,
     title: 'Winamp',
     component: Winamp,
     isFocus: false,
@@ -125,6 +127,14 @@ export const defaultIconState = [
     component: PictoChat,
     isFocus: false,
     appName: 'PictoChat',
+  },
+  { // Changed from GifPlayer Icon Entry to Egg
+    id: genId(),
+    icon: eggIconLarge, // Using your large icon for the desktop
+    title: '???', // Title displayed on the desktop icon
+    component: Egg,
+    isFocus: false,
+    appName: 'Egg', // This matches the key in appSettings
   },
 ];
 
@@ -234,7 +244,7 @@ export const appSettings = {
   Winamp: {
     name: 'Winamp',
     header: {
-      icon: winampIcon, // Using the renamed import
+      icon: winampIcon,
       title: 'Winamp',
       invisible: true,
     },
@@ -244,14 +254,13 @@ export const appSettings = {
       height: 0,
     },
     defaultOffset: {
-      x: 0,
-      y: 0,
+      x: 200,
+      y: 200,
     },
     resizable: false,
     minimized: false,
     maximized: false,
     multiInstance: false,
-    // Assuming initialTracks and initialSkin are handled by its own config or passed dynamically
   },
   Paint: {
     name: 'Paint',
@@ -296,7 +305,7 @@ export const appSettings = {
   VoltorbFlip: {
     name: 'VoltorbFlip',
     header: {
-      icon: voltorbFlipIcon, // Using the provided Voltorb icon
+      icon: voltorbFlipIcon,
       title: 'Voltorb Flip',
     },
     component: VoltorbFlip,
@@ -353,6 +362,26 @@ export const appSettings = {
     maximized: true,
     multiInstance: false,
   },
+  Egg: {
+    name: 'Egg',
+    header: {
+      icon: eggIcon,
+      title: '???',
+    },
+    component: Egg,
+    defaultSize: {
+      width: 400,
+      height: 350,
+    },
+    defaultOffset: {
+      x: typeof window !== 'undefined' ? window.innerWidth / 2 - 190 : 200,
+      y: typeof window !== 'undefined' ? window.innerHeight / 2 - 190 : 150,
+    },
+    resizable: false,
+    minimized: false,
+    maximized: false,
+    multiInstance: false,
+  },
 };
 
 export {
@@ -367,4 +396,5 @@ export {
   VoltorbFlip,
   Pinball,
   PictoChat,
+  Egg,
 };

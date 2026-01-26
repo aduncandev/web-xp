@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import styled from 'styled-components';
+import React, { useState, useEffect } from 'react';
+import styled, { createGlobalStyle } from 'styled-components'; // createGlobalStyle is still needed by Egg.js
 
 import SubMenu from 'components/SubMenu';
 import ie from 'assets/windowsIcons/ie.png';
@@ -30,6 +30,71 @@ import empty from 'assets/empty.png';
 
 import { AllPrograms, ConnectTo, MyRecentDocuments } from './FooterMenuData';
 
+// --- NEW EGG IMPORTS ---
+import eggIcon from 'assets/windowsIcons/egg.png';
+// We no longer import the custom font
+
+// --- EGG COUNTER LOGIC ---
+const EGG_COUNT_KEY = 'eggCount';
+
+// We no longer need CounterFontStyles
+// const CounterFontStyles = ...
+
+const EggCounterContainer = styled.div`
+  display: flex;
+  align-items: center;
+  margin-left: auto; /* This pushes it to the right */
+  margin-right: 10px; /* Some padding from the edge */
+  color: white;
+
+  /* --- STYLE CHANGES --- */
+  font-family: inherit; /* Inherit font from header (Tahoma, etc.) */
+  font-size: 13px; /* Smaller font size */
+  font-weight: 700; /* Match username weight */
+  /* --- END STYLE CHANGES --- */
+
+  user-select: none;
+  text-shadow: 1px 1px rgba(0, 0, 0, 0.7); /* Match user text shadow */
+`;
+
+const EggCounterIcon = styled.img`
+  /* --- STYLE CHANGES --- */
+  width: 18px; /* Set width */
+  height: auto; /* Set height to auto to fix aspect ratio */
+  /* --- END STYLE CHANGES --- */
+
+  margin-right: 4px; /* Reduced margin */
+  image-rendering: pixelated;
+`;
+
+function EggCounter() {
+  const [count, setCount] = useState(() =>
+    parseInt(localStorage.getItem(EGG_COUNT_KEY) || '0', 10),
+  );
+
+  useEffect(() => {
+    // This listener updates the counter if another tab/window changes the value
+    const handleStorageChange = e => {
+      if (e.key === EGG_COUNT_KEY) {
+        setCount(parseInt(e.newValue || '0', 10));
+      }
+    };
+
+    window.addEventListener('storage', handleStorageChange);
+    return () => {
+      window.removeEventListener('storage', handleStorageChange);
+    };
+  }, []);
+
+  return (
+    <EggCounterContainer>
+      <EggCounterIcon src={eggIcon} alt="Egg" />
+      <span>x {count}</span>
+    </EggCounterContainer>
+  );
+}
+// --- END EGG COUNTER ---
+
 function FooterMenu({ className, onClick }) {
   const [hovering, setHovering] = useState('');
   function onMouseOver(e) {
@@ -39,9 +104,12 @@ function FooterMenu({ className, onClick }) {
   }
   return (
     <div className={className}>
+      {/* We no longer inject CounterFontStyles */}
       <header>
         <img className="header__img" src={user} alt="avatar" />
         <span className="header__text">Skillz</span>
+        {/* --- EGG COUNTER ADDED HERE --- */}
+        <EggCounter />
       </header>
       <section className="menu" onMouseOver={onMouseOver}>
         <hr className="orange-hr" />
@@ -223,6 +291,7 @@ function Item({
   );
 }
 export default styled(FooterMenu)`
+  /* ... All your other existing styles are unchanged ... */
   font-size: 11px;
   line-height: 14px;
   display: flex;

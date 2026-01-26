@@ -1,73 +1,85 @@
 import React, { useEffect, useRef, useCallback, useState } from 'react';
 import styled from 'styled-components';
 
+// 1. Import the hook
+import { useVolume } from '../../../context/VolumeContext'; // Adjust path if needed
+
 function VoltorbFlip({ isFocus }) {
   const gameUrl = `${process.env.PUBLIC_URL}/voltorb_flip/`;
   const iframeRef = useRef(null);
   const [iframeReady, setIframeReady] = useState(false);
 
+  // 2. Get volume state
+  const { volume, isMuted } = useVolume();
+
+  const getTargetOrigin = useCallback(() => {
+    let targetOrigin;
+    try {
+      targetOrigin = new URL(gameUrl).origin;
+    } catch (e) {
+      targetOrigin = new URL(gameUrl, window.location.origin).origin;
+    }
+    if (targetOrigin === 'null' || targetOrigin === 'about:blank') {
+      targetOrigin = window.location.origin;
+    }
+    return targetOrigin;
+  }, [gameUrl]);
+
   const sendFocusMessage = useCallback(
     focusState => {
-      // Prettier: Removed parentheses for single arg
       const iframe = iframeRef.current;
       if (iframe && iframe.contentWindow) {
-        let targetOrigin;
-        try {
-          targetOrigin = new URL(gameUrl).origin;
-        } catch (e) {
-          targetOrigin = new URL(gameUrl, window.location.origin).origin;
-        }
-        if (targetOrigin === 'null' || targetOrigin === 'about:blank') {
-          targetOrigin = window.location.origin;
-        }
-        // console.log(
-        //   `Parent: Sending message - focused: ${focusState} to Voltorb Flip iframe at origin: ${targetOrigin}`
-        // );
+        const targetOrigin = getTargetOrigin();
         iframe.contentWindow.postMessage(
           { type: 'VOLTORB_FLIP_FOCUS_CHANGE', focused: focusState },
           targetOrigin,
         );
       }
     },
-    [gameUrl],
+    [getTargetOrigin],
   );
 
+  // 3. Create a new function to send volume messages
+  const sendVolumeMessage = useCallback(
+    (currentVolume, currentMuted) => {
+      const iframe = iframeRef.current;
+      if (iframe && iframe.contentWindow && iframeReady) {
+        const targetOrigin = getTargetOrigin();
+        iframe.contentWindow.postMessage(
+          {
+            type: 'VOLTORB_FLIP_VOLUME_CHANGE',
+            volume: currentVolume / 100, // Convert 0-100 to 0.0-1.0
+            muted: currentMuted,
+          },
+          targetOrigin,
+        );
+      }
+    },
+    [getTargetOrigin, iframeReady], // Depends on iframeReady
+  );
+
+  // 4. Send focus messages when isFocus or iframeReady changes
   useEffect(() => {
     if (iframeReady) {
-      // console.log(
-      //   `Parent: isFocus prop changed to ${isFocus}. Sending message because iframe is ready.`
-      // );
       sendFocusMessage(isFocus);
     }
   }, [isFocus, iframeReady, sendFocusMessage]);
 
+  // 5. Send volume messages when volume, muted, or iframeReady changes
+  useEffect(() => {
+    if (iframeReady) {
+      sendVolumeMessage(volume, isMuted);
+    }
+  }, [volume, isMuted, iframeReady, sendVolumeMessage]);
+
   useEffect(() => {
     const handleIframeMessage = event => {
-      // Prettier: Removed parentheses for single arg
-      let expectedIframeOrigin;
-      try {
-        expectedIframeOrigin = new URL(gameUrl, window.location.origin).origin;
-      } catch (e) {
-        expectedIframeOrigin = window.location.origin;
-      }
-      if (
-        expectedIframeOrigin === 'null' ||
-        expectedIframeOrigin === 'about:blank'
-      ) {
-        expectedIframeOrigin = window.location.origin;
-      }
+      const expectedIframeOrigin = getTargetOrigin();
 
       if (event.origin !== expectedIframeOrigin) {
-        // console.warn(
-        //   `Parent: Message from unexpected origin '${event.origin}' rejected. Expected '${expectedIframeOrigin}'.`
-        // );
         return;
       }
-
       if (event.source !== iframeRef.current?.contentWindow) {
-        // console.warn(
-        //   'Parent: Message received, but not from the expected iframe source.'
-        // );
         return;
       }
 
@@ -76,11 +88,10 @@ function VoltorbFlip({ isFocus }) {
         typeof event.data === 'object' &&
         event.data.type === 'VOLTORB_FLIP_IFRAME_READY'
       ) {
-        // console.log(
-        //   'Parent: Received VOLTORB_FLIP_IFRAME_READY from iframe. Sending initial focus state.'
-        // );
         setIframeReady(true);
+        // 6. Send initial focus AND volume state when iframe is ready
         sendFocusMessage(isFocus);
+        sendVolumeMessage(volume, isMuted);
       }
     };
 
@@ -88,7 +99,7 @@ function VoltorbFlip({ isFocus }) {
     return () => {
       window.removeEventListener('message', handleIframeMessage);
     };
-  }, [gameUrl, isFocus, sendFocusMessage]);
+  }, [gameUrl, isFocus, sendFocusMessage, getTargetOrigin, volume, isMuted, sendVolumeMessage]);
 
   return (
     <AppContainer>
@@ -103,6 +114,7 @@ function VoltorbFlip({ isFocus }) {
   );
 }
 
+// ... (styled components are unchanged) ...
 const AppContainer = styled.div`
   width: 100%;
   height: 100%;
@@ -129,3 +141,4 @@ const Overlay = styled.div`
 `;
 
 export default VoltorbFlip;
+

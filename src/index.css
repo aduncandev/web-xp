@@ -1,3 +1,11 @@
 #root {
   height: 100%;
 }
+
+@font-face {
+  font-family: 'DeterminationMono';
+  src: url('../public/fonts/DeterminationMonoWeb.woff') format('woff');
+  font-weight: normal;
+  font-style: normal;
+  font-display: block;
+}

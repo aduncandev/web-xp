@@ -7,38 +7,56 @@ import ShutdownScreen from './components/ShutdownScreen';
 import './index.css';
 
 // --- Sound Imports ---
-// Ensure these paths are correct relative to your src/assets/ folder.
 import xpStartupSoundSrc from 'assets/sounds/xp_startup.wav';
 import xpLogonSoundSrc from 'assets/sounds/xp_logon.wav';
 import xpShutdownSoundSrc from 'assets/sounds/xp_shutdown.wav';
-// xpLogoffSound is imported and played in WinXP/index.js
+
+// --- Volume Context ---
+import { VolumeProvider, useVolume } from './context/VolumeContext'; // Import the provider and hook
 
 /**
- * Plays a sound file.
- * @param {string} soundSrc - The imported sound source.
+ * This component holds all your application logic.
+ * Because it will be rendered *inside* VolumeProvider, it can safely use the useVolume() hook.
  */
-const playSound = soundSrc => {
-  if (!soundSrc) {
-    console.warn('playSound called with no soundSrc in App.js');
-    return;
-  }
-  try {
-    const audio = new Audio(soundSrc);
-    audio.play().catch(error => {
-      console.warn(`Audio playback failed for ${soundSrc} in App.js:`, error);
-    });
-  } catch (error) {
-    console.error(`Error loading/playing audio ${soundSrc} in App.js:`, error);
-  }
-};
-
-// --- Main App Component ---
-function App() {
+function AppLogic() {
   const [screen, setScreen] = useState('boot');
   const [skillzSessionStatus, setSkillzSessionStatus] = useState('loggedOut');
   const [shutdownMessage, setShutdownMessage] = useState(
     'Windows is shutting down...',
   );
+
+  // Get volume controls from our context. This is safe now.
+  const { applyVolume } = useVolume();
+
+  /**
+   * Plays a sound file, applying the global volume and mute settings.
+   */
+  const playSound = useCallback((soundSrc) => {
+    if (!soundSrc) {
+      console.warn('playSound called with no soundSrc in App.js');
+      return;
+    }
+    try {
+      const audio = new Audio(soundSrc);
+
+      // Apply global volume settings
+      if (typeof applyVolume !== 'function') {
+        console.error('applyVolume is not a function! Check VolumeContext.js');
+        // Still try to play, just without volume control
+      } else {
+        applyVolume(audio); // This should no longer be an error
+      }
+
+      audio.play().catch(error => {
+        // Ignore errors caused by user not interacting with the page yet
+        if (error.name !== 'NotAllowedError') {
+          console.warn(`Audio playback failed for ${soundSrc} in App.js:`, error);
+        }
+      });
+    } catch (error) {
+      console.error(`Error loading/playing audio ${soundSrc} in App.js:`, error);
+    }
+  }, [applyVolume]); // Re-create this function if applyVolume changes
 
   useEffect(() => {
     let timer;
@@ -69,7 +87,7 @@ function App() {
       playSound(xpStartupSoundSrc);
       setScreen('welcome');
     }
-  }, [skillzSessionStatus]);
+  }, [skillzSessionStatus, playSound]);
 
   const handleLogoff = useCallback(() => {
     // Logoff sound is played in WinXP/index.js
@@ -92,7 +110,7 @@ function App() {
   }, []);
 
   const handleRestart = useCallback(() => {
-    // This is called from WinXP component (after user is logged in)
+    // This is called from WinXP component (after user is in)
     // Restart sound is played in WinXP/index.js
     setShutdownMessage('Windows is restarting...');
     setScreen('restarting');
@@ -102,12 +120,10 @@ function App() {
   // --- Handler for shutdown initiated from LoginScreen ---
   const handleInitiateShutdownFromLogin = useCallback(() => {
     playSound(xpShutdownSoundSrc); // Play shutdown sound
-    // When shutting down from login screen, user is not logged in,
-    // so we can directly go to the "Windows is shutting down..." message.
     setShutdownMessage('Windows is shutting down...');
     setScreen('shuttingDown');
-    setSkillzSessionStatus('loggedOut'); // Ensure state is consistent
-  }, []);
+    setSkillzSessionStatus('loggedOut');
+  }, [playSound]);
 
   const renderScreen = () => {
     switch (screen) {
@@ -118,7 +134,7 @@ function App() {
           <LoginScreen
             onLogin={handleLogin}
             userStatus={skillzSessionStatus}
-            onInitiateShutdown={handleInitiateShutdownFromLogin} // Pass the new handler
+            onInitiateShutdown={handleInitiateShutdownFromLogin}
           />
         );
       case 'welcome':
@@ -134,7 +150,6 @@ function App() {
         );
       case 'shuttingDown':
       case 'restarting':
-        // Ensure ShutdownScreen uses 'finalMessage' prop as defined in its implementation
         return <ShutdownScreen finalMessage={shutdownMessage} />;
       default:
         console.warn(`Unknown screen state: ${screen}. Falling back to login.`);
@@ -151,4 +166,16 @@ function App() {
   return <div className="App">{renderScreen()}</div>;
 }
 
+/**
+ * Main App component now just wraps AppLogic with the VolumeProvider.
+ */
+function App() {
+  return (
+    <VolumeProvider>
+      <AppLogic />
+    </VolumeProvider>
+  );
+}
+
 export default App;
+
