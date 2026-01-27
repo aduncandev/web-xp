@@ -9,7 +9,8 @@ import AboutMe from './AboutMe';
 import VoltorbFlip from './VoltorbFlip';
 import Pinball from './Pinball';
 import PictoChat from './PictoChat';
-import Egg from './Egg'; // Changed from GifPlayer to Egg
+import Egg from './Egg';
+import MediaPlayer from './MediaPlayer'; // <--- NEW IMPORT
 
 // --- Icon Imports ---
 import iePaper from 'assets/windowsIcons/ie-paper.png';
@@ -129,13 +130,21 @@ export const defaultIconState = [
     appName: 'PictoChat',
   },
   {
-    // Changed from GifPlayer Icon Entry to Egg
     id: genId(),
-    icon: eggIconLarge, // Using your large icon for the desktop
-    title: '???', // Title displayed on the desktop icon
+    icon: eggIconLarge,
+    title: '???',
     component: Egg,
     isFocus: false,
-    appName: 'Egg', // This matches the key in appSettings
+    appName: 'Egg',
+  },
+  {
+    // NEW: Media Player Icon (Reusing Winamp Icon)
+    id: genId(),
+    icon: winampIcon,
+    title: 'Media Player',
+    component: MediaPlayer,
+    isFocus: false,
+    appName: 'MediaPlayer',
   },
 ];
 
@@ -383,6 +392,30 @@ export const appSettings = {
     maximized: false,
     multiInstance: false,
   },
+  // NEW: Media Player Settings
+  MediaPlayer: {
+    name: 'MediaPlayer',
+    header: {
+      icon: winampIcon, // Reusing icon as requested
+      title: 'Media Player',
+      invisible: false, // Set to FALSE so you can see buttons and drag it
+    },
+    component: MediaPlayer,
+    defaultSize: {
+      width: 300,
+      height: 450,
+    },
+    defaultOffset: {
+      x: 300,
+      y: 100,
+    },
+    resizable: true, // You can now resize it
+    minimized: false,
+    maximized: false,
+    multiInstance: false,
+    minWidth: 300,
+    minHeight: 300,
+  },
 };
 
 export {
@@ -398,4 +431,5 @@ export {
   Pinball,
   PictoChat,
   Egg,
+  MediaPlayer, // Exported new app
 };

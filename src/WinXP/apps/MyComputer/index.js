@@ -1,8 +1,10 @@
-import React from 'react';
+import React, { useState } from 'react';
 import styled from 'styled-components';
 
-import { WindowDropDowns } from 'components'; // Assuming this is a valid path
+import { WindowDropDowns } from 'components';
 import dropDownData from './dropDownData';
+
+// Icons
 import go from 'assets/windowsIcons/290.png';
 import search from 'assets/windowsIcons/299(32x32).png';
 import computer from 'assets/windowsIcons/676(16x16).png';
@@ -21,21 +23,267 @@ import folderOpen from 'assets/windowsIcons/337(32x32).png';
 import disk from 'assets/windowsIcons/334(48x48).png';
 import cd from 'assets/windowsIcons/111(48x48).png';
 import dropdown from 'assets/windowsIcons/dropdown.png';
-import pullup from 'assets/windowsIcons/pullup.png'; // Added back for Details card
+import pullup from 'assets/windowsIcons/pullup.png';
 import windows from 'assets/windowsIcons/windows.png';
 
-function MyComputer({ onClose }) {
+export default function MyComputer({ onClose }) {
+  // --- STATE ---
+  const [history, setHistory] = useState(['My Computer']);
+  const [historyIndex, setHistoryIndex] = useState(0);
+  const [selectedItem, setSelectedItem] = useState(null);
+
+  const currentPath = history[historyIndex];
+
+  // --- MOCK FILE SYSTEM DATA ---
+  const fileSystem = {
+    'My Computer': {
+      label: 'My Computer',
+      icon: computer,
+      items: [
+        // Group: Files Stored on This Computer
+        {
+          name: 'Shared Documents',
+          type: 'File Folder',
+          icon: folder,
+          group: 'Files Stored on This Computer',
+          path: 'Shared Documents',
+        },
+        {
+          name: "User's Documents",
+          type: 'File Folder',
+          icon: folder,
+          group: 'Files Stored on This Computer',
+          path: "User's Documents",
+        },
+        // Group: Hard Disk Drives
+        {
+          name: 'Local Disk (C:)',
+          type: 'Local Disk',
+          icon: disk,
+          group: 'Hard Disk Drives',
+          path: 'C:',
+          freeSpace: '32 GB',
+          totalSize: '40 GB',
+        },
+        // Group: Devices with Removable Storage
+        {
+          name: 'CD Drive (D:)',
+          type: 'CD Drive',
+          icon: cd,
+          group: 'Devices with Removable Storage',
+          path: 'D:',
+          totalSize: '650 MB',
+        },
+      ],
+    },
+    'Shared Documents': {
+      label: 'Shared Documents',
+      type: 'File Folder',
+      items: [
+        { name: 'My Music', type: 'Folder', icon: folder },
+        { name: 'My Pictures', type: 'Folder', icon: folder },
+        { name: 'My Videos', type: 'Folder', icon: folder },
+      ],
+    },
+    "User's Documents": {
+      label: "User's Documents",
+      type: 'File Folder',
+      items: [
+        { name: 'Resume.txt', type: 'Text Document', icon: documentIcon },
+        { name: 'Notes', type: 'Folder', icon: folder },
+      ],
+    },
+    'C:': {
+      label: 'Local Disk (C:)',
+      type: 'Local Disk',
+      items: [
+        { name: 'WINDOWS', type: 'Folder', icon: folder },
+        { name: 'Program Files', type: 'Folder', icon: folder },
+        { name: 'Documents and Settings', type: 'Folder', icon: folder },
+      ],
+    },
+    'D:': {
+      label: 'CD Drive (D:)',
+      type: 'CD Drive',
+      items: [],
+    },
+  };
+
+  // --- NAVIGATION LOGIC ---
+  const navigateTo = path => {
+    if (!fileSystem[path]) return; // Prevent navigation if folder doesn't exist in mock data
+    const newHistory = history.slice(0, historyIndex + 1);
+    newHistory.push(path);
+    setHistory(newHistory);
+    setHistoryIndex(newHistory.length - 1);
+    setSelectedItem(null); // Deselect on nav
+  };
+
+  const goBack = () => {
+    if (historyIndex > 0) {
+      setHistoryIndex(historyIndex - 1);
+      setSelectedItem(null);
+    }
+  };
+
+  const goForward = () => {
+    if (historyIndex < history.length - 1) {
+      setHistoryIndex(historyIndex + 1);
+      setSelectedItem(null);
+    }
+  };
+
+  const goUp = () => {
+    // Simple logic: if not at root, go to 'My Computer'
+    // A real file system would parse paths (e.g. C:/Windows -> C:)
+    if (currentPath !== 'My Computer') {
+      navigateTo('My Computer');
+    }
+  };
+
   function onClickOptionItem(item) {
     switch (item) {
       case 'Close':
         onClose();
         break;
+      case 'Up One Level':
+        goUp();
+        break;
+      case 'Back':
+        goBack();
+        break;
+      case 'Forward':
+        goForward();
+        break;
       default:
-      // No default action
+        break;
     }
   }
+
+  // --- HELPER RENDERS ---
+  const renderDetailsPanel = () => {
+    if (selectedItem) {
+      return (
+        <div className="com__content__left__card__content">
+          {/* Shows icon if available, or generic info */}
+          <div className="com__content__left__card__text bold">
+            {selectedItem.name}
+          </div>
+          <div className="com__content__left__card__text">
+            {selectedItem.type}
+          </div>
+          {selectedItem.freeSpace && (
+            <div className="com__content__left__card__text">
+              Free Space: {selectedItem.freeSpace}
+            </div>
+          )}
+          {selectedItem.totalSize && (
+            <div className="com__content__left__card__text">
+              Total Size: {selectedItem.totalSize}
+            </div>
+          )}
+        </div>
+      );
+    }
+    // Default view when nothing selected depends on current folder
+    const folderInfo = fileSystem[currentPath];
+    return (
+      <div className="com__content__left__card__content">
+        <div className="com__content__left__card__text bold">
+          {folderInfo.label}
+        </div>
+        <div className="com__content__left__card__text">
+          {folderInfo.type || 'System Folder'}
+        </div>
+      </div>
+    );
+  };
+
+  const renderContent = () => {
+    const currentData = fileSystem[currentPath];
+    if (!currentData) return <div>Folder not found</div>;
+
+    // Special Layout for "My Computer" (Grouped)
+    if (currentPath === 'My Computer') {
+      const groups = [
+        'Files Stored on This Computer',
+        'Hard Disk Drives',
+        'Devices with Removable Storage',
+        'Other',
+      ];
+      return groups.map(group => {
+        const groupItems = currentData.items.filter(i => i.group === group);
+        if (groupItems.length === 0 && group !== 'Other') return null;
+
+        return (
+          <div key={group} className="com__content__right__card">
+            <div className="com__content__right__card__header">{group}</div>
+            <div className="com__content__right__card__content">
+              {groupItems.map(item => (
+                <div
+                  key={item.name}
+                  className={`com__content__right__card__item ${
+                    selectedItem?.name === item.name ? 'selected' : ''
+                  }`}
+                  onClick={e => {
+                    e.stopPropagation();
+                    setSelectedItem(item);
+                  }}
+                  onDoubleClick={() => item.path && navigateTo(item.path)}
+                >
+                  <img
+                    src={item.icon}
+                    alt={item.name}
+                    className="com__content__right__card__img"
+                  />
+                  <div className="com__content__right__card__img-container">
+                    <div className="com__content__right__card__text">
+                      {item.name}
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        );
+      });
+    }
+
+    // Generic Layout for other folders (Flat list)
+    return (
+      <div className="com__content__right__card">
+        <div className="com__content__right__card__content">
+          {currentData.items.map(item => (
+            <div
+              key={item.name}
+              className={`com__content__right__card__item ${
+                selectedItem?.name === item.name ? 'selected' : ''
+              }`}
+              onClick={e => {
+                e.stopPropagation();
+                setSelectedItem(item);
+              }}
+              onDoubleClick={() => item.path && navigateTo(item.path)}
+            >
+              <img
+                src={item.icon}
+                alt={item.name}
+                className="com__content__right__card__img"
+              />
+              <div className="com__content__right__card__img-container">
+                <div className="com__content__right__card__text">
+                  {item.name}
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+  };
+
   return (
-    <Div>
+    <Div onClick={() => setSelectedItem(null)}>
       <section className="com__toolbar">
         <div className="com__options">
           <WindowDropDowns
@@ -45,13 +293,27 @@ function MyComputer({ onClose }) {
         </div>
         <img className="com__windows-logo" src={windows} alt="windows" />
       </section>
+
       <section className="com__function_bar">
-        <div className="com__function_bar__button--disable">
+        {/* Back Button */}
+        <div
+          className={`com__function_bar__button${
+            historyIndex > 0 ? '' : '--disable'
+          }`}
+          onClick={goBack}
+        >
           <img className="com__function_bar__icon" src={back} alt="Back" />
           <span className="com__function_bar__text">Back</span>
           <div className="com__function_bar__arrow" />
         </div>
-        <div className="com__function_bar__button--disable">
+
+        {/* Forward Button */}
+        <div
+          className={`com__function_bar__button${
+            historyIndex < history.length - 1 ? '' : '--disable'
+          }`}
+          onClick={goForward}
+        >
           <img
             className="com__function_bar__icon"
             src={forward}
@@ -59,14 +321,18 @@ function MyComputer({ onClose }) {
           />
           <div className="com__function_bar__arrow" />
         </div>
-        <div className="com__function_bar__button">
+
+        {/* Up Button */}
+        <div className="com__function_bar__button" onClick={goUp}>
           <img
             className="com__function_bar__icon--normalize"
             src={up}
             alt="Up"
           />
         </div>
+
         <div className="com__function_bar__separate" />
+
         <div className="com__function_bar__button">
           <img
             className="com__function_bar__icon--normalize "
@@ -93,26 +359,31 @@ function MyComputer({ onClose }) {
           <div className="com__function_bar__arrow" />
         </div>
       </section>
+
       <section className="com__address_bar">
         <div className="com__address_bar__title">Address</div>
         <div className="com__address_bar__content">
           <img
             src={computer}
-            alt="My Computer icon"
+            alt="icon"
             className="com__address_bar__content__img"
           />
-          <div className="com__address_bar__content__text">My Computer</div>
+          <div className="com__address_bar__content__text">{currentPath}</div>
           <img
             src={dropdown}
-            alt="dropdown arrow"
+            alt="dropdown"
             className="com__address_bar__content__img"
           />
         </div>
-        <div className="com__address_bar__go">
+        <div
+          className="com__address_bar__go"
+          onClick={() => navigateTo(currentPath)}
+        >
           <img className="com__address_bar__go__img" src={go} alt="Go" />
           <span className="com__address_bar__go__text">Go</span>
         </div>
       </section>
+
       <div className="com__content">
         <div className="com__content__inner">
           <div className="com__content__left">
@@ -122,7 +393,7 @@ function MyComputer({ onClose }) {
                   System Tasks
                 </div>
                 <img
-                  src={pullup} // Assuming System Tasks also has this icon
+                  src={pullup}
                   alt=""
                   className="com__content__left__card__header__img"
                 />
@@ -132,7 +403,7 @@ function MyComputer({ onClose }) {
                   <img
                     className="com__content__left__card__img"
                     src={viewInfo}
-                    alt="View system information"
+                    alt="View info"
                   />
                   <div className="com__content__left__card__text link">
                     View system information
@@ -142,7 +413,7 @@ function MyComputer({ onClose }) {
                   <img
                     className="com__content__left__card__img"
                     src={remove}
-                    alt="Add or remove programs"
+                    alt="Remove programs"
                   />
                   <div className="com__content__left__card__text link">
                     Add or remove programs
@@ -152,7 +423,7 @@ function MyComputer({ onClose }) {
                   <img
                     className="com__content__left__card__img"
                     src={control}
-                    alt="Change a setting"
+                    alt="Change setting"
                   />
                   <div className="com__content__left__card__text link">
                     Change a setting
@@ -160,14 +431,14 @@ function MyComputer({ onClose }) {
                 </div>
               </div>
             </div>
+
             <div className="com__content__left__card">
               <div className="com__content__left__card__header">
                 <div className="com__content__left__card__header__text">
-                  Other Places{' '}
-                  {/* Kept original name as per user not wanting this changed */}
+                  Other Places
                 </div>
                 <img
-                  src={pullup} // Assuming Other Places also has this icon
+                  src={pullup}
                   alt=""
                   className="com__content__left__card__header__img"
                 />
@@ -177,7 +448,7 @@ function MyComputer({ onClose }) {
                   <img
                     className="com__content__left__card__img"
                     src={network}
-                    alt="My Network Places"
+                    alt="Network"
                   />
                   <div className="com__content__left__card__text link">
                     My Network Places
@@ -187,27 +458,20 @@ function MyComputer({ onClose }) {
                   <img
                     className="com__content__left__card__img"
                     src={documentIcon}
-                    alt="My Documents"
+                    alt="Docs"
                   />
-                  <div className="com__content__left__card__text link">
+                  <div
+                    className="com__content__left__card__text link"
+                    onClick={() => navigateTo("User's Documents")}
+                  >
                     My Documents
                   </div>
                 </div>
                 <div className="com__content__left__card__row">
                   <img
                     className="com__content__left__card__img"
-                    src={folderSmall}
-                    alt="Shared Documents"
-                  />
-                  <div className="com__content__left__card__text link">
-                    Shared Documents
-                  </div>
-                </div>
-                <div className="com__content__left__card__row">
-                  <img
-                    className="com__content__left__card__img"
                     src={control}
-                    alt="Control Panel"
+                    alt="Control"
                   />
                   <div className="com__content__left__card__text link">
                     Control Panel
@@ -215,6 +479,7 @@ function MyComputer({ onClose }) {
                 </div>
               </div>
             </div>
+
             <div className="com__content__left__card">
               <div className="com__content__left__card__header">
                 <div className="com__content__left__card__header__text">
@@ -226,105 +491,18 @@ function MyComputer({ onClose }) {
                   className="com__content__left__card__header__img"
                 />
               </div>
-              <div className="com__content__left__card__content">
-                {/* Content for Details card as per image */}
-                <div className="com__content__left__card__row">
-                  <div className="com__content__left__card__text black bold">
-                    My Computer
-                  </div>
-                </div>
-                <div className="com__content__left__card__row">
-                  <div className="com__content__left__card__text black">
-                    System Folder
-                  </div>
-                </div>
-              </div>
+              {renderDetailsPanel()}
             </div>
           </div>
-          <div className="com__content__right">
-            <div className="com__content__right__card">
-              <div className="com__content__right__card__header">
-                Files Stored on This Computer
-              </div>
-              <div className="com__content__right__card__content">
-                <div className="com__content__right__card__item">
-                  <img
-                    src={folder}
-                    alt="Shared Documents folder"
-                    className="com__content__right__card__img"
-                  />
-                  <div className="com__content__right__card__img-container">
-                    <div className="com__content__right__card__text">
-                      Shared Documents
-                    </div>
-                  </div>
-                </div>
-                <div className="com__content__right__card__item">
-                  <img
-                    src={folder}
-                    alt="User's Documents folder"
-                    className="com__content__right__card__img"
-                  />
-                  <div className="com__content__right__card__img-container">
-                    <div className="com__content__right__card__text">
-                      User's Documents
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-            <div className="com__content__right__card">
-              <div className="com__content__right__card__header">
-                Hard Disk Drives
-              </div>
-              <div className="com__content__right__card__content">
-                <div className="com__content__right__card__item">
-                  <img
-                    src={disk}
-                    alt="Local Disk (C:)"
-                    className="com__content__right__card__img"
-                  />
-                  <div className="com__content__right__card__img-container">
-                    <div className="com__content__right__card__text">
-                      Local Disk (C:)
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-            <div className="com__content__right__card">
-              <div className="com__content__right__card__header">
-                Devices with Removable Storage
-              </div>
-              <div className="com__content__right__card__content">
-                <div className="com__content__right__card__item">
-                  <div className="com__content__right__card__img-container">
-                    <img
-                      src={cd}
-                      alt="CD Drive (D:)"
-                      className="com__content__right__card__img"
-                    />
-                  </div>
-                  <div className="com__content__right__card__text">
-                    CD Drive (D:)
-                  </div>
-                </div>
-              </div>
-            </div>
-            {/* This card is now "Other" and has no animation */}
-            <div className="com__content__right__card">
-              <div className="com__content__right__card__header">Other</div>
-              <div className="com__content__right__card__content">
-                {/* Content for "Other" can be added here if needed */}
-              </div>
-            </div>
-          </div>
+
+          <div className="com__content__right">{renderContent()}</div>
         </div>
       </div>
     </Div>
   );
 }
 
+// --- STYLES ---
 const Div = styled.div`
   height: 100%;
   width: 100%;
@@ -333,6 +511,38 @@ const Div = styled.div`
   overflow: hidden;
   flex-direction: column;
   background: linear-gradient(to right, #edede5 0%, #ede8cd 100%);
+
+  /* ... [Previous Styled Components for toolbar, function_bar, address_bar remain same] ... */
+
+  /* ADDED: Styles for interactive items */
+  .com__content__right__card__item {
+    display: flex;
+    align-items: center;
+    width: 200px;
+    margin-bottom: 15px;
+    height: auto;
+    margin-right: 10px;
+    border: 1px solid transparent; /* Prepare for hover border */
+    padding: 2px;
+  }
+
+  .com__content__right__card__item:hover {
+    background-color: rgba(49, 106, 197, 0.1);
+    border: 1px solid rgba(49, 106, 197, 0.6);
+    cursor: default;
+  }
+
+  .com__content__right__card__item.selected {
+    background-color: #316ac5;
+    border: 1px solid #316ac5;
+  }
+
+  .com__content__right__card__item.selected .com__content__right__card__text {
+    color: white;
+  }
+
+  /* ... [Rest of your previous styles] ... */
+
   .com__toolbar {
     position: relative;
     display: flex;
@@ -433,19 +643,6 @@ const Div = styled.div`
       border-style: solid;
     }
   }
-  .com__function_bar__arrow--margin-11 {
-    height: 100%;
-    display: flex;
-    align-items: center;
-    margin: 0 1px 0 -1px;
-    &:before {
-      content: '';
-      display: block;
-      border-width: 3px 3px 0;
-      border-color: #000 transparent;
-      border-style: solid;
-    }
-  }
   .com__address_bar {
     flex-shrink: 0;
     border-top: 1px solid rgba(255, 255, 255, 0.7);
@@ -496,34 +693,12 @@ const Div = styled.div`
     padding: 0 18px 0 5px;
     height: 100%;
     position: relative;
+    cursor: pointer;
     &__img {
       height: 95%;
       border: 1px solid rgba(255, 255, 255, 0.2);
       margin-right: 3px;
     }
-  }
-  .com__address_bar__links {
-    display: flex;
-    align-items: center;
-    padding: 0 18px 0 5px;
-    height: 100%;
-    position: relative;
-    &__img {
-      position: absolute;
-      right: 2px;
-      top: 3px;
-      height: 5px;
-      width: 8px;
-    }
-    &__text {
-      color: rgba(0, 0, 0, 0.5);
-    }
-  }
-  .com__address_bar__separate {
-    height: 100%;
-    width: 1px;
-    background-color: rgba(0, 0, 0, 0.1);
-    box-shadow: 1px 0 rgba(255, 255, 255, 0.7);
   }
   .com__content {
     flex: 1;
@@ -607,9 +782,8 @@ const Div = styled.div`
   .com__content__left__card__text {
     font-size: 10px;
     line-height: 14px;
-    color: #0c327d; /* Default color for links in left panel */
+    color: #0c327d;
     &.black {
-      /* Class for black text, like in Details */
       color: #000;
     }
     &.bold {
@@ -631,7 +805,6 @@ const Div = styled.div`
     font-weight: 700;
     padding: 2px 0 3px 12px;
     position: relative;
-    /* No transition for the header text itself */
     &:after {
       content: '';
       display: block;
@@ -641,7 +814,6 @@ const Div = styled.div`
       left: 0;
       height: 1px;
       width: calc(100% - 12px);
-      /* No transition for the underline */
     }
   }
   .com__content__right__card__content {
@@ -650,15 +822,7 @@ const Div = styled.div`
     flex-wrap: wrap;
     padding: 15px 0 0 12px;
   }
-  .com__content__right__card__item {
-    display: flex;
-    align-items: center;
-    width: 200px;
-    margin-bottom: 15px;
-    height: auto;
-    margin-right: 10px;
-    /* No transitions for items by default */
-  }
+  /* .com__content__right__card__item moved up */
   .com__content__right__card__img {
     width: 45px;
     height: 45px;
@@ -667,7 +831,4 @@ const Div = styled.div`
   .com__content__right__card__text {
     white-space: nowrap;
   }
-  /* Removed .com__content__right__card--me and its hover effects */
 `;
-
-export default MyComputer;
