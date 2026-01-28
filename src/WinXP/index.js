@@ -194,6 +194,9 @@ function WinXP({ onLogoff, onShutdown, onRestart, onSwitchUser }) {
       case 'PictoChat':
         dispatch({ type: ADD_APP, payload: appSettings.PictoChat });
         break;
+      case 'Media Player':
+        dispatch({ type: ADD_APP, payload: appSettings.MediaPlayer });
+        break;
       case 'Log Off':
         dispatch({ type: POWER_OFF, payload: POWER_STATE.LOG_OFF });
         break;

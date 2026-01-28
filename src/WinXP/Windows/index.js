@@ -24,7 +24,7 @@ function Windows({
           onMouseUpClose={onClose}
           onMouseUpMinimize={onMinimize}
           onMouseUpMaximize={onMaximize}
-          isFocus={focusedAppId === app.id} // for styledWindow
+          isFocus={focusedAppId === app.id}
           {...app}
         />
       ))}
@@ -44,6 +44,8 @@ const Window = memo(function({
   defaultOffset,
   resizable,
   maximized,
+  minWidth,
+  minHeight,
   component,
   zIndex,
   isFocus,
@@ -68,6 +70,7 @@ const Window = memo(function({
   const dragRef = useRef(null);
   const ref = useRef(null);
   const { width: windowWidth, height: windowHeight } = useWindowSize();
+
   const { offset, size } = useElementResize(ref, {
     dragRef,
     defaultOffset,
@@ -80,7 +83,10 @@ const Window = memo(function({
     },
     resizable,
     resizeThreshold: 10,
+    minWidth,
+    minHeight,
   });
+
   let width, height, x, y;
   if (maximized) {
     width = windowWidth + 6;
@@ -90,6 +96,11 @@ const Window = memo(function({
   } else {
     width = size.width;
     height = size.height;
+
+    // 3. Safety Clamp: Ensure visual size never drops below minimum
+    if (minWidth && width < minWidth) width = minWidth;
+    if (minHeight && height < minHeight) height = minHeight;
+
     x = offset.x;
     y = offset.y;
   }

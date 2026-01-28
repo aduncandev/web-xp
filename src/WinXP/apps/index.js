@@ -34,6 +34,8 @@ import pictoChatIcon from 'assets/windowsIcons/pictochat.png';
 import pictoChatIconLarge from 'assets/windowsIcons/pictochat.png';
 import eggIcon from 'assets/windowsIcons/tree.gif';
 import eggIconLarge from 'assets/windowsIcons/tree.gif';
+import mediaPlayerIcon from 'assets/windowsIcons/846(16x16).png';
+import mediaPlayerIconLarge from 'assets/windowsIcons/846(32x32).png';
 
 const gen = () => {
   let id = -1;
@@ -140,7 +142,7 @@ export const defaultIconState = [
   {
     // NEW: Media Player Icon (Reusing Winamp Icon)
     id: genId(),
-    icon: winampIcon,
+    icon: mediaPlayerIconLarge,
     title: 'Media Player',
     component: MediaPlayer,
     isFocus: false,
@@ -396,7 +398,7 @@ export const appSettings = {
   MediaPlayer: {
     name: 'MediaPlayer',
     header: {
-      icon: winampIcon, // Reusing icon as requested
+      icon: mediaPlayerIcon, // Reusing icon as requested
       title: 'Media Player',
       invisible: false, // Set to FALSE so you can see buttons and drag it
     },

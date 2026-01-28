@@ -3,7 +3,6 @@ import styled from 'styled-components';
 import { initialTracks } from './config';
 import { useVolume } from '../../../context/VolumeContext';
 
-// --- HELPER: Media Type ---
 const getMediaType = (url, fileType) => {
   if (fileType) {
     if (fileType.startsWith('video')) return 'video';
@@ -17,7 +16,6 @@ const getMediaType = (url, fileType) => {
 };
 
 export default function MediaPlayer({ onClose, onMinimize, isFocus }) {
-  // --- STATE ---
   const [playlist, setPlaylist] = useState(() => {
     const tracks = Array.isArray(initialTracks) ? initialTracks : [];
     return tracks.map(t => ({
@@ -37,11 +35,8 @@ export default function MediaPlayer({ onClose, onMinimize, isFocus }) {
   const [showPlaylist, setShowPlaylist] = useState(true);
   const [isLooping, setIsLooping] = useState(false);
   const [localVolume, setLocalVolume] = useState(1);
-
-  // Window Dimensions for Responsive UI
   const [windowSize, setWindowSize] = useState({ width: 300, height: 300 });
 
-  // --- REFS ---
   const mediaRef = useRef(null);
   const canvasRef = useRef(null);
   const containerRef = useRef(null);
@@ -51,7 +46,8 @@ export default function MediaPlayer({ onClose, onMinimize, isFocus }) {
   const animationRef = useRef(null);
   const resizeObserverRef = useRef(null);
 
-  const { volume: globalVolume, isMuted } = useVolume();
+  const { volume: globalVolume, isMuted, toggleMute } = useVolume();
+
   const currentItem = playlist[currentIndex] || {
     type: 'audio',
     title: 'No Media',
@@ -59,26 +55,34 @@ export default function MediaPlayer({ onClose, onMinimize, isFocus }) {
   };
   const isImage = currentItem.type === 'image';
 
-  // --- RESIZE OBSERVER (Responsive UI & Sharp Canvas) ---
+  // --- RESIZE OBSERVER ---
   useEffect(() => {
     if (!containerRef.current) return;
-
     resizeObserverRef.current = new ResizeObserver(entries => {
       for (let entry of entries) {
         const { width, height } = entry.contentRect;
         setWindowSize({ width: Math.floor(width), height: Math.floor(height) });
       }
     });
-
     resizeObserverRef.current.observe(containerRef.current);
-
-    return () => {
-      if (resizeObserverRef.current) resizeObserverRef.current.disconnect();
-    };
+    return () => resizeObserverRef.current?.disconnect();
   }, []);
 
   // --- VISUALIZER ENGINE ---
-  const setupVisualizer = () => {
+
+  // FIX: Reset sourceRef when switching media types.
+  // This ensures that if the <audio> element is removed (image mode) and recreated,
+  // we don't hold onto a dead MediaElementSourceNode.
+  useEffect(() => {
+    if (currentItem.type !== 'audio') {
+      if (sourceRef.current) {
+        sourceRef.current.disconnect();
+        sourceRef.current = null;
+      }
+    }
+  }, [currentItem.type]);
+
+  const setupVisualizer = useCallback(() => {
     if (!mediaRef.current || currentItem.type !== 'audio') return;
 
     try {
@@ -92,26 +96,23 @@ export default function MediaPlayer({ onClose, onMinimize, isFocus }) {
 
       if (!analyserRef.current) {
         analyserRef.current = ctx.createAnalyser();
-        analyserRef.current.fftSize = 2048;
+        analyserRef.current.fftSize = 256;
       }
 
-      if (sourceRef.current) {
-        try {
-          sourceRef.current.disconnect();
-        } catch (e) {}
+      // Only create a new source if one doesn't exist for the current context
+      if (!sourceRef.current) {
+        sourceRef.current = ctx.createMediaElementSource(mediaRef.current);
+        sourceRef.current.connect(analyserRef.current);
+        analyserRef.current.connect(ctx.destination);
       }
 
-      sourceRef.current = ctx.createMediaElementSource(mediaRef.current);
-      sourceRef.current.connect(analyserRef.current);
-      analyserRef.current.connect(ctx.destination);
-
-      drawOscilloscope();
+      drawSpectrum();
     } catch (e) {
-      // Ignore
+      console.warn('Visualizer setup failed:', e);
     }
-  };
+  }, [currentItem.type]);
 
-  const drawOscilloscope = useCallback(() => {
+  const drawSpectrum = useCallback(() => {
     if (!canvasRef.current || !analyserRef.current) return;
 
     const canvas = canvasRef.current;
@@ -122,42 +123,33 @@ export default function MediaPlayer({ onClose, onMinimize, isFocus }) {
 
     const draw = () => {
       animationRef.current = requestAnimationFrame(draw);
-      analyser.getByteTimeDomainData(dataArray);
+      analyser.getByteFrequencyData(dataArray);
 
       ctx.fillStyle = '#000';
       ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-      ctx.lineWidth = 2;
-      ctx.strokeStyle = '#33c9ff'; // WMP Blue
-      ctx.beginPath();
-
-      const sliceWidth = (canvas.width * 1.0) / bufferLength;
+      const barWidth = (canvas.width / bufferLength) * 2.5;
+      let barHeight;
       let x = 0;
 
       for (let i = 0; i < bufferLength; i++) {
-        const v = dataArray[i] / 128.0;
-        const y = (v * canvas.height) / 2;
+        barHeight = (dataArray[i] / 255) * canvas.height;
 
-        if (i === 0) ctx.moveTo(x, y);
-        else ctx.lineTo(x, y);
+        const gradient = ctx.createLinearGradient(0, canvas.height, 0, 0);
+        gradient.addColorStop(0, '#004e92');
+        gradient.addColorStop(1, '#50cc7f');
 
-        x += sliceWidth;
+        ctx.fillStyle = gradient;
+        ctx.fillRect(x, canvas.height - barHeight, barWidth, barHeight);
+
+        x += barWidth + 1;
       }
-
-      ctx.lineTo(canvas.width, canvas.height / 2);
-      ctx.stroke();
     };
     draw();
   }, []);
 
-  // Redraw visualizer if window width changes
-  useEffect(() => {
-    if (isPlaying && currentItem.type === 'audio') {
-      drawOscilloscope();
-    }
-  }, [windowSize.width, isPlaying, currentItem.type, drawOscilloscope]);
+  // --- PLAYBACK LOGIC ---
 
-  // --- LOGIC ---
   useEffect(() => {
     if (mediaRef.current && !isImage) {
       const effectiveVolume = (globalVolume / 100) * localVolume;
@@ -167,10 +159,30 @@ export default function MediaPlayer({ onClose, onMinimize, isFocus }) {
   }, [globalVolume, localVolume, isMuted, isImage, currentIndex]);
 
   useEffect(() => {
-    setIsPlaying(false);
     setCurrentTime(0);
     setDuration(0);
-  }, [currentIndex]);
+
+    const playMedia = async () => {
+      if (mediaRef.current && !isImage && playlist.length > 0) {
+        try {
+          mediaRef.current.load();
+          await mediaRef.current.play();
+        } catch (err) {
+          setIsPlaying(false);
+        }
+      }
+    };
+
+    playMedia();
+
+    // Trigger visualizer setup only if we are playing audio
+    if (currentItem.type === 'audio') {
+      // Small timeout allows the DOM to settle if we just switched from Image -> Audio
+      setTimeout(() => {
+        if (isPlaying) setupVisualizer();
+      }, 50);
+    }
+  }, [currentIndex, isImage, playlist.length]);
 
   useEffect(() => {
     return () => {
@@ -180,31 +192,35 @@ export default function MediaPlayer({ onClose, onMinimize, isFocus }) {
   }, []);
 
   // --- CONTROLS ---
-  const togglePlay = () => {
-    if (isImage) return;
-    if (!mediaRef.current) return;
+
+  const onPlayEvent = () => {
+    setIsPlaying(true);
+    setupVisualizer();
+  };
+
+  const onPauseEvent = () => {
+    setIsPlaying(false);
+    if (animationRef.current) cancelAnimationFrame(animationRef.current);
+  };
+
+  const togglePlay = async () => {
+    if (isImage || !mediaRef.current) return;
+
+    if (audioContextRef.current?.state === 'suspended') {
+      await audioContextRef.current.resume();
+    }
 
     if (mediaRef.current.paused) {
-      mediaRef.current
-        .play()
-        .then(() => setIsPlaying(true))
-        .catch(e => console.error(e));
-      if (audioContextRef.current?.state === 'suspended')
-        audioContextRef.current.resume();
+      mediaRef.current.play().catch(e => console.error('Play failed', e));
     } else {
       mediaRef.current.pause();
-      setIsPlaying(false);
     }
   };
 
   const stop = () => {
-    if (isImage) return;
-    if (mediaRef.current) {
-      mediaRef.current.pause();
-      mediaRef.current.currentTime = 0;
-    }
-    setIsPlaying(false);
-    setCurrentTime(0);
+    if (isImage || !mediaRef.current) return;
+    mediaRef.current.pause();
+    mediaRef.current.currentTime = 0;
   };
 
   const nextTrack = () => {
@@ -220,16 +236,9 @@ export default function MediaPlayer({ onClose, onMinimize, isFocus }) {
   const handleEnded = () => {
     if (isLooping && mediaRef.current) {
       mediaRef.current.currentTime = 0;
-      mediaRef.current.play();
+      mediaRef.current.play().catch(e => console.error(e));
     } else {
       nextTrack();
-    }
-  };
-
-  const onTimeUpdate = () => {
-    if (mediaRef.current) {
-      setCurrentTime(mediaRef.current.currentTime);
-      setDuration(mediaRef.current.duration || 0);
     }
   };
 
@@ -245,17 +254,23 @@ export default function MediaPlayer({ onClose, onMinimize, isFocus }) {
     setLocalVolume(parseFloat(e.target.value));
   };
 
+  const handleMuteClick = e => {
+    e.stopPropagation();
+    if (toggleMute) toggleMute();
+  };
+
   const removeFromPlaylist = (indexToRemove, e) => {
     e.stopPropagation();
     setPlaylist(prev => {
       const newPlaylist = prev.filter((_, i) => i !== indexToRemove);
+      if (newPlaylist.length === 0) {
+        setCurrentIndex(0);
+        return newPlaylist;
+      }
       if (indexToRemove < currentIndex) {
-        setCurrentIndex(currentIndex - 1);
+        setCurrentIndex(c => c - 1);
       } else if (indexToRemove === currentIndex) {
-        setIsPlaying(false);
-        if (newPlaylist.length > 0)
-          setCurrentIndex(indexToRemove % newPlaylist.length);
-        else setCurrentIndex(0);
+        setCurrentIndex(c => c % newPlaylist.length);
       }
       return newPlaylist;
     });
@@ -278,7 +293,6 @@ export default function MediaPlayer({ onClose, onMinimize, isFocus }) {
         title: file.name,
       }));
       setPlaylist(prev => [...prev, ...newItems]);
-      if (playlist.length === 0) setCurrentIndex(0);
     }
   };
 
@@ -289,14 +303,18 @@ export default function MediaPlayer({ onClose, onMinimize, isFocus }) {
     if (currentItem.type === 'video') {
       return (
         <VideoElement
-          key={currentItem.url}
           ref={mediaRef}
-          onTimeUpdate={onTimeUpdate}
+          onTimeUpdate={() => {
+            if (mediaRef.current) {
+              setCurrentTime(mediaRef.current.currentTime);
+              setDuration(mediaRef.current.duration || 0);
+            }
+          }}
           onEnded={handleEnded}
-          onPlay={() => setIsPlaying(true)}
-          onPause={() => setIsPlaying(false)}
+          onPlay={onPlayEvent}
+          onPause={onPauseEvent}
           onClick={togglePlay}
-          autoPlay={true}
+          playsInline
         >
           <source src={currentItem.url} />
         </VideoElement>
@@ -308,18 +326,18 @@ export default function MediaPlayer({ onClose, onMinimize, isFocus }) {
     return (
       <VisualizerContainer>
         <audio
-          key={currentItem.url}
           ref={mediaRef}
           src={currentItem.url}
-          onTimeUpdate={onTimeUpdate}
-          onEnded={handleEnded}
-          onPlay={() => {
-            setIsPlaying(true);
-            setupVisualizer();
+          onTimeUpdate={() => {
+            if (mediaRef.current) {
+              setCurrentTime(mediaRef.current.currentTime);
+              setDuration(mediaRef.current.duration || 0);
+            }
           }}
-          onPause={() => setIsPlaying(false)}
+          onEnded={handleEnded}
+          onPlay={onPlayEvent}
+          onPause={onPauseEvent}
           crossOrigin="anonymous"
-          autoPlay={true}
         />
         <canvas
           ref={canvasRef}
@@ -331,9 +349,9 @@ export default function MediaPlayer({ onClose, onMinimize, isFocus }) {
     );
   };
 
-  // Responsive UI Logic
-  const hideTime = windowSize.width < 380;
-  const hideVolumeSlider = windowSize.width < 320;
+  const hideTime = windowSize.width < 340;
+  const hideVolumeSlider = windowSize.width < 300;
+  const compactMode = windowSize.width < 350;
 
   return (
     <PlayerContainer
@@ -360,12 +378,12 @@ export default function MediaPlayer({ onClose, onMinimize, isFocus }) {
           onChange={onSeek}
           disabled={isImage}
         />
-        <ButtonRow>
+        <ButtonRow compact={compactMode}>
           {!hideTime && (
             <TimeDisplay>
               {isImage
-                ? 'IMAGE'
-                : `${formatTime(currentTime)} / ${formatTime(duration)}`}
+                ? 'IMG'
+                : `${formatTime(currentTime)}/${formatTime(duration)}`}
             </TimeDisplay>
           )}
 
@@ -379,9 +397,10 @@ export default function MediaPlayer({ onClose, onMinimize, isFocus }) {
 
             <MediaBtn
               onClick={togglePlay}
-              style={{ fontSize: '18px' }}
+              style={{ fontSize: '18px', width: '36px', height: '36px' }}
               title="Play/Pause"
               disabled={isImage}
+              active={isPlaying}
             >
               {isPlaying ? '⏸' : '▶'}
             </MediaBtn>
@@ -401,10 +420,13 @@ export default function MediaPlayer({ onClose, onMinimize, isFocus }) {
           </MainControls>
 
           <SideControls>
-            <VolumeContainer
-              title={`Volume: ${Math.round(localVolume * 100)}%`}
-            >
-              <SpeakerIcon muted={isMuted || localVolume === 0} />
+            <VolumeContainer>
+              <MuteBtn
+                onClick={handleMuteClick}
+                title={isMuted ? 'Unmute' : 'Mute'}
+              >
+                <SpeakerIcon muted={isMuted || localVolume === 0} />
+              </MuteBtn>
               {!hideVolumeSlider && (
                 <VolumeSlider
                   type="range"
@@ -421,7 +443,6 @@ export default function MediaPlayer({ onClose, onMinimize, isFocus }) {
               onClick={() => setShowPlaylist(!showPlaylist)}
               active={showPlaylist}
               title="Toggle Playlist"
-              style={{ marginLeft: '4px' }}
             >
               <PlaylistIcon />
             </MediaBtn>
@@ -435,9 +456,7 @@ export default function MediaPlayer({ onClose, onMinimize, isFocus }) {
             <PlaylistItem
               key={i}
               active={i === currentIndex}
-              onDoubleClick={() => {
-                setCurrentIndex(i);
-              }}
+              onDoubleClick={() => setCurrentIndex(i)}
             >
               <ItemInfo>
                 <TypeIcon>{getTypeIcon(item.type)}</TypeIcon>
@@ -534,7 +553,9 @@ const getTypeIcon = type => {
 const PlayerContainer = styled.div`
   background: #1a1a1a;
   height: 100%;
-  min-width: 250px; /* Forces window to not shrink smaller than this */
+  width: 100%;
+  min-width: 280px;
+  min-height: 250px;
   display: flex;
   flex-direction: column;
   overflow: hidden;
@@ -556,7 +577,8 @@ const TopTitleBar = styled.div`
 
 const Marquee = styled.div`
   font-size: 11px;
-  color: #fff;
+  color: #0f0;
+  font-family: 'Courier New', monospace;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -572,7 +594,6 @@ const ScreenArea = styled.div`
   align-items: center;
   justify-content: center;
   overflow: hidden;
-  transition: flex 0.2s ease, height 0.2s ease;
   position: relative;
 `;
 
@@ -602,7 +623,7 @@ const ControlDeck = styled.div`
   border-top: 1px solid #555;
   border-bottom: 1px solid #000;
   flex-shrink: 0;
-  min-height: 64px;
+  min-height: 70px;
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.1);
   display: flex;
   flex-direction: column;
@@ -628,39 +649,46 @@ const ButtonRow = styled.div`
   display: flex;
   align-items: center;
   justify-content: space-between;
+  flex-wrap: ${props => (props.compact ? 'wrap' : 'nowrap')};
+  gap: ${props => (props.compact ? '4px' : '0')};
 `;
 
 const TimeDisplay = styled.div`
   font-family: monospace;
   font-size: 11px;
   color: #ccc;
-  /* Fix width to prevent jumping numbers */
-  width: 70px;
+  min-width: 60px;
   flex-shrink: 0;
+  margin-right: 8px;
 `;
 
 const MainControls = styled.div`
   display: flex;
-  gap: 6px;
+  gap: 4px;
   align-items: center;
-  flex-shrink: 0; /* Ensures buttons never squash */
-  flex-grow: 1; /* Centers controls if neighbors hide */
+  flex-shrink: 0;
+  flex-grow: 1;
   justify-content: center;
 `;
+
 const SideControls = styled.div`
   display: flex;
   align-items: center;
   justify-content: flex-end;
   flex-shrink: 0;
+  margin-left: auto;
+  gap: 8px;
 `;
 
 const MediaBtn = styled.button`
   background: ${props =>
-    props.active ? '#0078d7' : 'linear-gradient(to bottom, #555, #333)'};
+    props.active
+      ? 'radial-gradient(circle, #0078d7 0%, #0044bb 100%)'
+      : 'linear-gradient(to bottom, #555, #333)'};
   border: 1px solid #000;
-  border-radius: 50%;
-  width: 30px;
-  height: 30px;
+  border-radius: 4px;
+  width: 28px;
+  height: 28px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -668,7 +696,7 @@ const MediaBtn = styled.button`
   font-size: 12px;
   color: #fff;
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
-  transition: all 0.1s;
+  position: relative;
 
   &:active {
     transform: translateY(1px);
@@ -685,21 +713,32 @@ const MediaBtn = styled.button`
   }
 `;
 
+const MuteBtn = styled.button`
+  background: none;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4px;
+  z-index: 10;
+  position: relative;
+  &:hover svg {
+    stroke: #fff;
+  }
+`;
+
 const VolumeContainer = styled.div`
   display: flex;
   align-items: center;
-  gap: 4px;
-  margin-right: 8px;
+  gap: 5px;
 `;
 
 const VolumeSlider = styled.input`
   width: 50px;
-  height: 3px;
+  height: 4px;
   cursor: pointer;
-  accent-color: #999;
-  &:hover {
-    accent-color: #fff;
-  }
+  accent-color: #0078d7;
 `;
 
 const Playlist = styled.div`

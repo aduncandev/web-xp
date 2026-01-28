@@ -38,12 +38,11 @@ export const initialTracks = [
     },
   },
   {
-    url: `${process.env.PUBLIC_URL}/music/meowtheboard.mp3`,
+    url: `${process.env.PUBLIC_URL}/music/MIKEtheBOARDpleasey.wav`,
     duration: 118,
     metaData: {
-      title:
-        'MIKE, the BOARD, please! (MeowSynth Edition) (The real mike version)',
-      artist: 'Toby Fox... and uhh me I guess?',
+      title: 'MIKE, the BOARD, please!',
+      artist: 'Toby Fox (but I remade it in FL)',
       album,
     },
   },

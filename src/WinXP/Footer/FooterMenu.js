@@ -128,7 +128,7 @@ function FooterMenu({ className, onClick }) {
               { icon: notepad, text: 'Notepad' },
               { icon: winamp, text: 'Winamp' },
               { icon: paint, text: 'Paint' },
-              { icon: mediaPlayer, text: 'Windows Media Player' },
+              { icon: mediaPlayer, text: 'Media Player' },
               { icon: messenger, text: 'PictoChat' },
             ]}
           />
