@@ -1,3 +1,4 @@
+import React from 'react';
 import InternetExplorer from './InternetExplorer';
 import Minesweeper from './Minesweeper';
 import ErrorBox from './ErrorBox';
@@ -6,11 +7,13 @@ import Notepad from './Notepad';
 import Winamp from './Winamp';
 import Paint from './Paint';
 import AboutMe from './AboutMe';
-import VoltorbFlip from './VoltorbFlip';
-import Pinball from './Pinball';
 import PictoChat from './PictoChat';
 import Egg from './Egg';
-import MediaPlayer from './MediaPlayer'; // <--- NEW IMPORT
+import MediaPlayer from './MediaPlayer';
+
+// --- Renamed Imports for Wrapper Logic ---
+import VoltorbFlipComponent from './VoltorbFlip';
+import PinballComponent from './Pinball';
 
 // --- Icon Imports ---
 import iePaper from 'assets/windowsIcons/ie-paper.png';
@@ -37,6 +40,74 @@ import eggIconLarge from 'assets/windowsIcons/tree.gif';
 import mediaPlayerIcon from 'assets/windowsIcons/846(16x16).png';
 import mediaPlayerIconLarge from 'assets/windowsIcons/846(32x32).png';
 
+// --- Helper Functions ---
+
+const getWinState = () => {
+  if (typeof window === 'undefined')
+    return { w: 1024, h: 768, isMobile: false };
+  return {
+    w: window.innerWidth,
+    h: window.innerHeight,
+    isMobile: window.innerWidth < 800,
+  };
+};
+
+const getCenter = (appW, appH) => {
+  const { w, h } = getWinState();
+  const targetW = appW || 300;
+  const targetH = appH || 300;
+  return {
+    x: Math.max(0, w / 2 - targetW / 2),
+    y: Math.max(0, h / 2 - targetH / 2),
+  };
+};
+
+const shouldMaximize = (appW, appH, isResizable) => {
+  const { w, h, isMobile } = getWinState();
+  if (isResizable) return isMobile;
+  return w < appW || h < appH;
+};
+
+// --- Universal Compatibility Logic ---
+
+const isScreenTooSmall = minWidth => {
+  if (typeof window === 'undefined') return false;
+  return window.innerWidth < minWidth;
+};
+
+// 1. The Wrapper Component (renders ErrorBox or App)
+const createResponsiveComponent = (Component, minWidth, appName) => props => {
+  if (isScreenTooSmall(minWidth)) {
+    return (
+      <ErrorBox
+        {...props}
+        message={`Mobile Device / Small Screen Detected:\n\n${appName} requires a minimum screen width of ${minWidth}px to function correctly.\n\nPlease access this page on a desktop computer.`}
+        title="Compatibility Warning"
+      />
+    );
+  }
+  return <Component {...props} />;
+};
+
+// 2. The Size Logic (returns Error Size or App Size)
+const getResponsiveSize = (defaultW, defaultH, minWidth) => {
+  if (isScreenTooSmall(minWidth)) {
+    return { width: 380, height: 0 }; // Standard ErrorBox size
+  }
+  return { width: defaultW, height: defaultH };
+};
+
+// --- Wrapped Components ---
+// We redefine these exports as the "Smart" versions
+const VoltorbFlip = createResponsiveComponent(
+  VoltorbFlipComponent,
+  570,
+  'Voltorb Flip',
+);
+const Pinball = createResponsiveComponent(PinballComponent, 600, '3D Pinball');
+
+// ---------------------
+
 const gen = () => {
   let id = -1;
   return () => {
@@ -46,9 +117,7 @@ const gen = () => {
 };
 const genId = gen();
 
-export const defaultAppState = [
-  // No apps open by default
-];
+export const defaultAppState = [];
 
 export const defaultIconState = [
   {
@@ -111,7 +180,7 @@ export const defaultIconState = [
     id: genId(),
     icon: voltorbFlipIconLarge,
     title: 'Voltorb Flip',
-    component: VoltorbFlip,
+    component: VoltorbFlip, // Uses the wrapped component
     isFocus: false,
     appName: 'VoltorbFlip',
   },
@@ -119,7 +188,7 @@ export const defaultIconState = [
     id: genId(),
     icon: pinballIcon32,
     title: '3D Pinball',
-    component: Pinball,
+    component: Pinball, // Uses the wrapped component
     isFocus: false,
     appName: 'Pinball',
   },
@@ -140,7 +209,6 @@ export const defaultIconState = [
     appName: 'Egg',
   },
   {
-    // NEW: Media Player Icon (Reusing Winamp Icon)
     id: genId(),
     icon: mediaPlayerIconLarge,
     title: 'Media Player',
@@ -153,42 +221,24 @@ export const defaultIconState = [
 export const appSettings = {
   'Internet Explorer': {
     name: 'Internet Explorer',
-    header: {
-      icon: iePaper,
-      title: 'InternetExplorer',
-    },
+    header: { icon: iePaper, title: 'InternetExplorer' },
     component: InternetExplorer,
-    defaultSize: {
-      width: 700,
-      height: 500,
-    },
-    defaultOffset: {
-      x: typeof window !== 'undefined' ? window.innerWidth / 2 - 190 : 200,
-      y: typeof window !== 'undefined' ? window.innerHeight / 2 - 190 : 150,
-    },
+    defaultSize: { width: 700, height: 500 },
+    defaultOffset: getCenter(700, 500),
     resizable: true,
     minimized: false,
-    maximized: typeof window !== 'undefined' && window.innerWidth < 800,
+    maximized: shouldMaximize(700, 500, true),
     multiInstance: true,
   },
   Minesweeper: {
     name: 'Minesweeper',
-    header: {
-      icon: mine,
-      title: 'Minesweeper',
-    },
+    header: { icon: mine, title: 'Minesweeper' },
     component: Minesweeper,
-    defaultSize: {
-      width: 0,
-      height: 0,
-    },
-    defaultOffset: {
-      x: typeof window !== 'undefined' ? window.innerWidth / 2 - 190 : 200,
-      y: typeof window !== 'undefined' ? window.innerHeight / 2 - 190 : 150,
-    },
+    defaultSize: { width: 0, height: 0 },
+    defaultOffset: getCenter(0, 0),
     resizable: false,
     minimized: false,
-    maximized: false,
+    maximized: shouldMaximize(0, 0, false),
     multiInstance: true,
   },
   Error: {
@@ -200,14 +250,8 @@ export const appSettings = {
       noFooterWindow: true,
     },
     component: ErrorBox,
-    defaultSize: {
-      width: 380,
-      height: 0,
-    },
-    defaultOffset: {
-      x: typeof window !== 'undefined' ? window.innerWidth / 2 - 190 : 200,
-      y: typeof window !== 'undefined' ? window.innerHeight / 2 - 60 : 150,
-    },
+    defaultSize: { width: 380, height: 0 },
+    defaultOffset: getCenter(380, 200),
     resizable: false,
     minimized: false,
     maximized: false,
@@ -215,60 +259,32 @@ export const appSettings = {
   },
   'My Computer': {
     name: 'My Computer',
-    header: {
-      icon: computer,
-      title: 'My Computer',
-    },
+    header: { icon: computer, title: 'My Computer' },
     component: MyComputer,
-    defaultSize: {
-      width: 660,
-      height: 500,
-    },
-    defaultOffset: {
-      x: typeof window !== 'undefined' ? window.innerWidth / 2 - 190 : 200,
-      y: typeof window !== 'undefined' ? window.innerHeight / 2 - 190 : 150,
-    },
+    defaultSize: { width: 660, height: 500 },
+    defaultOffset: getCenter(660, 500),
     resizable: true,
     minimized: false,
-    maximized: typeof window !== 'undefined' && window.innerWidth < 800,
+    maximized: shouldMaximize(660, 500, true),
     multiInstance: false,
   },
   Notepad: {
     name: 'Notepad',
-    header: {
-      icon: notepad,
-      title: 'Untitled - Notepad',
-    },
+    header: { icon: notepad, title: 'Untitled - Notepad' },
     component: Notepad,
-    defaultSize: {
-      width: 660,
-      height: 500,
-    },
-    defaultOffset: {
-      x: typeof window !== 'undefined' ? window.innerWidth / 2 - 190 : 200,
-      y: typeof window !== 'undefined' ? window.innerHeight / 2 - 190 : 150,
-    },
+    defaultSize: { width: 660, height: 500 },
+    defaultOffset: getCenter(660, 500),
     resizable: true,
     minimized: false,
-    maximized: typeof window !== 'undefined' && window.innerWidth < 800,
+    maximized: shouldMaximize(660, 500, true),
     multiInstance: true,
   },
   Winamp: {
     name: 'Winamp',
-    header: {
-      icon: winampIcon,
-      title: 'Winamp',
-      invisible: true,
-    },
+    header: { icon: winampIcon, title: 'Winamp', invisible: true },
     component: Winamp,
-    defaultSize: {
-      width: 0,
-      height: 0,
-    },
-    defaultOffset: {
-      x: typeof window !== 'undefined' ? window.innerWidth / 2 - 190 : 200,
-      y: typeof window !== 'undefined' ? window.innerHeight / 2 - 190 : 150,
-    },
+    defaultSize: { width: 0, height: 0 },
+    defaultOffset: getCenter(0, 0),
     resizable: false,
     minimized: false,
     maximized: false,
@@ -276,59 +292,33 @@ export const appSettings = {
   },
   Paint: {
     name: 'Paint',
-    header: {
-      icon: paint,
-      title: 'Untitled - Paint',
-    },
+    header: { icon: paint, title: 'Untitled - Paint' },
     component: Paint,
-    defaultSize: {
-      width: 660,
-      height: 500,
-    },
-    defaultOffset: {
-      x: typeof window !== 'undefined' ? window.innerWidth / 2 - 190 : 200,
-      y: typeof window !== 'undefined' ? window.innerHeight / 2 - 190 : 150,
-    },
+    defaultSize: { width: 660, height: 500 },
+    defaultOffset: getCenter(660, 500),
     resizable: true,
     minimized: false,
-    maximized: typeof window !== 'undefined' && window.innerWidth < 800,
+    maximized: shouldMaximize(660, 500, true),
     multiInstance: true,
   },
   AboutMe: {
     name: 'AboutMe',
-    header: {
-      icon: aboutMeIcon,
-      title: 'aduncan.dev Tour',
-    },
+    header: { icon: aboutMeIcon, title: 'aduncan.dev Tour' },
     component: AboutMe,
-    defaultSize: {
-      width: 550,
-      height: 400,
-    },
-    defaultOffset: {
-      x: typeof window !== 'undefined' ? window.innerWidth / 2 - 190 : 200,
-      y: typeof window !== 'undefined' ? window.innerHeight / 2 - 190 : 150,
-    },
+    defaultSize: { width: 550, height: 400 },
+    defaultOffset: getCenter(550, 400),
     resizable: false,
     minimized: false,
-    maximized: false,
+    maximized: shouldMaximize(550, 400, false),
     multiInstance: false,
   },
   VoltorbFlip: {
     name: 'VoltorbFlip',
-    header: {
-      icon: voltorbFlipIcon,
-      title: 'Voltorb Flip',
-    },
+    header: { icon: voltorbFlipIcon, title: 'Voltorb Flip' },
     component: VoltorbFlip,
-    defaultSize: {
-      width: 570,
-      height: 670,
-    },
-    defaultOffset: {
-      x: typeof window !== 'undefined' ? window.innerWidth / 2 - 190 : 200,
-      y: typeof window !== 'undefined' ? window.innerHeight / 2 - 190 : 150,
-    },
+    // Dynamically set size: Small Error Size OR Big Game Size
+    defaultSize: getResponsiveSize(570, 670, 570),
+    defaultOffset: getCenter(570, 670),
     resizable: false,
     minimized: false,
     maximized: false,
@@ -341,14 +331,9 @@ export const appSettings = {
       title: '3D Pinball for Windows - Space Cadet',
     },
     component: Pinball,
-    defaultSize: {
-      width: 600,
-      height: 470,
-    },
-    defaultOffset: {
-      x: typeof window !== 'undefined' ? window.innerWidth / 2 - 190 : 200,
-      y: typeof window !== 'undefined' ? window.innerHeight / 2 - 190 : 150,
-    },
+    // Dynamically set size: Small Error Size OR Big Game Size
+    defaultSize: getResponsiveSize(600, 470, 600),
+    defaultOffset: getCenter(600, 470),
     resizable: false,
     minimized: false,
     maximized: false,
@@ -356,64 +341,35 @@ export const appSettings = {
   },
   PictoChat: {
     name: 'PictoChat',
-    header: {
-      icon: pictoChatIcon,
-      title: 'PictoChat',
-    },
+    header: { icon: pictoChatIcon, title: 'PictoChat' },
     component: PictoChat,
-    defaultSize: {
-      width: 400,
-      height: 600,
-    },
-    defaultOffset: {
-      x: typeof window !== 'undefined' ? window.innerWidth / 2 - 190 : 200,
-      y: typeof window !== 'undefined' ? window.innerHeight / 2 - 190 : 150,
-    },
+    defaultSize: { width: 400, height: 600 },
+    defaultOffset: getCenter(400, 600),
     resizable: true,
     minimized: false,
-    maximized: true,
+    maximized: shouldMaximize(400, 600, true),
     multiInstance: false,
   },
   Egg: {
     name: 'Egg',
-    header: {
-      icon: eggIcon,
-      title: '???',
-    },
+    header: { icon: eggIcon, title: '???' },
     component: Egg,
-    defaultSize: {
-      width: 400,
-      height: 350,
-    },
-    defaultOffset: {
-      x: typeof window !== 'undefined' ? window.innerWidth / 2 - 190 : 200,
-      y: typeof window !== 'undefined' ? window.innerHeight / 2 - 190 : 150,
-    },
+    defaultSize: { width: 400, height: 350 },
+    defaultOffset: getCenter(400, 350),
     resizable: false,
     minimized: false,
     maximized: false,
     multiInstance: false,
   },
-  // NEW: Media Player Settings
   MediaPlayer: {
     name: 'MediaPlayer',
-    header: {
-      icon: mediaPlayerIcon, // Reusing icon as requested
-      title: 'Media Player',
-      invisible: false, // Set to FALSE so you can see buttons and drag it
-    },
+    header: { icon: mediaPlayerIcon, title: 'Media Player', invisible: false },
     component: MediaPlayer,
-    defaultSize: {
-      width: 300,
-      height: 450,
-    },
-    defaultOffset: {
-      x: typeof window !== 'undefined' ? window.innerWidth / 2 - 190 : 200,
-      y: typeof window !== 'undefined' ? window.innerHeight / 2 - 190 : 150,
-    },
-    resizable: true, // You can now resize it
+    defaultSize: { width: 300, height: 450 },
+    defaultOffset: getCenter(300, 450),
+    resizable: true,
     minimized: false,
-    maximized: false,
+    maximized: shouldMaximize(300, 450, true),
     multiInstance: false,
     minWidth: 300,
     minHeight: 300,
@@ -433,5 +389,5 @@ export {
   Pinball,
   PictoChat,
   Egg,
-  MediaPlayer, // Exported new app
+  MediaPlayer,
 };
