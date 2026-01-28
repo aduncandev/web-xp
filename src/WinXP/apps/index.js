@@ -407,8 +407,8 @@ export const appSettings = {
     minimized: false,
     maximized: shouldMaximize(300, 450, true),
     multiInstance: false,
-    minWidth: 300,
-    minHeight: 300,
+    minWidth: 370,
+    minHeight: 370,
   },
 };
 

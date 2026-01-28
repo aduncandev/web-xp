@@ -190,7 +190,7 @@ export const AllPrograms = [
           {
             type: 'item',
             icon: mediaPlayer,
-            text: 'Windows Media Player',
+            text: 'Media Player',
           },
         ],
       },
@@ -405,7 +405,7 @@ export const AllPrograms = [
   {
     type: 'item',
     icon: mediaPlayer,
-    text: 'Windows Media Player',
+    text: 'Media Player',
   },
   {
     type: 'item',
