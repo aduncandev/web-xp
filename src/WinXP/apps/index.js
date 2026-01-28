@@ -1,6 +1,5 @@
 import React from 'react';
 import InternetExplorer from './InternetExplorer';
-import ErrorBox from './ErrorBox';
 import MyComputer from './MyComputer';
 import Notepad from './Notepad';
 import Winamp from './Winamp';
@@ -9,8 +8,9 @@ import AboutMe from './AboutMe';
 import PictoChat from './PictoChat';
 import Egg from './Egg';
 import MediaPlayer from './MediaPlayer';
+import ErrorBox from './ErrorBox';
 
-// --- Renamed Imports for Wrapper Logic ---
+// --- Import Raw Components for Wrapping ---
 import MinesweeperComponent from './Minesweeper';
 import VoltorbFlipComponent from './VoltorbFlip';
 import PinballComponent from './Pinball';
@@ -41,8 +41,6 @@ import mediaPlayerIcon from 'assets/windowsIcons/846(16x16).png';
 import mediaPlayerIconLarge from 'assets/windowsIcons/846(32x32).png';
 
 // --- Helper Functions ---
-
-// 1. Strict Mobile Device Check (User Agent)
 const isMobileUA = () => {
   if (typeof window === 'undefined') return false;
   const userAgent = navigator.userAgent || navigator.vendor || window.opera;
@@ -52,13 +50,12 @@ const isMobileUA = () => {
   );
 };
 
-// 2. Screen Dimensions Check (Width AND Height)
 const isScreenTooSmall = (minW, minH) => {
   if (typeof window === 'undefined') return false;
   return window.innerWidth < minW || window.innerHeight < minH;
 };
 
-// 3. Window State Helpers
+// Window positioning helpers
 const getWinState = () => {
   if (typeof window === 'undefined')
     return { w: 1024, h: 768, isMobile: false };
@@ -85,14 +82,12 @@ const shouldMaximize = (appW, appH, isResizable) => {
   return w < appW || h < appH;
 };
 
-// --- Blocking Logic Definitions ---
-
-const checkMinesweeperBlock = () => isMobileUA(); // Strictly User Agent
-const checkPinballBlock = () => isMobileUA() || isScreenTooSmall(600, 470); // UA OR Size
-const checkVoltorbBlock = () => isScreenTooSmall(570, 670); // Size Only (Width + Height)
+// --- Blocking Logic ---
+const checkMinesweeperBlock = () => isMobileUA();
+const checkPinballBlock = () => isMobileUA() || isScreenTooSmall(600, 470);
+const checkVoltorbBlock = () => isScreenTooSmall(570, 670);
 
 // --- Component Wrappers ---
-
 const WrappedMinesweeper = props => {
   if (checkMinesweeperBlock()) {
     return (
@@ -132,8 +127,7 @@ const WrappedVoltorb = props => {
   return <VoltorbFlipComponent {...props} />;
 };
 
-// ---------------------
-
+// --- ID Generator ---
 const gen = () => {
   let id = -1;
   return () => {
@@ -260,10 +254,14 @@ export const appSettings = {
     name: 'Minesweeper',
     header: { icon: mine, title: 'Minesweeper' },
     component: WrappedMinesweeper,
+    // Size check: 380 for error, 0 for game
     defaultSize: checkMinesweeperBlock()
       ? { width: 380, height: 0 }
       : { width: 0, height: 0 },
-    defaultOffset: getCenter(0, 0),
+    // Offset check: Center based on 380x200 if blocked, otherwise center normally
+    defaultOffset: checkMinesweeperBlock()
+      ? getCenter(380, 200)
+      : getCenter(0, 0),
     resizable: false,
     minimized: false,
     maximized: checkMinesweeperBlock() ? false : shouldMaximize(0, 0, false),
@@ -344,10 +342,14 @@ export const appSettings = {
     name: 'VoltorbFlip',
     header: { icon: voltorbFlipIcon, title: 'Voltorb Flip' },
     component: WrappedVoltorb,
+    // Size check: 380 for error, 570 for game
     defaultSize: checkVoltorbBlock()
       ? { width: 380, height: 0 }
       : { width: 570, height: 670 },
-    defaultOffset: getCenter(570, 670),
+    // Offset check: Center based on 380x200 if blocked, otherwise center 570x670
+    defaultOffset: checkVoltorbBlock()
+      ? getCenter(380, 200)
+      : getCenter(570, 670),
     resizable: false,
     minimized: false,
     maximized: checkVoltorbBlock() ? false : shouldMaximize(570, 670, false),
@@ -360,10 +362,14 @@ export const appSettings = {
       title: '3D Pinball for Windows - Space Cadet',
     },
     component: WrappedPinball,
+    // Size check: 380 for error, 600 for game
     defaultSize: checkPinballBlock()
       ? { width: 380, height: 0 }
       : { width: 600, height: 470 },
-    defaultOffset: getCenter(600, 470),
+    // Offset check: Center based on 380x200 if blocked, otherwise center 600x470
+    defaultOffset: checkPinballBlock()
+      ? getCenter(380, 200)
+      : getCenter(600, 470),
     resizable: false,
     minimized: false,
     maximized: checkPinballBlock() ? false : shouldMaximize(600, 470, false),
