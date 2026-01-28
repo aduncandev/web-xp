@@ -401,7 +401,7 @@ export const appSettings = {
     name: 'MediaPlayer',
     header: { icon: mediaPlayerIcon, title: 'Media Player', invisible: false },
     component: MediaPlayer,
-    defaultSize: { width: 300, height: 450 },
+    defaultSize: { width: 500, height: 500 },
     defaultOffset: getCenter(300, 450),
     resizable: true,
     minimized: false,

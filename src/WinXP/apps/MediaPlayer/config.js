@@ -1,49 +1,84 @@
-const album = 'N/A';
+// --- CONFIGURATION SETTINGS ---
+const BASE_PATH = process.env.PUBLIC_URL || '';
 
-export const initialTracks = [
-  {
-    url: `${process.env.PUBLIC_URL}/music/addiction.wav`,
-    duration: 288,
-    metaData: {
-      title: 'Addiction',
-      artist: 'Jogeir Liljedahl',
-      album,
-    },
-  },
-  {
-    url: `${process.env.PUBLIC_URL}/music/youwillknow.mp3`,
-    duration: 161,
-    metaData: {
-      title: 'You Will Know Our Names (Definitive Edition ver.)',
-      artist: 'Kenji Hiramatsu',
-      album,
-    },
-  },
-  {
-    url: `${process.env.PUBLIC_URL}/music/man.ogg`,
-    duration: 11,
-    metaData: {
-      title: 'man',
-      artist: 'Toby Fox',
-      album,
-    },
-  },
-  {
-    url: `${process.env.PUBLIC_URL}/music/robocop.mp3`,
-    duration: 118,
-    metaData: {
-      title: 'robocop.mp3',
-      artist: 'Kombat Unit',
-      album,
-    },
-  },
-  {
-    url: `${process.env.PUBLIC_URL}/music/MIKEtheBOARDpleasey.wav`,
-    duration: 118,
-    metaData: {
-      title: 'MIKE, the BOARD, please!',
-      artist: 'Toby Fox (but I remade it in FL)',
-      album,
-    },
-  },
+/**
+ * Helper to create media objects efficiently.
+ * Includes ID generation for Drag & Drop functionality.
+ */
+const createMedia = (type, relativePath, title, artist = '', duration = 0) => ({
+  url: `${BASE_PATH}${relativePath}`,
+  type,
+  title,
+  artist,
+  duration, // Optional: The player detects this automatically now, but keeping it doesn't hurt
+  // Generate a unique ID for drag-and-drop tracking
+  id: Math.random()
+    .toString(36)
+    .substr(2, 9),
+});
+
+// --- DEFINE YOUR FOLDERS HERE ---
+
+const musicTracks = [
+  createMedia(
+    'audio',
+    '/music/addiction.wav',
+    'Addiction',
+    'Jogeir Liljedahl',
+    288,
+  ),
+  createMedia(
+    'audio',
+    '/music/youwillknow.mp3',
+    'You Will Know Our Names',
+    'Kenji Hiramatsu',
+    161,
+  ),
+  createMedia(
+    'audio',
+    '/music/music1.wav',
+    'Music 1',
+    'Skillz Productions',
+    118,
+  ),
+  createMedia(
+    'audio',
+    '/music/EternalDepthsOfHell.mp3',
+    'Eternal Depths Of Hell',
+    'Skillz Productions',
+    118,
+  ),
+  createMedia(
+    'audio',
+    '/music/AudioWavesOfPainAndSuffering.mp3',
+    'Audio Waves Of Pain And Suffering',
+    'Skillz Productions',
+    118,
+  ),
+  createMedia(
+    'audio',
+    '/music/MIKEtheBOARDpleasey.wav',
+    'MIKE, the BOARD, please! (Skillz Productions Remake)',
+    'Toby Fox',
+    118,
+  ),
+  createMedia('audio', '/music/man.ogg', 'man', 'Toby Fox', 11),
+  createMedia('audio', '/music/robocop.mp3', 'robocop.mp3', 'Kombat Unit', 118),
 ];
+
+const videoTracks = [
+  // createMedia('video', '/videos/demo.mp4', 'My Cool Video'),
+];
+
+const imageTracks = [
+  // createMedia('image', '/photos/wallpaper.jpg', 'Cool Wallpaper'),
+];
+
+// --- EXPORT ---
+// The new player expects "mediaLibrary", not "initialTracks"
+export const mediaLibrary = {
+  'My Music': musicTracks,
+  Videos: videoTracks,
+  Photos: imageTracks,
+  'All Tracks': [...musicTracks, ...videoTracks, ...imageTracks],
+};
