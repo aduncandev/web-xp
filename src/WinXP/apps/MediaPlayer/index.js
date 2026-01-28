@@ -64,7 +64,6 @@ export default function MediaPlayer() {
   const sourceRef = useRef(null);
   const animationRef = useRef(null);
   const resizeObserverRef = useRef(null);
-  // NEW: Track which element is currently connected to avoid double-connection crashes
   const connectedElementRef = useRef(null);
 
   // Drag Sorting Refs
@@ -179,8 +178,6 @@ export default function MediaPlayer() {
   };
 
   // --- VISUALIZER ENGINE ---
-
-  // Cleanup old source when switching away from audio
   useEffect(() => {
     if (currentItem.type !== 'audio') {
       if (sourceRef.current) {
@@ -191,56 +188,13 @@ export default function MediaPlayer() {
     }
   }, [currentItem.type]);
 
-  const setupVisualizer = useCallback(() => {
-    if (!mediaRef.current || currentItem.type !== 'audio') return;
-
-    try {
-      if (!audioContextRef.current) {
-        const AudioContext = window.AudioContext || window.webkitAudioContext;
-        audioContextRef.current = new AudioContext();
-      }
-
-      const ctx = audioContextRef.current;
-      if (ctx.state === 'suspended') ctx.resume();
-
-      if (!analyserRef.current) {
-        analyserRef.current = ctx.createAnalyser();
-        analyserRef.current.fftSize = 256;
-      }
-
-      // CRITICAL FIX: Prevent Double Attachment
-      // If we are already connected to THIS exact element, do nothing.
-      if (connectedElementRef.current === mediaRef.current) {
-        return;
-      }
-
-      // If we are connected to a DIFFERENT element, disconnect first
-      if (sourceRef.current) {
-        try {
-          sourceRef.current.disconnect();
-        } catch (e) {}
-        sourceRef.current = null;
-      }
-
-      // Create new connection
-      sourceRef.current = ctx.createMediaElementSource(mediaRef.current);
-      sourceRef.current.connect(analyserRef.current);
-      analyserRef.current.connect(ctx.destination);
-
-      // Mark this element as connected
-      connectedElementRef.current = mediaRef.current;
-
-      drawSpectrum();
-    } catch (e) {
-      console.warn(
-        'Visualizer setup warning (harmless if re-initializing):',
-        e,
-      );
-    }
-  }, [currentItem.type]);
-
   const drawSpectrum = useCallback(() => {
     if (!canvasRef.current || !analyserRef.current) return;
+
+    // FIX: Ensure no duplicate loops are running
+    if (animationRef.current) {
+      cancelAnimationFrame(animationRef.current);
+    }
 
     const canvas = canvasRef.current;
     const ctx = canvas.getContext('2d');
@@ -271,14 +225,55 @@ export default function MediaPlayer() {
     draw();
   }, []);
 
+  const setupVisualizer = useCallback(() => {
+    if (!mediaRef.current || currentItem.type !== 'audio') return;
+
+    try {
+      if (!audioContextRef.current) {
+        const AudioContext = window.AudioContext || window.webkitAudioContext;
+        audioContextRef.current = new AudioContext();
+      }
+
+      const ctx = audioContextRef.current;
+      if (ctx.state === 'suspended') ctx.resume();
+
+      if (!analyserRef.current) {
+        analyserRef.current = ctx.createAnalyser();
+        analyserRef.current.fftSize = 256;
+      }
+
+      // FIX: Connection Logic vs Animation Logic
+      // Only run connection logic if we are NOT already connected
+      if (connectedElementRef.current !== mediaRef.current) {
+        if (sourceRef.current) {
+          try {
+            sourceRef.current.disconnect();
+          } catch (e) {}
+          sourceRef.current = null;
+        }
+
+        sourceRef.current = ctx.createMediaElementSource(mediaRef.current);
+        sourceRef.current.connect(analyserRef.current);
+        analyserRef.current.connect(ctx.destination);
+        connectedElementRef.current = mediaRef.current;
+      }
+
+      // Always call this to restart the loop if it was paused
+      drawSpectrum();
+    } catch (e) {
+      console.warn('Visualizer setup warning:', e);
+    }
+  }, [currentItem.type, drawSpectrum]);
+
   // --- PLAYBACK LOGIC ---
 
+  // Volume Fix: Watches currentItem.id to ensure volume persists across track changes
   useEffect(() => {
     if (mediaRef.current && !isImage) {
       mediaRef.current.volume = (globalVolume / 100) * localVolume;
       mediaRef.current.muted = isMuted;
     }
-  }, [globalVolume, localVolume, isMuted, isImage]);
+  }, [globalVolume, localVolume, isMuted, isImage, currentItem.id]);
 
   useEffect(() => {
     setCurrentTime(0);
@@ -301,7 +296,6 @@ export default function MediaPlayer() {
 
     playMedia();
 
-    // Hook up visualizer immediately (No timeout needed with key prop)
     if (currentItem.type === 'audio') {
       setupVisualizer();
     }
@@ -319,10 +313,12 @@ export default function MediaPlayer() {
     if (mediaRef.current.paused) {
       mediaRef.current.play();
       setIsPlaying(true);
+      // Restart the visualizer loop (and connect if needed)
       setupVisualizer();
     } else {
       mediaRef.current.pause();
       setIsPlaying(false);
+      // Explicitly stop the animation loop
       if (animationRef.current) cancelAnimationFrame(animationRef.current);
     }
   };
@@ -435,20 +431,25 @@ export default function MediaPlayer() {
             <MediaBtn onClick={stop} disabled={isImage} title="Stop">
               ⏹
             </MediaBtn>
+
             <MediaBtn
               onClick={togglePlay}
               active={isPlaying}
+              disabled={isImage}
               style={{ fontSize: '18px', width: '36px', height: '36px' }}
             >
               {isPlaying ? '⏸' : '▶'}
             </MediaBtn>
+
             <MediaBtn onClick={nextTrack} title="Next">
               ⏭
             </MediaBtn>
+
             <MediaBtn
               onClick={() => setIsLooping(!isLooping)}
               active={isLooping}
               title="Loop"
+              disabled={isImage}
             >
               <LoopIcon />
             </MediaBtn>
@@ -551,7 +552,6 @@ export default function MediaPlayer() {
               </PlaylistItem>
             ))}
 
-            {/* PERMANENT DROP HINT AT BOTTOM */}
             <PermanentDropHint>
               <span>➕</span> Drag & Drop Media Here
             </PermanentDropHint>
