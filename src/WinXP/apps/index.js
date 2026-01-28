@@ -1,6 +1,5 @@
 import React from 'react';
 import InternetExplorer from './InternetExplorer';
-import Minesweeper from './Minesweeper';
 import ErrorBox from './ErrorBox';
 import MyComputer from './MyComputer';
 import Notepad from './Notepad';
@@ -12,6 +11,7 @@ import Egg from './Egg';
 import MediaPlayer from './MediaPlayer';
 
 // --- Renamed Imports for Wrapper Logic ---
+import MinesweeperComponent from './Minesweeper';
 import VoltorbFlipComponent from './VoltorbFlip';
 import PinballComponent from './Pinball';
 
@@ -42,6 +42,23 @@ import mediaPlayerIconLarge from 'assets/windowsIcons/846(32x32).png';
 
 // --- Helper Functions ---
 
+// 1. Strict Mobile Device Check (User Agent)
+const isMobileUA = () => {
+  if (typeof window === 'undefined') return false;
+  const userAgent = navigator.userAgent || navigator.vendor || window.opera;
+  return (
+    /android/i.test(userAgent) ||
+    (/iPad|iPhone|iPod/.test(userAgent) && !window.MSStream)
+  );
+};
+
+// 2. Screen Dimensions Check (Width AND Height)
+const isScreenTooSmall = (minW, minH) => {
+  if (typeof window === 'undefined') return false;
+  return window.innerWidth < minW || window.innerHeight < minH;
+};
+
+// 3. Window State Helpers
 const getWinState = () => {
   if (typeof window === 'undefined')
     return { w: 1024, h: 768, isMobile: false };
@@ -68,43 +85,52 @@ const shouldMaximize = (appW, appH, isResizable) => {
   return w < appW || h < appH;
 };
 
-// --- Universal Compatibility Logic ---
+// --- Blocking Logic Definitions ---
 
-const isScreenTooSmall = minWidth => {
-  if (typeof window === 'undefined') return false;
-  return window.innerWidth < minWidth;
-};
+const checkMinesweeperBlock = () => isMobileUA(); // Strictly User Agent
+const checkPinballBlock = () => isMobileUA() || isScreenTooSmall(600, 470); // UA OR Size
+const checkVoltorbBlock = () => isScreenTooSmall(570, 670); // Size Only (Width + Height)
 
-// 1. The Wrapper Component (renders ErrorBox or App)
-const createResponsiveComponent = (Component, minWidth, appName) => props => {
-  if (isScreenTooSmall(minWidth)) {
+// --- Component Wrappers ---
+
+const WrappedMinesweeper = props => {
+  if (checkMinesweeperBlock()) {
     return (
       <ErrorBox
         {...props}
-        message={`Mobile Device / Small Screen Detected:\n\n${appName} requires a minimum screen width of ${minWidth}px to function correctly.\n\nPlease access this page on a desktop computer.`}
+        message="Mobile Device Detected: Minesweeper is designed for desktop mouse interaction and does not function correctly on mobile devices."
         title="Compatibility Warning"
       />
     );
   }
-  return <Component {...props} />;
+  return <MinesweeperComponent {...props} />;
 };
 
-// 2. The Size Logic (returns Error Size or App Size)
-const getResponsiveSize = (defaultW, defaultH, minWidth) => {
-  if (isScreenTooSmall(minWidth)) {
-    return { width: 380, height: 0 }; // Standard ErrorBox size
+const WrappedPinball = props => {
+  if (checkPinballBlock()) {
+    return (
+      <ErrorBox
+        {...props}
+        message="Incompatible Device / Screen: 3D Pinball requires a desktop environment and a screen size of at least 600x470px."
+        title="Compatibility Warning"
+      />
+    );
   }
-  return { width: defaultW, height: defaultH };
+  return <PinballComponent {...props} />;
 };
 
-// --- Wrapped Components ---
-// We redefine these exports as the "Smart" versions
-const VoltorbFlip = createResponsiveComponent(
-  VoltorbFlipComponent,
-  570,
-  'Voltorb Flip',
-);
-const Pinball = createResponsiveComponent(PinballComponent, 600, '3D Pinball');
+const WrappedVoltorb = props => {
+  if (checkVoltorbBlock()) {
+    return (
+      <ErrorBox
+        {...props}
+        message="Screen Too Small: Voltorb Flip requires a viewport of at least 570x670px. Please rotate your device or use a larger screen."
+        title="Display Error"
+      />
+    );
+  }
+  return <VoltorbFlipComponent {...props} />;
+};
 
 // ---------------------
 
@@ -132,7 +158,7 @@ export const defaultIconState = [
     id: genId(),
     icon: mine,
     title: 'Minesweeper',
-    component: Minesweeper,
+    component: WrappedMinesweeper,
     isFocus: false,
     appName: 'Minesweeper',
   },
@@ -180,7 +206,7 @@ export const defaultIconState = [
     id: genId(),
     icon: voltorbFlipIconLarge,
     title: 'Voltorb Flip',
-    component: VoltorbFlip, // Uses the wrapped component
+    component: WrappedVoltorb,
     isFocus: false,
     appName: 'VoltorbFlip',
   },
@@ -188,7 +214,7 @@ export const defaultIconState = [
     id: genId(),
     icon: pinballIcon32,
     title: '3D Pinball',
-    component: Pinball, // Uses the wrapped component
+    component: WrappedPinball,
     isFocus: false,
     appName: 'Pinball',
   },
@@ -233,12 +259,14 @@ export const appSettings = {
   Minesweeper: {
     name: 'Minesweeper',
     header: { icon: mine, title: 'Minesweeper' },
-    component: Minesweeper,
-    defaultSize: { width: 0, height: 0 },
+    component: WrappedMinesweeper,
+    defaultSize: checkMinesweeperBlock()
+      ? { width: 380, height: 0 }
+      : { width: 0, height: 0 },
     defaultOffset: getCenter(0, 0),
     resizable: false,
     minimized: false,
-    maximized: shouldMaximize(0, 0, false),
+    maximized: checkMinesweeperBlock() ? false : shouldMaximize(0, 0, false),
     multiInstance: true,
   },
   Error: {
@@ -315,13 +343,14 @@ export const appSettings = {
   VoltorbFlip: {
     name: 'VoltorbFlip',
     header: { icon: voltorbFlipIcon, title: 'Voltorb Flip' },
-    component: VoltorbFlip,
-    // Dynamically set size: Small Error Size OR Big Game Size
-    defaultSize: getResponsiveSize(570, 670, 570),
+    component: WrappedVoltorb,
+    defaultSize: checkVoltorbBlock()
+      ? { width: 380, height: 0 }
+      : { width: 570, height: 670 },
     defaultOffset: getCenter(570, 670),
     resizable: false,
     minimized: false,
-    maximized: false,
+    maximized: checkVoltorbBlock() ? false : shouldMaximize(570, 670, false),
     multiInstance: false,
   },
   Pinball: {
@@ -330,13 +359,14 @@ export const appSettings = {
       icon: pinballIcon16,
       title: '3D Pinball for Windows - Space Cadet',
     },
-    component: Pinball,
-    // Dynamically set size: Small Error Size OR Big Game Size
-    defaultSize: getResponsiveSize(600, 470, 600),
+    component: WrappedPinball,
+    defaultSize: checkPinballBlock()
+      ? { width: 380, height: 0 }
+      : { width: 600, height: 470 },
     defaultOffset: getCenter(600, 470),
     resizable: false,
     minimized: false,
-    maximized: false,
+    maximized: checkPinballBlock() ? false : shouldMaximize(600, 470, false),
     multiInstance: false,
   },
   PictoChat: {
@@ -378,15 +408,15 @@ export const appSettings = {
 
 export {
   InternetExplorer,
-  Minesweeper,
+  MinesweeperComponent as Minesweeper,
   ErrorBox,
   MyComputer,
   Notepad,
   Winamp,
   Paint,
   AboutMe,
-  VoltorbFlip,
-  Pinball,
+  VoltorbFlipComponent as VoltorbFlip,
+  PinballComponent as Pinball,
   PictoChat,
   Egg,
   MediaPlayer,
