@@ -191,7 +191,6 @@ export default function MediaPlayer() {
   const drawSpectrum = useCallback(() => {
     if (!canvasRef.current || !analyserRef.current) return;
 
-    // FIX: Ensure no duplicate loops are running
     if (animationRef.current) {
       cancelAnimationFrame(animationRef.current);
     }
@@ -199,6 +198,11 @@ export default function MediaPlayer() {
     const canvas = canvasRef.current;
     const ctx = canvas.getContext('2d');
     const analyser = analyserRef.current;
+
+    // We get the sample rate to determine the frequency cap
+    const sampleRate = audioContextRef.current
+      ? audioContextRef.current.sampleRate
+      : 48000;
     const bufferLength = analyser.frequencyBinCount;
     const dataArray = new Uint8Array(bufferLength);
 
@@ -209,17 +213,43 @@ export default function MediaPlayer() {
       ctx.fillStyle = '#000';
       ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-      const barWidth = (canvas.width / bufferLength) * 2.5;
+      // --- FIX: VISUAL DENSITY PRESERVATION ---
+      // 1. We cap the visualization at 22kHz (human hearing limit).
+      // 2. We calculate how many bins fit into that 22kHz range.
+      // 3. We only iterate over those "useful" bins.
+      const nyquist = sampleRate / 2;
+      const maxFreq = 22000; // 22kHz cap
+
+      // Calculate which bin corresponds to 22kHz
+      // If sample rate is high (96k), nyquist is 48k. 22k is roughly half the buffer.
+      // If sample rate is std (44.1k), nyquist is 22.05k. 22k is basically the whole buffer.
+      const usefulBins = Math.min(
+        bufferLength,
+        Math.floor(bufferLength * (maxFreq / nyquist)),
+      );
+
+      // Calculate bar width based on useful bins only
+      const barWidth = canvas.width / usefulBins;
+
       let x = 0;
 
-      for (let i = 0; i < bufferLength; i++) {
+      for (let i = 0; i < usefulBins; i++) {
         const barHeight = (dataArray[i] / 255) * canvas.height;
         const gradient = ctx.createLinearGradient(0, canvas.height, 0, 0);
         gradient.addColorStop(0, '#004e92');
         gradient.addColorStop(1, '#50cc7f');
         ctx.fillStyle = gradient;
-        ctx.fillRect(x, canvas.height - barHeight, barWidth, barHeight);
-        x += barWidth + 1;
+
+        // Use (barWidth - 1) to create a small gap, ensuring total width fits
+        // Math.max(1, ...) ensures bars don't disappear if they get too thin
+        ctx.fillRect(
+          x,
+          canvas.height - barHeight,
+          Math.max(1, barWidth - 1),
+          barHeight,
+        );
+
+        x += barWidth;
       }
     };
     draw();
@@ -239,11 +269,22 @@ export default function MediaPlayer() {
 
       if (!analyserRef.current) {
         analyserRef.current = ctx.createAnalyser();
-        analyserRef.current.fftSize = 256;
+
+        // --- FIX: DYNAMIC FFT RESOLUTION ---
+        // If sample rate is high (e.g. 192kHz), we increase the FFT size.
+        // This gives us MORE bars to work with, counteracting the "zoomed in" effect.
+        // Standard (48k) -> fftSize 256.
+        // High (192k) -> fftSize 1024.
+        const baseSize = 256;
+        const scale = Math.max(1, Math.ceil(ctx.sampleRate / 48000));
+
+        // Find next power of 2 to satisfy FFT requirements
+        let newSize = baseSize;
+        while (newSize < baseSize * scale) newSize *= 2;
+
+        analyserRef.current.fftSize = newSize;
       }
 
-      // FIX: Connection Logic vs Animation Logic
-      // Only run connection logic if we are NOT already connected
       if (connectedElementRef.current !== mediaRef.current) {
         if (sourceRef.current) {
           try {
@@ -258,7 +299,6 @@ export default function MediaPlayer() {
         connectedElementRef.current = mediaRef.current;
       }
 
-      // Always call this to restart the loop if it was paused
       drawSpectrum();
     } catch (e) {
       console.warn('Visualizer setup warning:', e);
@@ -267,7 +307,6 @@ export default function MediaPlayer() {
 
   // --- PLAYBACK LOGIC ---
 
-  // Volume Fix: Watches currentItem.id to ensure volume persists across track changes
   useEffect(() => {
     if (mediaRef.current && !isImage) {
       mediaRef.current.volume = (globalVolume / 100) * localVolume;
@@ -313,12 +352,10 @@ export default function MediaPlayer() {
     if (mediaRef.current.paused) {
       mediaRef.current.play();
       setIsPlaying(true);
-      // Restart the visualizer loop (and connect if needed)
       setupVisualizer();
     } else {
       mediaRef.current.pause();
       setIsPlaying(false);
-      // Explicitly stop the animation loop
       if (animationRef.current) cancelAnimationFrame(animationRef.current);
     }
   };
