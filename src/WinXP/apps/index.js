@@ -392,10 +392,12 @@ export const appSettings = {
     component: Egg,
     defaultSize: { width: 400, height: 350 },
     defaultOffset: getCenter(400, 350),
-    resizable: false,
+    resizable: true,
     minimized: false,
     maximized: false,
     multiInstance: false,
+    minWidth: 400,
+    minHeight: 350,
   },
   MediaPlayer: {
     name: 'MediaPlayer',

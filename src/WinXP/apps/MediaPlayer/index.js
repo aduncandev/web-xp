@@ -4,8 +4,9 @@ import React, {
   useEffect,
   useCallback,
   useMemo,
+  useLayoutEffect, // Added for accurate measurement
 } from 'react';
-import styled from 'styled-components';
+import styled, { keyframes } from 'styled-components'; // Added keyframes
 import { mediaLibrary } from './config';
 import { useVolume } from '../../../context/VolumeContext';
 
@@ -21,6 +22,89 @@ const getMediaType = (url, type) => {
   if (url.match(/\.(jpg|jpeg|png|gif|bmp)$/i)) return 'image';
   return 'audio';
 };
+
+// --- NEW COMPONENT: SCROLLING TICKER ---
+// 1. Define the scroll animation
+const scroll = keyframes`
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+`;
+
+// 2. Define Styles
+const TickerContainer = styled.div`
+  font-size: 11px;
+  color: #0f0;
+  font-family: 'Courier New', monospace;
+  white-space: nowrap;
+  overflow: hidden;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  position: relative;
+`;
+
+const TickerWrapper = styled.div`
+  display: inline-flex;
+  /* Duration calculation: roughly 0.2s per character for readable speed */
+  animation: ${scroll} ${props => props.duration}s linear infinite;
+`;
+
+const TickerItem = styled.span`
+  padding-right: 40px; /* Gap between the text loops */
+  white-space: nowrap;
+`;
+
+// 3. The Logic Component
+const TrackTicker = ({ text }) => {
+  const [isOverflowing, setIsOverflowing] = useState(false);
+  const containerRef = useRef(null);
+  const measurerRef = useRef(null);
+
+  // Measure width whenever text changes or parent resizes (re-renders)
+  useLayoutEffect(() => {
+    if (containerRef.current && measurerRef.current) {
+      const containerWidth = containerRef.current.offsetWidth;
+      const contentWidth = measurerRef.current.offsetWidth;
+
+      // Update state only if changed to prevent unnecessary re-renders
+      const shouldScroll = contentWidth > containerWidth;
+      setIsOverflowing(prev => (prev !== shouldScroll ? shouldScroll : prev));
+    }
+  });
+
+  // Calculate speed based on text length (so long titles don't fly by too fast)
+  const duration = Math.max(5, text.length * 0.25);
+
+  return (
+    <TickerContainer ref={containerRef}>
+      {/* Invisible span just to measure the true width of the text */}
+      <span
+        ref={measurerRef}
+        style={{
+          position: 'absolute',
+          visibility: 'hidden',
+          pointerEvents: 'none',
+          whiteSpace: 'nowrap',
+        }}
+      >
+        {text}
+      </span>
+
+      {isOverflowing ? (
+        // If overflowing, render two copies for a seamless infinite loop
+        <TickerWrapper duration={duration}>
+          <TickerItem>{text}</TickerItem>
+          <TickerItem>{text}</TickerItem>
+        </TickerWrapper>
+      ) : (
+        // If it fits, just render static text
+        <span>{text}</span>
+      )}
+    </TickerContainer>
+  );
+};
+// --- END NEW COMPONENT ---
 
 export default function MediaPlayer() {
   // --- STATE ---
@@ -198,13 +282,16 @@ export default function MediaPlayer() {
     const canvas = canvasRef.current;
     const ctx = canvas.getContext('2d');
     const analyser = analyserRef.current;
-
-    // We get the sample rate to determine the frequency cap
-    const sampleRate = audioContextRef.current
-      ? audioContextRef.current.sampleRate
-      : 48000;
     const bufferLength = analyser.frequencyBinCount;
     const dataArray = new Uint8Array(bufferLength);
+
+    const sampleRate = audioContextRef.current
+      ? audioContextRef.current.sampleRate
+      : 44100;
+    const nyquist = sampleRate / 2;
+    const maxFreq = 20000;
+    const meaningfulBins = Math.floor((maxFreq / nyquist) * bufferLength);
+    const binsToDraw = Math.max(1, Math.min(bufferLength, meaningfulBins));
 
     const draw = () => {
       animationRef.current = requestAnimationFrame(draw);
@@ -213,42 +300,21 @@ export default function MediaPlayer() {
       ctx.fillStyle = '#000';
       ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-      // --- FIX: VISUAL DENSITY PRESERVATION ---
-      // 1. We cap the visualization at 22kHz (human hearing limit).
-      // 2. We calculate how many bins fit into that 22kHz range.
-      // 3. We only iterate over those "useful" bins.
-      const nyquist = sampleRate / 2;
-      const maxFreq = 22000; // 22kHz cap
-
-      // Calculate which bin corresponds to 22kHz
-      // If sample rate is high (96k), nyquist is 48k. 22k is roughly half the buffer.
-      // If sample rate is std (44.1k), nyquist is 22.05k. 22k is basically the whole buffer.
-      const usefulBins = Math.min(
-        bufferLength,
-        Math.floor(bufferLength * (maxFreq / nyquist)),
-      );
-
-      // Calculate bar width based on useful bins only
-      const barWidth = canvas.width / usefulBins;
+      const barWidth = canvas.width / binsToDraw;
+      const gap = barWidth > 3 ? 1 : 0;
 
       let x = 0;
 
-      for (let i = 0; i < usefulBins; i++) {
+      for (let i = 0; i < binsToDraw; i++) {
         const barHeight = (dataArray[i] / 255) * canvas.height;
         const gradient = ctx.createLinearGradient(0, canvas.height, 0, 0);
         gradient.addColorStop(0, '#004e92');
         gradient.addColorStop(1, '#50cc7f');
         ctx.fillStyle = gradient;
 
-        // Use (barWidth - 1) to create a small gap, ensuring total width fits
-        // Math.max(1, ...) ensures bars don't disappear if they get too thin
-        ctx.fillRect(
-          x,
-          canvas.height - barHeight,
-          Math.max(1, barWidth - 1),
-          barHeight,
-        );
+        const drawWidth = Math.max(0.1, barWidth - gap);
 
+        ctx.fillRect(x, canvas.height - barHeight, drawWidth, barHeight);
         x += barWidth;
       }
     };
@@ -269,20 +335,7 @@ export default function MediaPlayer() {
 
       if (!analyserRef.current) {
         analyserRef.current = ctx.createAnalyser();
-
-        // --- FIX: DYNAMIC FFT RESOLUTION ---
-        // If sample rate is high (e.g. 192kHz), we increase the FFT size.
-        // This gives us MORE bars to work with, counteracting the "zoomed in" effect.
-        // Standard (48k) -> fftSize 256.
-        // High (192k) -> fftSize 1024.
-        const baseSize = 256;
-        const scale = Math.max(1, Math.ceil(ctx.sampleRate / 48000));
-
-        // Find next power of 2 to satisfy FFT requirements
-        let newSize = baseSize;
-        while (newSize < baseSize * scale) newSize *= 2;
-
-        analyserRef.current.fftSize = newSize;
+        analyserRef.current.fftSize = 2048;
       }
 
       if (connectedElementRef.current !== mediaRef.current) {
@@ -424,6 +477,13 @@ export default function MediaPlayer() {
 
   const compactMode = windowSize.width < 350;
 
+  // Construct text for the ticker
+  const titleText = playlist.length
+    ? `${currentIndex + 1}. ${
+        currentItem.artist ? `${currentItem.artist} - ` : ''
+      }${currentItem.title}`
+    : 'Waiting for media...';
+
   return (
     <PlayerContainer
       ref={containerRef}
@@ -431,13 +491,8 @@ export default function MediaPlayer() {
       onDrop={handleDrop}
     >
       <TopTitleBar>
-        <Marquee>
-          {playlist.length
-            ? `${currentIndex + 1}. ${
-                currentItem.artist ? `${currentItem.artist} - ` : ''
-              }${currentItem.title}`
-            : 'Waiting for media...'}
-        </Marquee>
+        {/* Replaced Marquee with new TrackTicker */}
+        <TrackTicker text={titleText} />
       </TopTitleBar>
 
       <ScreenArea expanded={!showPlaylist}>{renderMedia()}</ScreenArea>
@@ -590,7 +645,7 @@ export default function MediaPlayer() {
             ))}
 
             <PermanentDropHint>
-              <span>➕</span> Drag & Drop Media Here
+              <span>+</span> Drag & Drop Media Here
             </PermanentDropHint>
           </PlaylistItems>
         </PlaylistContainer>
@@ -599,7 +654,6 @@ export default function MediaPlayer() {
   );
 }
 
-// --- HELPERS ---
 const formatTime = t => {
   if (!t) return '0:00';
   const m = Math.floor(t / 60);
@@ -607,7 +661,6 @@ const formatTime = t => {
   return `${m}:${s < 10 ? '0' + s : s}`;
 };
 
-// Icons
 const PlaylistIcon = () => (
   <svg
     width="14"
@@ -666,7 +719,6 @@ const SpeakerIcon = ({ muted }) => (
   </svg>
 );
 
-// --- STYLES ---
 const PlayerContainer = styled.div`
   background: #1a1a1a;
   height: 100%;
@@ -687,16 +739,10 @@ const TopTitleBar = styled.div`
   padding: 0 8px;
   border-bottom: 1px solid #333;
   flex-shrink: 0;
-`;
-const Marquee = styled.div`
-  font-size: 11px;
-  color: #0f0;
-  font-family: 'Courier New', monospace;
-  white-space: nowrap;
   overflow: hidden;
-  text-overflow: ellipsis;
-  width: 100%;
 `;
+/* Removed old Marquee component */
+
 const ScreenArea = styled.div`
   flex: ${props => (props.expanded ? '1' : '0 0 auto')};
   height: ${props => (props.expanded ? 'auto' : '150px')};
@@ -908,7 +954,6 @@ const DeleteBtn = styled.button`
   }
 `;
 
-// NEW: Permanent Drop Hint style
 const PermanentDropHint = styled.div`
   padding: 15px;
   text-align: center;

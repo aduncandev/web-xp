@@ -1,257 +1,273 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState, useLayoutEffect } from 'react';
 import styled, { keyframes, createGlobalStyle } from 'styled-components';
+import eggImg from 'assets/windowsIcons/egg.png';
 
-import egg from 'assets/windowsIcons/egg.png';
+import { useVolume } from '../../../context/VolumeContext';
 
-// --- 1. Import the hook ---
-import { useVolume } from '../../../context/VolumeContext'; // Assuming this path is correct
-
-// --- LOCALSTORAGE KEYS ---
-const EGG_COUNT_KEY = 'eggCount';
+const EGG_DATA_KEY = 'eggData';
+const OLD_EGG_COUNT_KEY = 'eggCount';
 const LAST_EGG_TIME_KEY = 'lastEggTime';
 
-// --- STYLES ---
-// ... (All styled components are unchanged) ...
 const FontStyles = createGlobalStyle`
-  @font-face {
-    font-family: 'DeterminationMono';
-    font-weight: normal;
-    font-style: normal;
-    font-display: block; 
-  }
+  @font-face {
+    font-family: 'DeterminationMono';
+    font-weight: normal;
+    font-style: normal;
+    font-display: block; 
+  }
 `;
 
 const AppContainer = styled.div`
-   width: 100%;
-   height: 100%;
-   display: flex;
-   justify-content: center;
-   align-items: center;
-   background-color: #000000;
-   overflow: hidden;
-   position: relative;
+  width: 100%;
+  height: 100%;
+  background-color: #000000;
+  overflow: hidden;
+  position: relative;
+  user-select: none;
+`;
+
+const EggLayer = styled.div`
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 2;
 `;
 
 const CenteredContent = styled.div`
-   display: flex;
-   flex-direction: column;
-   justify-content: center;
-   align-items: center;
-   width: 100%;
-   height: 100%;
-   position: relative;
-   overflow: hidden; /* NO SCROLLBARS */
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  height: 100%;
+  position: relative;
+  z-index: 10;
 `;
 
 const StyledGif = styled.img`
-   max-width: 100%;
-   max-height: 100%;
-   object-fit: contain;
-   cursor: pointer;
-   user-select: none;
-   position: relative;
-   z-index: 5;
-   /* Move tree up slightly to make more room for eggs */
-  transform: translateY(
-    -10%
-  );
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+  cursor: pointer;
+  position: relative;
+  z-index: 5;
+  transform: translateY(-10%);
 `;
 
 const float = keyframes`
-  0% { transform: translateY(0px); }
-  50% { transform: translateY(-10px); }
-  100% { transform: translateY(0px); }
+  0% { margin-top: 0px; }
+  50% { margin-top: -10px; }
+  100% { margin-top: 0px; }
 `;
 
 const StyledEgg = styled.img`
-   max-width: 80px; /* This is our key number */
-   height: auto;
-   animation: ${float} 3s ease-in-out infinite;
-   user-select: none;
-   position: absolute;
-   z-index: 4;
+  max-width: 80px;
+  height: auto;
+  position: absolute;
+  top: 0;
+  left: 0;
+  will-change: transform;
+  animation: ${float} 3s ease-in-out infinite;
+  z-index: 5;
 `;
 
 const DialogueContainer = styled.div`
-   position: absolute;
-   bottom: 10px;
-   left: 10px;
-   right: 10px;
-   z-index: 10;
-
-   background-color: #000;
-   border: 3px solid #fff;
-   padding: 15px;
-   color: white;
-
-   font-family: 'DeterminationMono', monospace;
-
-   font-size: 1.2rem;
-   line-height: 1.4;
-   user-select: none;
-
-   -webkit-font-smoothing: none;
-   font-smoothing: none;
-   image-rendering: pixelated;
+  position: absolute;
+  bottom: 10px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: calc(100% - 20px);
+  max-width: 600px;
+  z-index: 20;
+  background-color: #000;
+  border: 3px solid #fff;
+  padding: 15px;
+  box-sizing: border-box;
+  color: white;
+  font-family: 'DeterminationMono', monospace;
+  font-size: 1.2rem;
+  line-height: 1.4;
+  image-rendering: pixelated;
+  pointer-events: auto;
 `;
 
 const DialogueText = styled.p`
-   margin: 0;
+  margin: 0;
 `;
 
 const OptionsContainer = styled.div`
-   margin: 0;
-   display: flex;
-   flex-direction: row;
-   justify-content: center;
-   gap: 30px;
+  margin: 0;
+  display: flex;
+  justify-content: center;
+  gap: 30px;
 `;
 
 const Option = styled.div`
-  margin: 0;
-  cursor: pointer;
-  color: #fff;
-
-  &:hover {
-    color: yellow;
-  }
-
-  &::before {
-    content: '* ';
-  }
+  cursor: pointer;
+  color: #fff;
+  &:hover {
+    color: yellow;
+  }
+  &::before {
+    content: '* ';
+  }
 `;
-
-// --- COMPONENT LOGIC ---
 
 function Egg() {
   const gifSrc = `${process.env.PUBLIC_URL}/gifs/tree.gif`;
-  const eggSrc = egg;
   const musicSrc = `${process.env.PUBLIC_URL}/music/man.ogg`;
   const soundSrc = `${process.env.PUBLIC_URL}/music/egg.mp3`;
 
   const audioRef = useRef(null);
-
+  const containerRef = useRef(null);
   const { volume, isMuted, applyVolume } = useVolume();
 
-  const [eggCount, setEggCount] = useState(() =>
-    parseInt(localStorage.getItem(EGG_COUNT_KEY) || '0', 10),
-  );
   const [dialogueStep, setDialogueStep] = useState(0);
 
-  // --- 3. This effect now ONLY handles autoplay logic ---
-  useEffect(() => {
-    const audio = audioRef.current;
-    if (audio) {
-      audio.play().catch(error => {
-        console.log('Autoplay prevented. Click the tree to start.', error);
-      });
-      return () => {
-        audio.pause();
-        audio.currentTime = 0;
-      };
-    }
-  }, []); // Runs only on mount
+  const [eggs, setEggs] = useState(() => {
+    const saved = localStorage.getItem(EGG_DATA_KEY);
+    if (saved) return JSON.parse(saved);
 
-  // --- 4. NEW: This effect syncs the music volume in real-time ---
+    const oldKey = localStorage.getItem(OLD_EGG_COUNT_KEY);
+    if (oldKey) {
+      const count = parseInt(oldKey, 10);
+      return Array.from({ length: count }).map((_, i) => ({
+        x: Math.random() * window.screen.width,
+        y: Math.random() * window.screen.height,
+        id: Date.now() + i,
+      }));
+    }
+    return [];
+  });
+
+  useLayoutEffect(() => {
+    let animationId;
+
+    const updateEggPositions = () => {
+      if (!containerRef.current) return;
+
+      const rect = containerRef.current.getBoundingClientRect();
+      const winX = rect.left;
+      const winY = rect.top;
+
+      const eggElements = document.querySelectorAll('.magic-egg-target');
+
+      eggElements.forEach(el => {
+        const globalX = parseFloat(el.getAttribute('data-x'));
+        const globalY = parseFloat(el.getAttribute('data-y'));
+
+        const drawX = globalX - winX;
+        const drawY = globalY - winY;
+
+        el.style.transform = `translate3d(${drawX}px, ${drawY}px, 0)`;
+
+        const isVisible =
+          drawX > -100 &&
+          drawX < rect.width + 100 &&
+          drawY > -100 &&
+          drawY < rect.height + 100;
+
+        el.style.display = isVisible ? 'block' : 'none';
+      });
+
+      animationId = requestAnimationFrame(updateEggPositions);
+    };
+
+    animationId = requestAnimationFrame(updateEggPositions);
+    return () => cancelAnimationFrame(animationId);
+  }, [eggs]);
+
   useEffect(() => {
     const audio = audioRef.current;
     if (audio) {
-      // HTML audio volume is 0.0 to 1.0
       audio.volume = volume / 100;
       audio.muted = isMuted;
+
+      const playPromise = audio.play();
+      if (playPromise !== undefined) {
+        playPromise.catch(() => {
+          const startAudio = () => {
+            audio.play();
+            if (containerRef.current) {
+              containerRef.current.removeEventListener('click', startAudio);
+            }
+          };
+          if (containerRef.current) {
+            containerRef.current.addEventListener('click', startAudio);
+          }
+        });
+      }
     }
-    // This runs every time volume or isMuted changes
+    return () => {
+      if (audio) {
+        audio.pause();
+        audio.currentTime = 0;
+      }
+    };
+  }, []);
+
+  useEffect(() => {
+    if (audioRef.current) {
+      audioRef.current.volume = volume / 100;
+      audioRef.current.muted = isMuted;
+    }
   }, [volume, isMuted]);
 
-  // --- MODIFIED: When the tree is clicked ---
   const handleTreeClick = () => {
     if (dialogueStep === 0) {
-      // --- This check is moved from handleYes ---
-      const lastEggTime = parseInt(
+      const lastTime = parseInt(
         localStorage.getItem(LAST_EGG_TIME_KEY) || '0',
         10,
       );
       const now = Date.now();
-      const oneDay = 24 * 60 * 60 * 1000; // 24 hours
 
-      if (now - lastEggTime < oneDay) {
-        // Set to < 1 for testing
-        setDialogueStep(7); // Show "no man here" message
+      if (now - lastTime < 24 * 60 * 60 * 1000) {
+        setDialogueStep(7);
       } else {
-        setDialogueStep(1); // Start the normal dialogue
+        setDialogueStep(1);
       }
-      // -----------------------------------------
 
-      const audio = audioRef.current;
-      if (audio && audio.paused) {
-        // The audio element *already* has the correct volume
-        // from the useEffect above, so we can just play it.
-        audio.play();
-      }
+      if (audioRef.current?.paused) audioRef.current.play();
     }
   };
 
-  // When the dialogue box is clicked (to advance text)
-  const handleDialogueClick = () => {
-    // ... (no changes in this function) ...
-    if (dialogueStep === 1) {
-      setDialogueStep(2); // "* (He offered you something)"
-    } else if (dialogueStep === 2) {
-      setDialogueStep(3); // Show options
-    } else if (dialogueStep === 7) {
-      setDialogueStep(8);
-    }
-    // After choice/fail (steps 4, 5, 7), click to close
-    else if (dialogueStep >= 4) {
-      setDialogueStep(0); // Hide box
-    }
-    // If step is 3 (options shown), clicking the box does nothing.
-  };
-
-  // --- MODIFIED: When "YES." is clicked ---
   const handleYes = e => {
-    e.stopPropagation(); // Prevents handleDialogueClick
+    e.stopPropagation();
+    setDialogueStep(4);
 
-    // --- The time check is removed, as it's now in handleTreeClick ---
-    // We can assume it's safe to give an egg.
+    if (!containerRef.current) return;
 
-    setDialogueStep(4); // "* (You Recieved an Egg.)"
+    const rect = containerRef.current.getBoundingClientRect();
+    const eggSize = 90;
+    const safeWidth = Math.max(0, rect.width - eggSize);
+    const safeHeight = Math.max(0, rect.height - eggSize);
 
-    const currentCount = parseInt(
-      localStorage.getItem(EGG_COUNT_KEY) || '0',
-      10,
-    );
-    const newCount = currentCount + 1;
-    const now = Date.now(); // We still need 'now' to save the time
+    const randomX = rect.left + Math.random() * safeWidth;
+    const randomY = rect.top + Math.random() * safeHeight;
 
-    setEggCount(newCount);
-    localStorage.setItem(EGG_COUNT_KEY, newCount.toString());
-    localStorage.setItem(LAST_EGG_TIME_KEY, now.toString()); // Save new time
+    const newEgg = { x: randomX, y: randomY, id: Date.now() };
+    const newEggs = [...eggs, newEgg];
 
-    // --- 5. Apply volume to the sound effect ---
+    setEggs(newEggs);
+    localStorage.setItem(EGG_DATA_KEY, JSON.stringify(newEggs));
+    localStorage.setItem(LAST_EGG_TIME_KEY, Date.now().toString());
+
     const sound = new Audio(soundSrc);
-    applyVolume(sound); // Apply global volume settings
+    applyVolume(sound);
     sound.play();
-    // ------------------------------------------
-
-    window.dispatchEvent(
-      new StorageEvent('storage', {
-        key: EGG_COUNT_KEY,
-        newValue: newCount.toString(),
-      }),
-    );
   };
 
-  // When "NO." is clicked
-  const handleNo = e => {
-    // ... (no changes in this function) ...
-    e.stopPropagation(); // Prevents handleDialogueClick
-    setDialogueStep(5); // "* (...)"
+  const handleDialogueClick = () => {
+    if (dialogueStep === 1) setDialogueStep(2);
+    else if (dialogueStep === 2) setDialogueStep(3);
+    else if (dialogueStep === 7) setDialogueStep(8);
+    else if (dialogueStep >= 4) setDialogueStep(0);
   };
 
-  // Helper function to render the correct dialogue
   const renderDialogue = () => {
-    // ... (no changes in this function) ...
     switch (dialogueStep) {
       case 1:
         return <DialogueText>* (Well, there is a man here.)</DialogueText>;
@@ -261,7 +277,14 @@ function Egg() {
         return (
           <OptionsContainer>
             <Option onClick={handleYes}>YES.</Option>
-            <Option onClick={handleNo}>NO.</Option>
+            <Option
+              onClick={e => {
+                e.stopPropagation();
+                setDialogueStep(5);
+              }}
+            >
+              NO.
+            </Option>
           </OptionsContainer>
         );
       case 4:
@@ -278,35 +301,25 @@ function Egg() {
   };
 
   return (
-    <AppContainer>
+    <AppContainer ref={containerRef}>
       <FontStyles />
 
+      <EggLayer>
+        {eggs.map(egg => (
+          <StyledEgg
+            key={egg.id}
+            src={eggImg}
+            alt="An Egg"
+            className="magic-egg-target"
+            data-x={egg.x}
+            data-y={egg.y}
+            style={{ transform: 'translate(-9999px, -9999px)' }}
+          />
+        ))}
+      </EggLayer>
+
       <CenteredContent>
-        {/* ... (no changes to JSX) ... */}
-        <StyledGif
-          src={gifSrc}
-          alt="A mysterious tree"
-          onClick={handleTreeClick}
-        />
-
-        {Array.from({ length: eggCount }).map((_, index) => {
-          const randTop = Math.sin(index * 5.37 + 0.5) * 0.5 + 0.5;
-          const randLeft = Math.cos(index * 3.79 + 0.3) * 0.5 + 0.5;
-          const top = `calc(${randTop} * (100%))`;
-          const left = `calc(${randLeft} * (100%))`;
-
-          return (
-            <StyledEgg
-              key={index}
-              src={eggSrc}
-              alt="An Egg"
-              style={{
-                top: top,
-                left: left,
-              }}
-            />
-          );
-        })}
+        <StyledGif src={gifSrc} onClick={handleTreeClick} />
       </CenteredContent>
 
       <audio ref={audioRef} src={musicSrc} loop />

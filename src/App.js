@@ -4,70 +4,74 @@ import BootScreen from './components/BootScreen';
 import LoginScreen from './components/LoginScreen';
 import WelcomeScreen from './components/WelcomeScreen';
 import ShutdownScreen from './components/ShutdownScreen';
+import BSOD from './components/BSOD';
 import './index.css';
 
-// --- Sound Imports ---
 import xpStartupSoundSrc from 'assets/sounds/xp_startup.wav';
 import xpLogonSoundSrc from 'assets/sounds/xp_logon.wav';
 import xpShutdownSoundSrc from 'assets/sounds/xp_shutdown.wav';
+import xpErrorSoundSrc from 'assets/sounds/error.wav';
 
-// --- Volume Context ---
-import { VolumeProvider, useVolume } from './context/VolumeContext'; // Import the provider and hook
+import { VolumeProvider, useVolume } from './context/VolumeContext';
 
-/**
- * This component holds all your application logic.
- * Because it will be rendered *inside* VolumeProvider, it can safely use the useVolume() hook.
- */
 function AppLogic() {
   const [screen, setScreen] = useState('boot');
   const [skillzSessionStatus, setSkillzSessionStatus] = useState('loggedOut');
-  const [shutdownMessage, setShutdownMessage] = useState(
+  const [shutdownMessages, setShutdownMessages] = useState([
+    'Logging out...',
+    'Saving your settings...',
     'Windows is shutting down...',
-  );
+  ]);
+  const [crashError, setCrashError] = useState(null); // Store the error text
 
-  // Get volume controls from our context. This is safe now.
   const { applyVolume } = useVolume();
 
-  /**
-   * Plays a sound file, applying the global volume and mute settings.
-   */
   const playSound = useCallback(
     soundSrc => {
-      if (!soundSrc) {
-        console.warn('playSound called with no soundSrc in App.js');
-        return;
-      }
+      if (!soundSrc) return;
       try {
         const audio = new Audio(soundSrc);
-
-        // Apply global volume settings
-        if (typeof applyVolume !== 'function') {
-          console.error(
-            'applyVolume is not a function! Check VolumeContext.js',
-          );
-          // Still try to play, just without volume control
-        } else {
-          applyVolume(audio); // This should no longer be an error
+        if (typeof applyVolume === 'function') {
+          applyVolume(audio);
         }
-
         audio.play().catch(error => {
-          // Ignore errors caused by user not interacting with the page yet
           if (error.name !== 'NotAllowedError') {
-            console.warn(
-              `Audio playback failed for ${soundSrc} in App.js:`,
-              error,
-            );
+            console.warn(`Audio playback failed:`, error);
           }
         });
       } catch (error) {
-        console.error(
-          `Error loading/playing audio ${soundSrc} in App.js:`,
-          error,
-        );
+        console.error(`Error loading audio:`, error);
       }
     },
     [applyVolume],
-  ); // Re-create this function if applyVolume changes
+  );
+
+  // --- GLOBAL ERROR HANDLER ---
+  useEffect(() => {
+    const handleGlobalError = (message, source, lineno, colno, error) => {
+      if (screen === 'bsod') return;
+
+      console.error('SYSTEM CRASH DETECTED:', message);
+      setCrashError(message);
+      setScreen('bsod');
+    };
+
+    const handlePromiseRejection = event => {
+      if (screen === 'bsod') return;
+      const reason =
+        event.reason?.message || event.reason || 'Unknown Promise Error';
+      setCrashError(reason);
+      setScreen('bsod');
+    };
+
+    window.addEventListener('error', handleGlobalError);
+    window.addEventListener('unhandledrejection', handlePromiseRejection);
+
+    return () => {
+      window.removeEventListener('error', handleGlobalError);
+      window.removeEventListener('unhandledrejection', handlePromiseRejection);
+    };
+  }, [screen]);
 
   useEffect(() => {
     let timer;
@@ -101,37 +105,38 @@ function AppLogic() {
   }, [skillzSessionStatus, playSound]);
 
   const handleLogoff = useCallback(() => {
-    // Logoff sound is played in WinXP/index.js
     setScreen('login');
     setSkillzSessionStatus('loggedOut');
   }, []);
 
   const handleSwitchUser = useCallback(() => {
-    // Logoff sound for switch user is played in WinXP/index.js
     setScreen('login');
     setSkillzSessionStatus('loggedInInBackground');
   }, []);
 
   const handleShutdown = useCallback(() => {
-    // This is called from WinXP component (after user is logged in)
-    // Shutdown sound is played in WinXP/index.js
-    setShutdownMessage('Windows is shutting down...');
+    setShutdownMessages([
+      'Logging out...',
+      'Saving your settings...',
+      'Windows is shutting down...',
+    ]);
     setScreen('shuttingDown');
     setSkillzSessionStatus('loggedOut');
   }, []);
 
   const handleRestart = useCallback(() => {
-    // This is called from WinXP component (after user is in)
-    // Restart sound is played in WinXP/index.js
-    setShutdownMessage('Windows is restarting...');
+    setShutdownMessages([
+      'Logging out...',
+      'Saving your settings...',
+      'Windows is restarting...',
+    ]);
     setScreen('restarting');
     setSkillzSessionStatus('loggedOut');
   }, []);
 
-  // --- Handler for shutdown initiated from LoginScreen ---
   const handleInitiateShutdownFromLogin = useCallback(() => {
-    playSound(xpShutdownSoundSrc); // Play shutdown sound
-    setShutdownMessage('Windows is shutting down...');
+    playSound(xpShutdownSoundSrc);
+    setShutdownMessages(['Windows is shutting down...']);
     setScreen('shuttingDown');
     setSkillzSessionStatus('loggedOut');
   }, [playSound]);
@@ -161,9 +166,10 @@ function AppLogic() {
         );
       case 'shuttingDown':
       case 'restarting':
-        return <ShutdownScreen finalMessage={shutdownMessage} />;
+        return <ShutdownScreen messages={shutdownMessages} />;
+      case 'bsod':
+        return <BSOD error={crashError} />;
       default:
-        console.warn(`Unknown screen state: ${screen}. Falling back to login.`);
         return (
           <LoginScreen
             onLogin={handleLogin}
@@ -177,9 +183,6 @@ function AppLogic() {
   return <div className="App">{renderScreen()}</div>;
 }
 
-/**
- * Main App component now just wraps AppLogic with the VolumeProvider.
- */
 function App() {
   return (
     <VolumeProvider>

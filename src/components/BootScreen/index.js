@@ -1,129 +1,148 @@
-// src/components/BootScreen/index.js
 import React from 'react';
+import styled, { keyframes, createGlobalStyle } from 'styled-components';
 import winLogo from 'assets/windowsIcons/xplogo.png';
 import MicrosoftLogo from 'assets/windowsIcons/microsoft-logo.png';
 
+// --- GLOBAL PIXELATION ---
+// This forces images and everything else to scale without blurring
+const PixelateStyle = createGlobalStyle`
+  .boot-screen-root {
+    image-rendering: -moz-crisp-edges;
+    image-rendering: -webkit-crisp-edges;
+    image-rendering: pixelated;
+    image-rendering: crisp-edges;
+  }
+`;
+
+// --- ANIMATIONS ---
+const loadingMove = keyframes`
+  0% { left: -40px; }
+  100% { left: 100%; }
+`;
+
+// --- STYLED COMPONENTS ---
+
+const BootContainer = styled.div`
+  background-color: #000000;
+  color: #fefefe;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100vh;
+  width: 100vw;
+  font-family: 'Tahoma', sans-serif;
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 9999;
+  padding-bottom: 60px;
+  user-select: none;
+`;
+
+const BootLogo = styled.img`
+  width: 275px;
+  height: auto;
+  margin-bottom: 45px;
+  /* Ensure the logo itself doesn't get blurry if scaled */
+  image-rendering: pixelated;
+`;
+
+const LoadingBarContainer = styled.div`
+  width: 142px;
+  height: 14px;
+  background-color: transparent;
+  /* Simple, chunky 2px border, no smoothing */
+  border: 2px solid #b2b2b2;
+  border-radius: 3px;
+  overflow: hidden;
+  position: relative;
+  padding: 2px;
+  box-sizing: content-box;
+`;
+
+const LoadingBarProgress = styled.div`
+  position: absolute;
+  top: 2px;
+  left: 0;
+  height: 14px;
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  animation: ${loadingMove} 2s linear infinite;
+`;
+
+// The "Pixel Art" Chiclet
+// Instead of a smooth gradient, we use hard stops to create "rows" of pixels
+const Chiclet = styled.div`
+  width: 10px;
+  height: 100%;
+  border-radius: 1px; /* Very slight rounding */
+
+  /* Hard-stop gradient to simulate pixel rows */
+  background: linear-gradient(
+    to bottom,
+    #adceff 0px,
+    #adceff 2px,
+    /* Top highlight (2px) */ #5398e9 2px,
+    #5398e9 4px,
+    /* Main body (2px) */ #2258a6 4px,
+    #2258a6 9px,
+    /* Darker body (5px) */ #15366a 9px,
+    #15366a 100% /* Bottom shadow */
+  );
+
+  /* Remove the soft shadow, use a distinct border-like shadow if needed */
+  box-shadow: none;
+`;
+
+const CopyrightText = styled.div`
+  position: absolute;
+  bottom: 20px;
+  left: 25px;
+  font-size: 0.75em;
+  color: #cccccc;
+  letter-spacing: 0.5px;
+  font-weight: 600;
+  /* Force font to look a bit sharper/aliased if possible */
+  -webkit-font-smoothing: none;
+`;
+
+const MicrosoftLogoBottom = styled.img`
+  position: absolute;
+  bottom: 20px;
+  right: 25px;
+  width: 70px;
+  height: auto;
+  filter: grayscale(1) brightness(1.8);
+  image-rendering: pixelated;
+`;
+
+// --- COMPONENT ---
+
 const BootScreen = () => {
-  // --- Further Refined Styles for Boot Screen ---
-  const style = `
-    @import url('https://fonts.googleapis.com/css2?family=Tahoma&display=swap');
-
-    .boot-screen {
-      background-color: #000000;
-      color: #FEFEFE;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      height: 100vh;
-      width: 100vw;
-      font-family: 'Tahoma', sans-serif;
-      position: fixed;
-      top: 0;
-      left: 0;
-      z-index: 9999;
-      padding-bottom: 60px;
-    }
-    .boot-logo {
-      width: 300px;
-      height: auto;
-      margin-bottom: 40px;
-    }
-    /* Loading Bar Styles */
-    .loading-bar-container {
-      width: 160px;
-      height: 10px;
-      background-color: #1a1a1a;
-      border: 1px solid #6a6a6a;
-      border-radius: 0px;
-      overflow: hidden; /* Important for moving block */
-      margin-top: 10px;
-      padding: 1px;
-      box-shadow: inset 0 0 1px #000;
-      position: relative; /* Needed for positioning the moving block */
-    }
-    /* --- NEW: Moving Block Style --- */
-    .loading-bar-progress {
-      position: absolute; /* Position relative to container */
-      top: 1px; /* Align with padding */
-      left: 0; /* Start at the left */
-      height: calc(100% - 2px); /* Account for padding */
-      width: 25px; /* Width of the moving block */
-      /* 3-segment blue gradient for the block */
-      background: linear-gradient(
-        90deg,
-        #2d9dff 0px, #2d9dff 7px, /* Segment 1 */
-        #1e6bb8 7px, #1e6bb8 8px, /* Separator */
-        #2d9dff 8px, #2d9dff 15px, /* Segment 2 */
-        #1e6bb8 15px, #1e6bb8 16px, /* Separator */
-        #2d9dff 16px, #2d9dff 23px /* Segment 3 */
-        /* The rest is transparent implicitly */
-      );
-      background-size: 100% 100%; /* Ensure gradient covers the block */
-      border-radius: 0px;
-      /* --- NEW: Animation for moving block --- */
-      animation: loadingXP_move 1.5s linear infinite; /* Loop infinitely */
-    }
-
-    /* Copyright and Bottom Logo Styles */
-    .copyright-text {
-        position: absolute;
-        bottom: 20px;
-        left: 25px;
-        font-size: 0.75em;
-        color: #cccccc;
-        letter-spacing: 0.5px;
-    }
-    .microsoft-logo-bottom {
-        position: absolute;
-        bottom: 20px;
-        right: 25px;
-        width: 90px;
-        height: auto;
-        filter: grayscale(1) brightness(1.8);
-    }
-
-    /* --- UPDATED: Keyframes for moving block animation --- */
-    @keyframes loadingXP_move {
-      0% {
-        left: -25px; /* Start off-screen left */
-      }
-      100% {
-        left: 130px; /* End off-screen right (container width) */
-      }
-    }
-  `;
-
   return (
-    <>
-      <style>{style}</style>
-      <div className="boot-screen">
-        {/* --- PLACEHOLDER LOGOS --- */}
-        <img
-          src={winLogo}
-          alt="Windows XP Logo"
-          className="boot-logo"
-          onError={e =>
-            (e.target.src =
-              'https://placehold.co/220x80/000000/FFFFFF?text=Windows+XP+Logo')
-          }
-        />
-        <div className="loading-bar-container">
-          {/* The progress div is now the moving block */}
-          <div className="loading-bar-progress"></div>
-        </div>
-        <div className="copyright-text">Copyright © Microsoft Corporation</div>
-        <img
-          src={MicrosoftLogo}
-          alt="Microsoft"
-          className="microsoft-logo-bottom"
-          onError={e =>
-            (e.target.src =
-              'https://placehold.co/90x20/000000/CCCCCC?text=Microsoft')
-          }
-        />
-      </div>
-    </>
+    <BootContainer className="boot-screen-root">
+      <PixelateStyle />
+      <BootLogo
+        src={winLogo}
+        alt="Windows XP Logo"
+        onError={e => (e.target.style.opacity = 0)}
+      />
+      <LoadingBarContainer>
+        <LoadingBarProgress>
+          <Chiclet />
+          <Chiclet />
+          <Chiclet />
+        </LoadingBarProgress>
+      </LoadingBarContainer>
+      <CopyrightText>Copyright © Microsoft Corporation</CopyrightText>
+      <MicrosoftLogoBottom
+        src={MicrosoftLogo}
+        alt="Microsoft"
+        onError={e => (e.target.style.opacity = 0)}
+      />
+    </BootContainer>
   );
 };
 
