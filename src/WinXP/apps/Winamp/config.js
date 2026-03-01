@@ -2,7 +2,7 @@ const album = 'N/A';
 
 export const initialTracks = [
   {
-    url: `${process.env.PUBLIC_URL}/music/addiction.wav`,
+    url: `${import.meta.env.BASE_URL}music/addiction.wav`,
     duration: 288,
     metaData: {
       title: 'Addiction',
@@ -11,7 +11,7 @@ export const initialTracks = [
     },
   },
   {
-    url: `${process.env.PUBLIC_URL}/music/youwillknow.mp3`,
+    url: `${import.meta.env.BASE_URL}music/youwillknow.mp3`,
     duration: 161,
     metaData: {
       title: 'You Will Know Our Names (Definitive Edition ver.)',
@@ -20,7 +20,7 @@ export const initialTracks = [
     },
   },
   {
-    url: `${process.env.PUBLIC_URL}/music/man.ogg`,
+    url: `${import.meta.env.BASE_URL}music/man.ogg`,
     duration: 11,
     metaData: {
       title: 'man',
@@ -29,7 +29,7 @@ export const initialTracks = [
     },
   },
   {
-    url: `${process.env.PUBLIC_URL}/music/robocop.mp3`,
+    url: `${import.meta.env.BASE_URL}music/robocop.mp3`,
     duration: 118,
     metaData: {
       title: 'robocop.mp3',
@@ -38,7 +38,7 @@ export const initialTracks = [
     },
   },
   {
-    url: `${process.env.PUBLIC_URL}/music/MIKEtheBOARDpleasey.wav`,
+    url: `${import.meta.env.BASE_URL}music/MIKEtheBOARDpleasey.wav`,
     duration: 118,
     metaData: {
       title: 'MIKE, the BOARD, please!',
