@@ -1,5 +1,5 @@
 // --- CONFIGURATION SETTINGS ---
-const BASE_PATH = process.env.PUBLIC_URL || '';
+const BASE_PATH = import.meta.env.BASE_URL.replace(/\/$/, '');
 
 /**
  * Helper to create media objects efficiently.
