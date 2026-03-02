@@ -1,7 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import styled from 'styled-components';
 
-// Icons component definition (no changes to its JS logic)
 function Icons({
   icons,
   onMouseDown,
@@ -13,9 +12,7 @@ function Icons({
 }) {
   const [iconsRect, setIconsRect] = useState([]);
   function measure(rect) {
-    // Prevent adding duplicates if measure is called multiple times for the same icon
     if (iconsRect.find(r => r.id === rect.id)) return;
-    // Use functional update for setting state based on previous state
     setIconsRect(prevIconsRect => [...prevIconsRect, rect]);
   }
   useEffect(() => {
@@ -31,7 +28,7 @@ function Icons({
       })
       .map(icon => icon.id);
     setSelectedIcons(selectedIds);
-  }, [iconsRect, setSelectedIcons, selecting, mouse.docX, mouse.docY]); // Added mouse.docX, mouse.docY as they are used
+  }, [iconsRect, setSelectedIcons, selecting, mouse.docX, mouse.docY]);
   return (
     <IconsContainer>
       {icons.map(iconData => (
@@ -48,26 +45,25 @@ function Icons({
   );
 }
 
-// Icon component definition (no changes to its JS logic)
 function Icon({
   title,
   onMouseDown,
   onDoubleClick,
-  icon, // image src
+  icon,
   className,
   id,
-  component, // This is the actual component to render on double click
+  component,
   measure,
 }) {
   const ref = useRef(null);
   function _onMouseDown() {
     if (onMouseDown && typeof onMouseDown === 'function') {
-      onMouseDown(id); // Pass the icon's ID
+      onMouseDown(id);
     }
   }
   function _onDoubleClick() {
     if (onDoubleClick && typeof onDoubleClick === 'function') {
-      onDoubleClick(component); // Pass the component to open
+      onDoubleClick(component);
     }
   }
   useEffect(() => {
@@ -76,11 +72,10 @@ function Icon({
     const { left, top, width, height } = ref.current.getBoundingClientRect();
     const posX = left + window.scrollX;
     const posY = top + window.scrollY;
-    // Ensure measure is only called if it's a function
     if (typeof measure === 'function') {
       measure({ id, x: posX, y: posY, w: width, h: height });
     }
-  }, [id, measure]); // Added measure to dependency array
+  }, [id, measure]);
   return (
     <div
       className={className}
@@ -98,8 +93,6 @@ function Icon({
   );
 }
 
-// --- CSS MODIFICATIONS START HERE ---
-
 const IconsContainer = styled.div`
   position: absolute;
   top: 40px;
@@ -115,8 +108,6 @@ const IconsContainer = styled.div`
   overflow-x: hidden;
   gap: 15px;
 
-  /* This allows mouse events to pass through the container to elements behind it,
-     like the main desktop area that might be handling drag-to-select. */
   pointer-events: none;
 `;
 
@@ -127,10 +118,8 @@ const StyledIcon = styled(Icon)`
   align-items: center;
   flex-shrink: 0;
 
-  /* This ensures that the icons themselves are still interactive (clickable, draggable). */
   pointer-events: auto;
 
-  /* Descendant styles (no changes here, assuming they are correct) */
   &__text__container {
     width: 100%;
     font-size: 10px;
@@ -153,28 +142,23 @@ const StyledIcon = styled(Icon)`
   }
   &__text {
     padding: 0 3px 2px;
-    background-color: ${(
-      { isFocus, displayFocus }, // isFocus might not be defined here if displayFocus is the sole prop
-    ) => (isFocus && displayFocus ? '#0b61ff' : 'transparent')};
+    background-color: ${({ isFocus, displayFocus }) =>
+      isFocus && displayFocus ? '#0b61ff' : 'transparent'};
     text-align: center;
     flex-shrink: 1;
   }
   &__img__container {
     width: 30px;
     height: 30px;
-    filter: ${(
-      { isFocus, displayFocus }, // isFocus might not be defined here
-    ) => (isFocus && displayFocus ? 'drop-shadow(0 0 blue)' : '')};
+    filter: ${({ isFocus, displayFocus }) =>
+      isFocus && displayFocus ? 'drop-shadow(0 0 blue)' : ''};
   }
   &__img {
     width: 30px;
     height: 30px;
-    opacity: ${(
-      { isFocus, displayFocus }, // isFocus might not be defined here
-    ) => (isFocus && displayFocus ? 0.5 : 1)};
+    opacity: ${({ isFocus, displayFocus }) =>
+      isFocus && displayFocus ? 0.5 : 1};
   }
 `;
-
-// --- CSS MODIFICATIONS END HERE ---
 
 export default Icons;

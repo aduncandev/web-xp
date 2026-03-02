@@ -17,7 +17,7 @@ import wireless from 'assets/windowsIcons/234(16x16).png';
 import accessibility from 'assets/windowsIcons/238(16x16).png';
 import connection from 'assets/windowsIcons/309(16x16).png';
 import update from 'assets/windowsIcons/322(16x16).png';
-import notepad from 'assets/windowsIcons/327(16x16).png'; // Used for Notepad icon
+import notepad from 'assets/windowsIcons/327(16x16).png';
 import networkAssistance from 'assets/windowsIcons/357(16x16).png';
 import menu from 'assets/windowsIcons/358(16x16).png';
 import transfer from 'assets/windowsIcons/367(16x16).png';
@@ -29,22 +29,22 @@ import address from 'assets/windowsIcons/554(16x16).png';
 import connectionWizard from 'assets/windowsIcons/663(16x16).png';
 import networkSetup from 'assets/windowsIcons/664(16x16).png';
 import hyperCmd from 'assets/windowsIcons/669(16x16).png';
-import painter from 'assets/windowsIcons/680(16x16).png'; // Used for Paint icon
+import painter from 'assets/windowsIcons/680(16x16).png';
 import sound from 'assets/windowsIcons/690(16x16).png';
 import recent from 'assets/windowsIcons/716(16x16).png';
 import compatibility from 'assets/windowsIcons/747(16x16).png';
 import magnifier from 'assets/windowsIcons/817(16x16).png';
-import mediaPlayer from 'assets/windowsIcons/846(16x16).png'; // Used for WMP icon
+import mediaPlayer from 'assets/windowsIcons/846(16x16).png';
 import tour from 'assets/windowsIcons/853(32x32).png';
-import outlook from 'assets/windowsIcons/887(16x16).png'; // Used for Outlook icon
+import outlook from 'assets/windowsIcons/887(16x16).png';
 import spade from 'assets/windowsIcons/888(16x16).png';
 import reversi from 'assets/windowsIcons/889(16x16).png';
 import onlineHeart from 'assets/windowsIcons/890(16x16).png';
 import checker from 'assets/windowsIcons/891(16x16).png';
 import backgammon from 'assets/windowsIcons/892(16x16).png';
 import movieMaker from 'assets/windowsIcons/894(16x16).png';
-import ie from 'assets/windowsIcons/896(16x16).png'; // Used for IE icon
-import messenger from 'assets/windowsIcons/msn.png'; // Used for Messenger icon
+import ie from 'assets/windowsIcons/896(16x16).png';
+import messenger from 'assets/windowsIcons/msn.png';
 import spider from 'assets/windowsIcons/spider.png';
 import freecell from 'assets/windowsIcons/freecell.png';
 import heart from 'assets/windowsIcons/heart.png';
@@ -53,12 +53,11 @@ import solitaire from 'assets/windowsIcons/solitaire.png';
 import narrator from 'assets/windowsIcons/narrator.ico';
 import pinball from 'assets/windowsIcons/pinball.png';
 import restore from 'assets/windowsIcons/restore.ico';
-import mine from 'assets/minesweeper/mine-icon.png'; // Used for Minesweeper
-import winamp from 'assets/windowsIcons/winamp.png'; // Used for Winamp icon
+import mine from 'assets/minesweeper/mine-icon.png';
+import winamp from 'assets/windowsIcons/winamp.png';
 import voltorbflip from 'assets/windowsIcons/voltorb.png';
 
-// Placeholder icon for "About Me" - replace with your actual 16x16 icon
-import aboutMeIcon from 'assets/windowsIcons/676(16x16).png'; // Using My Computer icon as placeholder
+import aboutMeIcon from 'assets/windowsIcons/676(16x16).png';
 
 export const MyRecentDocuments = [
   {
@@ -80,7 +79,6 @@ export const ConnectTo = [
   },
 ];
 
-// This is the main data structure for the "All Programs" menu
 export const AllPrograms = [
   {
     type: 'item',
@@ -102,7 +100,7 @@ export const AllPrograms = [
   },
   {
     type: 'menu',
-    icon: menu, // Generic submenu icon
+    icon: menu,
     text: 'Accessories',
     items: [
       {
@@ -227,7 +225,7 @@ export const AllPrograms = [
           },
           {
             type: 'item',
-            icon: recent, // This icon seems to be 'Scheduled Tasks' in XP
+            icon: recent,
             text: 'Scheduled Tasks',
           },
           {
@@ -259,12 +257,12 @@ export const AllPrograms = [
       },
       {
         type: 'item',
-        icon: notepad, // Corrected to use imported notepad icon
+        icon: notepad,
         text: 'Notepad',
       },
       {
         type: 'item',
-        icon: painter, // Corrected to use imported painter icon
+        icon: painter,
         text: 'Paint',
       },
       {
@@ -289,7 +287,7 @@ export const AllPrograms = [
       },
       {
         type: 'item',
-        icon: tour, // This icon is 32x32, ensure SubMenu handles it or use a 16x16
+        icon: tour,
         text: 'Tour Windows XP',
       },
       {
@@ -306,7 +304,7 @@ export const AllPrograms = [
   },
   {
     type: 'menu',
-    icon: menu, // Generic submenu icon
+    icon: menu,
     text: 'Games',
     items: [
       {
@@ -346,7 +344,7 @@ export const AllPrograms = [
       },
       {
         type: 'item',
-        icon: mine, // Minesweeper icon
+        icon: mine,
         text: 'Minesweeper',
       },
       {
@@ -364,10 +362,9 @@ export const AllPrograms = [
         icon: spider,
         text: 'Spider Solitaire',
       },
-      // Add Voltorb Flip to the Games submenu
       {
         type: 'item',
-        icon: voltorbflip, // Placeholder: Use actual Voltorb Flip icon (16x16)
+        icon: voltorbflip,
         text: 'Voltorb Flip',
       },
     ],
@@ -384,24 +381,21 @@ export const AllPrograms = [
       },
     ],
   },
-  // These are often "pinned" or frequently used programs in the Start Menu's left panel
   {
     type: 'item',
-    icon: ie, // Corrected to use imported ie icon
+    icon: ie,
     text: 'Internet Explorer',
   },
   {
     type: 'item',
-    icon: outlook, // Corrected to use imported outlook icon
+    icon: outlook,
     text: 'Outlook Express',
   },
-  // Add "About Me" as a pinned item
   {
     type: 'item',
-    icon: aboutMeIcon, // Use the imported placeholder/actual icon for About Me
+    icon: aboutMeIcon,
     text: 'About Me',
   },
-  // Add other frequently used apps here if desired, for example:
   {
     type: 'item',
     icon: mediaPlayer,
@@ -419,7 +413,7 @@ export const AllPrograms = [
   },
   {
     type: 'item',
-    icon: winamp, // Winamp icon
+    icon: winamp,
     text: 'Winamp',
   },
 ];

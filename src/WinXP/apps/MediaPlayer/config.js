@@ -1,23 +1,15 @@
-// --- CONFIGURATION SETTINGS ---
 const BASE_PATH = import.meta.env.BASE_URL.replace(/\/$/, '');
 
-/**
- * Helper to create media objects efficiently.
- * Includes ID generation for Drag & Drop functionality.
- */
 const createMedia = (type, relativePath, title, artist = '', duration = 0) => ({
   url: `${BASE_PATH}${relativePath}`,
   type,
   title,
   artist,
-  duration, // Optional: The player detects this automatically now, but keeping it doesn't hurt
-  // Generate a unique ID for drag-and-drop tracking
+  duration,
   id: Math.random()
     .toString(36)
     .substr(2, 9),
 });
-
-// --- DEFINE YOUR FOLDERS HERE ---
 
 const musicTracks = [
   createMedia(
@@ -74,8 +66,6 @@ const imageTracks = [
   // createMedia('image', '/photos/wallpaper.jpg', 'Cool Wallpaper'),
 ];
 
-// --- EXPORT ---
-// The new player expects "mediaLibrary", not "initialTracks"
 export const mediaLibrary = {
   'My Music': musicTracks,
   Videos: videoTracks,

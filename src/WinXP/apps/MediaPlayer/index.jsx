@@ -10,7 +10,6 @@ import styled, { keyframes } from 'styled-components';
 import { mediaLibrary } from './config';
 import { useVolume } from '../../../context/VolumeContext';
 
-// Helper to determine media type
 const getMediaType = (url, type) => {
   if (type) {
     if (type.startsWith('video')) return 'video';
@@ -23,7 +22,6 @@ const getMediaType = (url, type) => {
   return 'audio';
 };
 
-// Scrolling ticker for track titles
 const scroll = keyframes`
   0% { transform: translateX(0); }
   100% { transform: translateX(-50%); }
@@ -44,12 +42,11 @@ const TickerContainer = styled.div`
 
 const TickerWrapper = styled.div`
   display: inline-flex;
-  /* Duration calculation: roughly 0.2s per character for readable speed */
   animation: ${scroll} ${props => props.duration}s linear infinite;
 `;
 
 const TickerItem = styled.span`
-  padding-right: 40px; /* Gap between the text loops */
+  padding-right: 40px;
   white-space: nowrap;
 `;
 
@@ -58,24 +55,20 @@ const TrackTicker = ({ text }) => {
   const containerRef = useRef(null);
   const measurerRef = useRef(null);
 
-  // Measure width whenever text changes or parent resizes (re-renders)
   useLayoutEffect(() => {
     if (containerRef.current && measurerRef.current) {
       const containerWidth = containerRef.current.offsetWidth;
       const contentWidth = measurerRef.current.offsetWidth;
 
-      // Update state only if changed to prevent unnecessary re-renders
       const shouldScroll = contentWidth > containerWidth;
       setIsOverflowing(prev => (prev !== shouldScroll ? shouldScroll : prev));
     }
   });
 
-  // Calculate speed based on text length (so long titles don't fly by too fast)
   const duration = Math.max(5, text.length * 0.25);
 
   return (
     <TickerContainer ref={containerRef}>
-      {/* Invisible span just to measure the true width of the text */}
       <span
         ref={measurerRef}
         style={{
@@ -89,20 +82,17 @@ const TrackTicker = ({ text }) => {
       </span>
 
       {isOverflowing ? (
-        // If overflowing, render two copies for a seamless infinite loop
         <TickerWrapper duration={duration}>
           <TickerItem>{text}</TickerItem>
           <TickerItem>{text}</TickerItem>
         </TickerWrapper>
       ) : (
-        // If it fits, just render static text
         <span>{text}</span>
       )}
     </TickerContainer>
   );
 };
 export default function MediaPlayer() {
-  // Library State
   const [library, setLibrary] = useState(() => {
     const lib = { ...mediaLibrary };
     delete lib['All Tracks'];
@@ -115,7 +105,6 @@ export default function MediaPlayer() {
   );
   const [currentIndex, setCurrentIndex] = useState(0);
 
-  // Dynamic Playlist
   const playlist = useMemo(() => {
     if (currentFolder === 'All Media') {
       const allFolderItems = Object.values(library).flat();
@@ -132,7 +121,6 @@ export default function MediaPlayer() {
   const [localVolume, setLocalVolume] = useState(1);
   const [windowSize, setWindowSize] = useState({ width: 300, height: 300 });
 
-  // Refs
   const mediaRef = useRef(null);
   const canvasRef = useRef(null);
   const containerRef = useRef(null);
@@ -143,7 +131,6 @@ export default function MediaPlayer() {
   const resizeObserverRef = useRef(null);
   const connectedElementRef = useRef(null);
 
-  // Drag Sorting Refs
   const dragItem = useRef(null);
   const dragOverItem = useRef(null);
 
@@ -157,7 +144,6 @@ export default function MediaPlayer() {
   };
   const isImage = currentItem.type === 'image';
 
-  // --- RESIZE OBSERVER ---
   useEffect(() => {
     if (!containerRef.current) return;
     resizeObserverRef.current = new ResizeObserver(entries => {
@@ -172,7 +158,6 @@ export default function MediaPlayer() {
     return () => resizeObserverRef.current?.disconnect();
   }, []);
 
-  // --- FOLDER SWITCHING ---
   const changeFolder = folderName => {
     if (folderName === currentFolder) return;
     setIsPlaying(false);
@@ -181,7 +166,6 @@ export default function MediaPlayer() {
     setCurrentFolder(folderName);
   };
 
-  // --- DRAG AND DROP (UPLOAD) ---
   const handleDrop = e => {
     e.preventDefault();
     e.stopPropagation();
@@ -215,7 +199,6 @@ export default function MediaPlayer() {
     }
   };
 
-  // --- DRAG SORTING ---
   const handleSortStart = (e, position) => {
     dragItem.current = position;
     e.dataTransfer.effectAllowed = 'move';
@@ -254,7 +237,6 @@ export default function MediaPlayer() {
     setLibrary(prev => ({ ...prev, [currentFolder]: newPlaylist }));
   };
 
-  // --- VISUALIZER ENGINE ---
   useEffect(() => {
     if (currentItem.type !== 'audio') {
       if (sourceRef.current) {
@@ -346,12 +328,8 @@ export default function MediaPlayer() {
       }
 
       drawSpectrum();
-    } catch (e) {
-      // Visualizer setup failed
-    }
+    } catch (e) {}
   }, [currentItem.type, drawSpectrum]);
-
-  // --- PLAYBACK LOGIC ---
 
   useEffect(() => {
     if (mediaRef.current && !isImage) {
@@ -385,8 +363,6 @@ export default function MediaPlayer() {
       setupVisualizer();
     }
   }, [currentIndex, isImage, playlist, currentItem.id, setupVisualizer]);
-
-  // --- CONTROLS ---
 
   const togglePlay = async () => {
     if (isImage || !mediaRef.current) return;
@@ -429,7 +405,6 @@ export default function MediaPlayer() {
     }
   };
 
-  // --- RENDER ---
   const renderMedia = () => {
     if (!currentItem.url) return <VisualizerContainer />;
 
@@ -470,7 +445,6 @@ export default function MediaPlayer() {
 
   const compactMode = windowSize.width < 350;
 
-  // Construct text for the ticker
   const titleText = playlist.length
     ? `${currentIndex + 1}. ${
         currentItem.artist ? `${currentItem.artist} - ` : ''
@@ -484,7 +458,6 @@ export default function MediaPlayer() {
       onDrop={handleDrop}
     >
       <TopTitleBar>
-        {/* Replaced Marquee with new TrackTicker */}
         <TrackTicker text={titleText} />
       </TopTitleBar>
 

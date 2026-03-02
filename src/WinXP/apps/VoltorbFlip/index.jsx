@@ -1,15 +1,12 @@
 import React, { useEffect, useRef, useCallback, useState } from 'react';
 import styled from 'styled-components';
-
-// 1. Import the hook
-import { useVolume } from '../../../context/VolumeContext'; // Adjust path if needed
+import { useVolume } from '../../../context/VolumeContext';
 
 function VoltorbFlip({ isFocus }) {
   const gameUrl = `${import.meta.env.BASE_URL}voltorb_flip/`;
   const iframeRef = useRef(null);
   const [iframeReady, setIframeReady] = useState(false);
 
-  // 2. Get volume state
   const { volume, isMuted } = useVolume();
 
   const getTargetOrigin = useCallback(() => {
@@ -39,7 +36,6 @@ function VoltorbFlip({ isFocus }) {
     [getTargetOrigin],
   );
 
-  // 3. Create a new function to send volume messages
   const sendVolumeMessage = useCallback(
     (currentVolume, currentMuted) => {
       const iframe = iframeRef.current;
@@ -48,24 +44,22 @@ function VoltorbFlip({ isFocus }) {
         iframe.contentWindow.postMessage(
           {
             type: 'VOLTORB_FLIP_VOLUME_CHANGE',
-            volume: currentVolume / 100, // Convert 0-100 to 0.0-1.0
+            volume: currentVolume / 100,
             muted: currentMuted,
           },
           targetOrigin,
         );
       }
     },
-    [getTargetOrigin, iframeReady], // Depends on iframeReady
+    [getTargetOrigin, iframeReady],
   );
 
-  // 4. Send focus messages when isFocus or iframeReady changes
   useEffect(() => {
     if (iframeReady) {
       sendFocusMessage(isFocus);
     }
   }, [isFocus, iframeReady, sendFocusMessage]);
 
-  // 5. Send volume messages when volume, muted, or iframeReady changes
   useEffect(() => {
     if (iframeReady) {
       sendVolumeMessage(volume, isMuted);
@@ -89,7 +83,6 @@ function VoltorbFlip({ isFocus }) {
         event.data.type === 'VOLTORB_FLIP_IFRAME_READY'
       ) {
         setIframeReady(true);
-        // 6. Send initial focus AND volume state when iframe is ready
         sendFocusMessage(isFocus);
         sendVolumeMessage(volume, isMuted);
       }
@@ -122,20 +115,19 @@ function VoltorbFlip({ isFocus }) {
   );
 }
 
-// ... (styled components are unchanged) ...
 const AppContainer = styled.div`
   width: 100%;
   height: 100%;
   position: relative;
-  background-color: #309f6a; /* Match your game's body background if desired */
-  overflow: hidden; /* Ensures iframe fits well */
+  background-color: #309f6a;
+  overflow: hidden;
 `;
 
 const StyledIframe = styled.iframe`
   display: block;
   width: 100%;
   height: 100%;
-  border: none; /* Remove default iframe border */
+  border: none;
 `;
 
 const Overlay = styled.div`
@@ -144,7 +136,7 @@ const Overlay = styled.div`
   left: 0;
   width: 100%;
   height: 100%;
-  z-index: 2; /* Ensures it's above the iframe */
+  z-index: 2;
   background-color: transparent;
 `;
 

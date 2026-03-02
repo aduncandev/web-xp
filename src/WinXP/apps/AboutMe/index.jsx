@@ -3,7 +3,6 @@ import styled from 'styled-components';
 
 import placeholderLeftImage from 'assets/windowsIcons/tourimage.png';
 
-// Main component for the About Me application
 function AboutMe({ onClose }) {
   const [activeSection, setActiveSection] = useState('initial');
   const [selectedOption, setSelectedOption] = useState(null);
@@ -19,7 +18,6 @@ function AboutMe({ onClose }) {
           <ul>
             <li>uhh...</li>
             <li>i dont really know yet</li>
-            {/* Add more skills */}
           </ul>
         </>
       ),
@@ -36,7 +34,6 @@ function AboutMe({ onClose }) {
               <strong>Something or another:</strong> Maybe I'm working on
               something...
             </li>
-            {/* Add more projects */}
           </ul>
         </>
       ),
@@ -52,7 +49,6 @@ function AboutMe({ onClose }) {
             <li>Email: skillzdevs@proton.me</li>
             <li>Discord: skillzdev</li>
             <li>GitHub: github.com/skillz808</li>
-            {/* Add more contact methods */}
           </ul>
         </>
       ),
@@ -118,7 +114,6 @@ function AboutMe({ onClose }) {
     <AppWindow>
       <MainContentArea>
         <LeftPanel>
-          {/* The image will now fill this panel */}
           <img src={placeholderLeftImage} alt="About me visual" />
         </LeftPanel>
         <RightPanel>{renderRightPanelContent()}</RightPanel>
@@ -142,13 +137,12 @@ function AboutMe({ onClose }) {
   );
 }
 
-// Styled Components
 const AppWindow = styled.div`
   display: flex;
   flex-direction: column;
   width: 100%;
   height: 100%;
-  background-color: #ece9d8; /* XP dialog background color */
+  background-color: #ece9d8;
   font-family: 'Tahoma', sans-serif;
   font-size: 11px;
   color: #000;
@@ -158,26 +152,24 @@ const AppWindow = styled.div`
 const MainContentArea = styled.div`
   display: flex;
   flex-grow: 1;
-  overflow: hidden; /* Important to contain children */
+  overflow: hidden;
 `;
 
 const LeftPanel = styled.div`
   width: 170px;
-  background-color: #f0f0f0; /* Fallback if image doesn't load or for transparency */
-  /* Removed padding: 10px; */
-  display: flex; /* Helps with image sizing if needed, though width/height 100% on img is key */
-  align-items: stretch; /* Makes child (img) stretch vertically if it's a flex item */
-  justify-content: stretch; /* Makes child (img) stretch horizontally */
+  background-color: #f0f0f0;
+  display: flex;
+  align-items: stretch;
+  justify-content: stretch;
   border-right: 1px solid #aca899;
   flex-shrink: 0;
-  overflow: hidden; /* Ensures image doesn't overflow its container */
+  overflow: hidden;
 
   img {
-    width: 100%; /* Make image take full width of LeftPanel */
-    height: 100%; /* Make image take full height of LeftPanel */
-    object-fit: cover; /* Cover the area, cropping if necessary. Use 'fill' to stretch, 'contain' to fit within. */
-    /* Removed border: 1px solid #808080; */
-    display: block; /* Removes any extra space below the image if it were inline */
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
   }
 `;
 
@@ -292,9 +284,7 @@ const HeaderBar = styled.div`
   }
 `;
 
-const ContentArea = styled.div`
-  /* Styles for the detailed content area */
-`;
+const ContentArea = styled.div``;
 
 const BottomControls = styled.div`
   flex-shrink: 0;

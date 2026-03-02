@@ -10,12 +10,10 @@ import Egg from './Egg';
 import MediaPlayer from './MediaPlayer';
 import ErrorBox from './ErrorBox';
 
-// --- Import Raw Components for Wrapping ---
 import MinesweeperComponent from './Minesweeper';
 import VoltorbFlipComponent from './VoltorbFlip';
 import PinballComponent from './Pinball';
 
-// --- Icon Imports ---
 import iePaper from 'assets/windowsIcons/ie-paper.png';
 import ie from 'assets/windowsIcons/ie.png';
 import mine from 'assets/minesweeper/mine-icon.png';
@@ -40,7 +38,6 @@ import eggIconLarge from 'assets/windowsIcons/tree.gif';
 import mediaPlayerIcon from 'assets/windowsIcons/846(16x16).png';
 import mediaPlayerIconLarge from 'assets/windowsIcons/846(32x32).png';
 
-// --- Helper Functions ---
 const isMobileUA = () => {
   if (typeof window === 'undefined') return false;
   const userAgent = navigator.userAgent || navigator.vendor || window.opera;
@@ -55,7 +52,6 @@ const isScreenTooSmall = (minW, minH) => {
   return window.innerWidth < minW || window.innerHeight < minH;
 };
 
-// Window positioning helpers
 const getWinState = () => {
   if (typeof window === 'undefined')
     return { w: 1024, h: 768, isMobile: false };
@@ -82,12 +78,10 @@ const shouldMaximize = (appW, appH, isResizable) => {
   return w < appW || h < appH;
 };
 
-// --- Blocking Logic ---
 const checkMinesweeperBlock = () => isMobileUA();
 const checkPinballBlock = () => isMobileUA() || isScreenTooSmall(600, 470);
 const checkVoltorbBlock = () => isScreenTooSmall(570, 670);
 
-// --- Component Wrappers ---
 const WrappedMinesweeper = props => {
   if (checkMinesweeperBlock()) {
     return (
@@ -127,7 +121,6 @@ const WrappedVoltorb = props => {
   return <VoltorbFlipComponent {...props} />;
 };
 
-// --- ID Generator ---
 const gen = () => {
   let id = -1;
   return () => {
@@ -254,11 +247,9 @@ export const appSettings = {
     name: 'Minesweeper',
     header: { icon: mine, title: 'Minesweeper' },
     component: WrappedMinesweeper,
-    // Size check: 380 for error, 0 for game
     defaultSize: checkMinesweeperBlock()
       ? { width: 380, height: 0 }
       : { width: 0, height: 0 },
-    // Offset check: Center based on 380x200 if blocked, otherwise center normally
     defaultOffset: checkMinesweeperBlock()
       ? getCenter(380, 200)
       : getCenter(0, 0),
@@ -342,11 +333,9 @@ export const appSettings = {
     name: 'VoltorbFlip',
     header: { icon: voltorbFlipIcon, title: 'Voltorb Flip' },
     component: WrappedVoltorb,
-    // Size check: 380 for error, 570 for game
     defaultSize: checkVoltorbBlock()
       ? { width: 380, height: 0 }
       : { width: 570, height: 670 },
-    // Offset check: Center based on 380x200 if blocked, otherwise center 570x670
     defaultOffset: checkVoltorbBlock()
       ? getCenter(380, 200)
       : getCenter(570, 670),
@@ -362,11 +351,9 @@ export const appSettings = {
       title: '3D Pinball for Windows - Space Cadet',
     },
     component: WrappedPinball,
-    // Size check: 380 for error, 600 for game
     defaultSize: checkPinballBlock()
       ? { width: 380, height: 0 }
       : { width: 600, height: 470 },
-    // Offset check: Center based on 380x200 if blocked, otherwise center 600x470
     defaultOffset: checkPinballBlock()
       ? getCenter(380, 200)
       : getCenter(600, 470),

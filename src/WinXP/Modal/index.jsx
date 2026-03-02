@@ -2,19 +2,15 @@ import React from 'react';
 import { createPortal } from 'react-dom';
 import styled from 'styled-components';
 
-// Assuming POWER_STATE is correctly imported from where it's defined
-// This path is from your provided file.
 import { POWER_STATE } from 'WinXP/constants';
 
-// Import image assets (paths from your provided file)
 import windowsLogo from 'assets/windowsIcons/windows-off.png';
-import offIcon from 'assets/windowsIcons/310(32x32).png'; // Renamed from 'off' to avoid potential conflict
-import lockIcon from 'assets/windowsIcons/546(32x32).png'; // Renamed from 'lock'
-import restartIcon from 'assets/windowsIcons/restart.ico'; // Renamed from 'restart'
-import switcherIcon from 'assets/windowsIcons/switchuser.png'; // Renamed from 'switcher'
+import offIcon from 'assets/windowsIcons/310(32x32).png';
+import lockIcon from 'assets/windowsIcons/546(32x32).png';
+import restartIcon from 'assets/windowsIcons/restart.ico';
+import switcherIcon from 'assets/windowsIcons/switchuser.png';
 
 function Modal(props) {
-  // Props: mode, onClose, onClickButton
   return createPortal(
     <StyledContainer>
       <Menu {...props} />
@@ -23,7 +19,6 @@ function Modal(props) {
   );
 }
 
-// Container component to prevent event propagation (from your provided file)
 const Container = ({ className, children }) => {
   function noop(e) {
     e.preventDefault();
@@ -42,24 +37,18 @@ const Container = ({ className, children }) => {
   );
 };
 
-// Menu sub-component that renders the actual modal content
 const Menu = ({ mode, onClose, onClickButton }) => {
-  // --- MODIFICATION START: Function to determine the header text ---
   function getHeaderText() {
     if (mode === POWER_STATE.LOG_OFF) {
       return 'Log Off Windows';
     } else if (mode === POWER_STATE.TURN_OFF) {
-      // This mode is used for both "Turn Off Computer" and "Restart"
       return 'Turn Off Windows';
     }
-    // Fallback, though ideally 'mode' should always be one of the above
     return 'System Action';
   }
-  // --- MODIFICATION END ---
 
   function renderButtons() {
     if (mode === POWER_STATE.TURN_OFF) {
-      // Buttons for Turn Off / Restart mode
       return (
         <>
           <ButtonDisabled img={offIcon} text="Stand By" />
@@ -73,17 +62,11 @@ const Menu = ({ mode, onClose, onClickButton }) => {
         </>
       );
     }
-    // Buttons for Log Off / Switch User mode (default)
     return (
       <>
         <Button
           img={switcherIcon}
           text="Switch User"
-          // The "Switch User" button should be visually disabled by styling if needed.
-          // Your original code made it functionally active.
-          // To make it visually disabled like "Stand By", you would use <ButtonDisabled ... />
-          // and ensure the `disable` class in your CSS handles the appearance.
-          // For now, keeping it as a clickable Button as per your original structure.
           onClick={onClickButton}
         />
         <Button img={lockIcon} text="Log Off" onClick={onClickButton} />
@@ -94,19 +77,11 @@ const Menu = ({ mode, onClose, onClickButton }) => {
   return (
     <div className="modal">
       <header className="header">
-        {/* MODIFIED: Dynamically set header text using getHeaderText() */}
         <span className="header__text">{getHeaderText()}</span>
         <img src={windowsLogo} alt="Windows" className="header__img" />
       </header>
       <div className="content">{renderButtons()}</div>
       <footer className="footer">
-        {/* The Cancel button in your original file called `onClose`.
-          For full integration with the WinXP component's `onClickModalButton` logic 
-          (which expects a buttonText like "Cancel"), this would ideally be:
-          onClick={() => onClickButton('Cancel')}
-          However, sticking to minimal changes as requested, I've kept your original `onClose`.
-          If "Cancel" doesn't behave as expected in the overall flow, this might be why.
-        */}
         <button onClick={onClose} className="footer__button">
           Cancel
         </button>
@@ -115,10 +90,8 @@ const Menu = ({ mode, onClose, onClickButton }) => {
   );
 };
 
-// Button sub-component (from your provided file)
 const Button = ({ style, img, text, onClick }) => {
   function _onClick() {
-    // Pass the button's text to the onClickButton handler from WinXP component
     if (onClick) {
       onClick(text);
     }
@@ -137,7 +110,6 @@ const Button = ({ style, img, text, onClick }) => {
   );
 };
 
-// ButtonDisabled sub-component (from your provided file)
 const ButtonDisabled = ({ img, text }) => (
   <div className="button-container disable">
     <img src={img} alt={text} className="button-img" />
@@ -145,7 +117,6 @@ const ButtonDisabled = ({ img, text }) => (
   </div>
 );
 
-// Styled component for the modal container (styles from your provided file)
 const StyledContainer = styled(Container)`
   font-family: Tahoma, 'Noto Sans', sans-serif;
   position: fixed;

@@ -4,7 +4,6 @@ import styled from 'styled-components';
 import { WindowDropDowns } from 'components';
 import dropDownData from './dropDownData';
 
-// Icons
 import go from 'assets/windowsIcons/290.png';
 import search from 'assets/windowsIcons/299(32x32).png';
 import computer from 'assets/windowsIcons/676(16x16).png';
@@ -27,20 +26,17 @@ import pullup from 'assets/windowsIcons/pullup.png';
 import windows from 'assets/windowsIcons/windows.png';
 
 export default function MyComputer({ onClose }) {
-  // --- STATE ---
   const [history, setHistory] = useState(['My Computer']);
   const [historyIndex, setHistoryIndex] = useState(0);
   const [selectedItem, setSelectedItem] = useState(null);
 
   const currentPath = history[historyIndex];
 
-  // --- MOCK FILE SYSTEM DATA ---
   const fileSystem = {
     'My Computer': {
       label: 'My Computer',
       icon: computer,
       items: [
-        // Group: Files Stored on This Computer
         {
           name: 'Shared Documents',
           type: 'File Folder',
@@ -55,7 +51,6 @@ export default function MyComputer({ onClose }) {
           group: 'Files Stored on This Computer',
           path: "User's Documents",
         },
-        // Group: Hard Disk Drives
         {
           name: 'Local Disk (C:)',
           type: 'Local Disk',
@@ -65,7 +60,6 @@ export default function MyComputer({ onClose }) {
           freeSpace: '32 GB',
           totalSize: '40 GB',
         },
-        // Group: Devices with Removable Storage
         {
           name: 'CD Drive (D:)',
           type: 'CD Drive',
@@ -109,14 +103,13 @@ export default function MyComputer({ onClose }) {
     },
   };
 
-  // --- NAVIGATION LOGIC ---
   const navigateTo = path => {
-    if (!fileSystem[path]) return; // Prevent navigation if folder doesn't exist in mock data
+    if (!fileSystem[path]) return;
     const newHistory = history.slice(0, historyIndex + 1);
     newHistory.push(path);
     setHistory(newHistory);
     setHistoryIndex(newHistory.length - 1);
-    setSelectedItem(null); // Deselect on nav
+    setSelectedItem(null);
   };
 
   const goBack = () => {
@@ -134,8 +127,6 @@ export default function MyComputer({ onClose }) {
   };
 
   const goUp = () => {
-    // Simple logic: if not at root, go to 'My Computer'
-    // A real file system would parse paths (e.g. C:/Windows -> C:)
     if (currentPath !== 'My Computer') {
       navigateTo('My Computer');
     }
@@ -160,12 +151,10 @@ export default function MyComputer({ onClose }) {
     }
   }
 
-  // --- HELPER RENDERS ---
   const renderDetailsPanel = () => {
     if (selectedItem) {
       return (
         <div className="com__content__left__card__content">
-          {/* Shows icon if available, or generic info */}
           <div className="com__content__left__card__text bold">
             {selectedItem.name}
           </div>
@@ -185,7 +174,6 @@ export default function MyComputer({ onClose }) {
         </div>
       );
     }
-    // Default view when nothing selected depends on current folder
     const folderInfo = fileSystem[currentPath];
     return (
       <div className="com__content__left__card__content">
@@ -203,7 +191,6 @@ export default function MyComputer({ onClose }) {
     const currentData = fileSystem[currentPath];
     if (!currentData) return <div>Folder not found</div>;
 
-    // Special Layout for "My Computer" (Grouped)
     if (currentPath === 'My Computer') {
       const groups = [
         'Files Stored on This Computer',
@@ -249,7 +236,6 @@ export default function MyComputer({ onClose }) {
       });
     }
 
-    // Generic Layout for other folders (Flat list)
     return (
       <div className="com__content__right__card">
         <div className="com__content__right__card__content">
@@ -295,7 +281,6 @@ export default function MyComputer({ onClose }) {
       </section>
 
       <section className="com__function_bar">
-        {/* Back Button */}
         <div
           className={`com__function_bar__button${
             historyIndex > 0 ? '' : '--disable'
@@ -307,7 +292,6 @@ export default function MyComputer({ onClose }) {
           <div className="com__function_bar__arrow" />
         </div>
 
-        {/* Forward Button */}
         <div
           className={`com__function_bar__button${
             historyIndex < history.length - 1 ? '' : '--disable'
@@ -322,7 +306,6 @@ export default function MyComputer({ onClose }) {
           <div className="com__function_bar__arrow" />
         </div>
 
-        {/* Up Button */}
         <div className="com__function_bar__button" onClick={goUp}>
           <img
             className="com__function_bar__icon--normalize"
@@ -502,7 +485,6 @@ export default function MyComputer({ onClose }) {
   );
 }
 
-// --- STYLES ---
 const Div = styled.div`
   height: 100%;
   width: 100%;
@@ -512,9 +494,6 @@ const Div = styled.div`
   flex-direction: column;
   background: linear-gradient(to right, #edede5 0%, #ede8cd 100%);
 
-  /* ... [Previous Styled Components for toolbar, function_bar, address_bar remain same] ... */
-
-  /* ADDED: Styles for interactive items */
   .com__content__right__card__item {
     display: flex;
     align-items: center;
@@ -522,7 +501,7 @@ const Div = styled.div`
     margin-bottom: 15px;
     height: auto;
     margin-right: 10px;
-    border: 1px solid transparent; /* Prepare for hover border */
+    border: 1px solid transparent;
     padding: 2px;
   }
 
@@ -540,8 +519,6 @@ const Div = styled.div`
   .com__content__right__card__item.selected .com__content__right__card__text {
     color: white;
   }
-
-  /* ... [Rest of your previous styles] ... */
 
   .com__toolbar {
     position: relative;
@@ -822,7 +799,6 @@ const Div = styled.div`
     flex-wrap: wrap;
     padding: 15px 0 0 12px;
   }
-  /* .com__content__right__card__item moved up */
   .com__content__right__card__img {
     width: 45px;
     height: 45px;

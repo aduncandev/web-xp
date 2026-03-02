@@ -3,8 +3,6 @@ import styled, { keyframes, createGlobalStyle } from 'styled-components';
 import winLogo from 'assets/windowsIcons/xplogo.png';
 import MicrosoftLogo from 'assets/windowsIcons/microsoft-logo.png';
 
-// --- GLOBAL PIXELATION ---
-// This forces images and everything else to scale without blurring
 const PixelateStyle = createGlobalStyle`
   .boot-screen-root {
     image-rendering: -moz-crisp-edges;
@@ -14,13 +12,10 @@ const PixelateStyle = createGlobalStyle`
   }
 `;
 
-// --- ANIMATIONS ---
 const loadingMove = keyframes`
   0% { left: -40px; }
   100% { left: 100%; }
 `;
-
-// --- STYLED COMPONENTS ---
 
 const BootContainer = styled.div`
   background-color: #000000;
@@ -44,7 +39,6 @@ const BootLogo = styled.img`
   width: 275px;
   height: auto;
   margin-bottom: 45px;
-  /* Ensure the logo itself doesn't get blurry if scaled */
   image-rendering: pixelated;
 `;
 
@@ -52,7 +46,6 @@ const LoadingBarContainer = styled.div`
   width: 142px;
   height: 14px;
   background-color: transparent;
-  /* Simple, chunky 2px border, no smoothing */
   border: 2px solid #b2b2b2;
   border-radius: 3px;
   overflow: hidden;
@@ -72,27 +65,23 @@ const LoadingBarProgress = styled.div`
   animation: ${loadingMove} 2s linear infinite;
 `;
 
-// The "Pixel Art" Chiclet
-// Instead of a smooth gradient, we use hard stops to create "rows" of pixels
 const Chiclet = styled.div`
   width: 10px;
   height: 100%;
-  border-radius: 1px; /* Very slight rounding */
+  border-radius: 1px;
 
-  /* Hard-stop gradient to simulate pixel rows */
   background: linear-gradient(
     to bottom,
     #adceff 0px,
     #adceff 2px,
-    /* Top highlight (2px) */ #5398e9 2px,
+    #5398e9 2px,
     #5398e9 4px,
-    /* Main body (2px) */ #2258a6 4px,
+    #2258a6 4px,
     #2258a6 9px,
-    /* Darker body (5px) */ #15366a 9px,
-    #15366a 100% /* Bottom shadow */
+    #15366a 9px,
+    #15366a 100%
   );
 
-  /* Remove the soft shadow, use a distinct border-like shadow if needed */
   box-shadow: none;
 `;
 
@@ -104,7 +93,6 @@ const CopyrightText = styled.div`
   color: #cccccc;
   letter-spacing: 0.5px;
   font-weight: 600;
-  /* Force font to look a bit sharper/aliased if possible */
   -webkit-font-smoothing: none;
 `;
 
@@ -117,8 +105,6 @@ const MicrosoftLogoBottom = styled.img`
   filter: grayscale(1) brightness(1.8);
   image-rendering: pixelated;
 `;
-
-// --- COMPONENT ---
 
 const BootScreen = () => {
   return (
@@ -136,7 +122,7 @@ const BootScreen = () => {
           <Chiclet />
         </LoadingBarProgress>
       </LoadingBarContainer>
-      <CopyrightText>Copyright © Microsoft Corporation</CopyrightText>
+      <CopyrightText>Copyright &copy; Microsoft Corporation</CopyrightText>
       <MicrosoftLogoBottom
         src={MicrosoftLogo}
         alt="Microsoft"

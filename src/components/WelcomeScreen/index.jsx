@@ -1,8 +1,6 @@
 import React from 'react';
 import styled from 'styled-components';
 
-// --- STYLED COMPONENTS ---
-
 const WelcomeContainer = styled.div`
   height: 100vh;
   width: 100vw;
@@ -41,7 +39,6 @@ const HeaderBar = styled.div`
     );
   }
 
-  /* --- FIX: Match LoginScreen scaling --- */
   @media (max-width: 768px) {
     min-height: 50px;
   }
@@ -86,7 +83,6 @@ const WelcomeText = styled.div`
   font-style: italic;
   letter-spacing: 1px;
 
-  /* Optional: Scale text slightly on mobile too so it fits the smaller layout */
   @media (max-width: 768px) {
     font-size: 2.5em;
   }
@@ -116,13 +112,10 @@ const FooterBar = styled.div`
     );
   }
 
-  /* --- FIX: Match LoginScreen scaling --- */
   @media (max-width: 768px) {
     min-height: 55px;
   }
 `;
-
-// --- COMPONENT ---
 
 const WelcomeScreen = () => {
   return (

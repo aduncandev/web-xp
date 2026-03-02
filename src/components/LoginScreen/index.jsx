@@ -6,9 +6,7 @@ import offIcon from 'assets/windowsIcons/310(32x32).png';
 import adminAvatar from 'assets/userIcons/dog.bmp';
 import arrowIcon from 'assets/windowsIcons/290.ico';
 import skillzAvatar from 'assets/userIcons/skillz.bmp';
-import errorIcon from 'assets/windowsIcons/897(16x16).png'; // Using standard error icon
-
-// --- STYLED COMPONENTS ---
+import errorIcon from 'assets/windowsIcons/897(16x16).png';
 
 const Container = styled.div`
   height: 100vh;
@@ -269,7 +267,7 @@ const UserDetails = styled.div`
 
 const PasswordSection = styled.div`
   margin-top: 4px;
-  position: relative; /* Needed for tooltip positioning */
+  position: relative;
 
   .instruction {
     font-family: 'Tahoma', sans-serif;
@@ -319,7 +317,6 @@ const PasswordSection = styled.div`
   }
 `;
 
-// --- TOOLTIP ANIMATIONS ---
 const fadeIn = keyframes`
   from { opacity: 0; transform: translateY(-5px); }
   to { opacity: 1; transform: translateY(0); }
@@ -342,7 +339,6 @@ const Tooltip = styled.div`
   color: black;
   animation: ${fadeIn} 0.2s ease-out;
 
-  /* The arrow pointing UP */
   &:before {
     content: '';
     position: absolute;
@@ -355,7 +351,6 @@ const Tooltip = styled.div`
     border-color: transparent transparent black transparent;
   }
 
-  /* The inner arrow color to mask the border */
   &:after {
     content: '';
     position: absolute;
@@ -482,8 +477,6 @@ const FooterInfo = styled.div`
   }
 `;
 
-// --- COMPONENT ---
-
 const LoginScreen = ({ onLogin, userStatus, onInitiateShutdown }) => {
   const [selectedUser, setSelectedUser] = useState(null);
   const [showAdminPasswordPrompt, setShowAdminPasswordPrompt] = useState(false);
@@ -590,7 +583,6 @@ const LoginScreen = ({ onLogin, userStatus, onInitiateShutdown }) => {
                         <img src={arrowIcon} alt="OK" />
                       </button>
                     </form>
-                    {/* --- ERROR TOOLTIP --- */}
                     {showError && (
                       <Tooltip onClick={() => setShowError(false)}>
                         <img

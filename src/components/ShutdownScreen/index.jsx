@@ -2,8 +2,6 @@ import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
 import winLogo from 'assets/windowsIcons/xplogo.png';
 
-// --- STYLED COMPONENTS ---
-
 const Container = styled.div`
   height: 100vh;
   width: 100vw;
@@ -43,7 +41,6 @@ const HeaderBar = styled.div`
     );
   }
 
-  /* --- FIX: Match Login/Welcome scaling --- */
   @media (max-width: 768px) {
     min-height: 50px;
   }
@@ -122,19 +119,15 @@ const FooterBar = styled.div`
     );
   }
 
-  /* --- FIX: Match Login/Welcome scaling --- */
   @media (max-width: 768px) {
     min-height: 55px;
   }
 `;
 
-// --- COMPONENT ---
-
 const ShutdownScreen = ({ messages = ['Windows is shutting down...'] }) => {
   const [currentMessageIndex, setCurrentMessageIndex] = useState(0);
 
   useEffect(() => {
-    // Only cycle messages if there is more than one
     if (currentMessageIndex < messages.length - 1) {
       const timer = setTimeout(() => {
         setCurrentMessageIndex(prevIndex => prevIndex + 1);
