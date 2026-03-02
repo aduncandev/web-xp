@@ -11,6 +11,7 @@ function Windows({
   onClose,
   onMinimize,
   onMaximize,
+  onSetTitle,
   focusedAppId,
 }) {
   return (
@@ -24,6 +25,7 @@ function Windows({
           onMouseUpClose={onClose}
           onMouseUpMinimize={onMinimize}
           onMouseUpMaximize={onMaximize}
+          onSetTitle={onSetTitle}
           isFocus={focusedAppId === app.id}
           {...app}
         />
@@ -39,6 +41,7 @@ const Window = memo(function({
   onMouseUpClose,
   onMouseUpMinimize,
   onMouseUpMaximize,
+  onSetTitle,
   header,
   defaultSize,
   defaultOffset,
@@ -62,6 +65,9 @@ const Window = memo(function({
   }
   function _onMouseUpMaximize() {
     if (resizable) onMouseUpMaximize(id);
+  }
+  function _onSetTitle(title) {
+    if (onSetTitle) onSetTitle(id, title);
   }
   function onDoubleClickHeader(e) {
     if (e.target !== dragRef.current) return;
@@ -144,6 +150,7 @@ const Window = memo(function({
         {component({
           onClose: _onMouseUpClose,
           onMinimize: _onMouseUpMinimize,
+          onSetTitle: _onSetTitle,
           isFocus,
           ...injectProps,
         })}

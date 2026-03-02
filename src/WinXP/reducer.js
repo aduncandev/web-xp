@@ -11,16 +11,18 @@ import {
   END_SELECT,
   POWER_OFF,
   CANCEL_POWER_OFF,
+  SET_HEADER_TITLE,
 } from './constants/actions';
 import { FOCUSING, POWER_STATE } from './constants';
-import { defaultIconState, defaultAppState } from './apps';
+import { defaultAppState } from './apps';
 
 export const initState = {
   apps: defaultAppState,
   nextAppID: defaultAppState.length,
   nextZIndex: defaultAppState.length,
   focusing: FOCUSING.WINDOW,
-  icons: defaultIconState,
+  // Icons are now VFS-backed — selectedIconIds tracks selection
+  selectedIconIds: [],
   selecting: null,
   powerState: POWER_STATE.START,
 };
@@ -66,7 +68,7 @@ export const reducer = (state, action = { type: '' }) => {
       let nextFocusing = FOCUSING.DESKTOP;
       if (remainingApps.length > 0) {
         nextFocusing = FOCUSING.WINDOW;
-      } else if (state.icons.find(icon => icon.isFocus)) {
+      } else if (state.selectedIconIds.length > 0) {
         nextFocusing = FOCUSING.ICON;
       }
       return {
@@ -96,7 +98,7 @@ export const reducer = (state, action = { type: '' }) => {
       let nextFocusing = FOCUSING.DESKTOP;
       if (openWindows.length > 0) {
         nextFocusing = FOCUSING.WINDOW;
-      } else if (state.icons.find(icon => icon.isFocus)) {
+      } else if (state.selectedIconIds.length > 0) {
         nextFocusing = FOCUSING.ICON;
       }
       return {
@@ -115,45 +117,29 @@ export const reducer = (state, action = { type: '' }) => {
         focusing: FOCUSING.WINDOW,
       };
     }
-    case FOCUS_ICON: {
-      const icons = state.icons.map(icon => ({
-        ...icon,
-        isFocus: icon.id === action.payload,
-      }));
+    case FOCUS_ICON:
       return {
         ...state,
         focusing: FOCUSING.ICON,
-        icons,
+        selectedIconIds: [action.payload],
       };
-    }
-    case SELECT_ICONS: {
-      const icons = state.icons.map(icon => ({
-        ...icon,
-        isFocus: action.payload.includes(icon.id),
-      }));
+    case SELECT_ICONS:
       return {
         ...state,
-        icons,
-        focusing: FOCUSING.ICON,
+        selectedIconIds: action.payload,
+        focusing: action.payload.length > 0 ? FOCUSING.ICON : state.focusing,
       };
-    }
     case FOCUS_DESKTOP:
       return {
         ...state,
         focusing: FOCUSING.DESKTOP,
-        icons: state.icons.map(icon => ({
-          ...icon,
-          isFocus: false,
-        })),
+        selectedIconIds: [],
       };
     case START_SELECT:
       return {
         ...state,
         focusing: FOCUSING.DESKTOP,
-        icons: state.icons.map(icon => ({
-          ...icon,
-          isFocus: false,
-        })),
+        selectedIconIds: [],
         selecting: action.payload,
       };
     case END_SELECT:
@@ -171,6 +157,14 @@ export const reducer = (state, action = { type: '' }) => {
         ...state,
         powerState: POWER_STATE.START,
       };
+    case SET_HEADER_TITLE: {
+      const apps = state.apps.map(app =>
+        app.id === action.payload.id
+          ? { ...app, header: { ...app.header, title: action.payload.title } }
+          : app,
+      );
+      return { ...state, apps };
+    }
     default:
       return state;
   }

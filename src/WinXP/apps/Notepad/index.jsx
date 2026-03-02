@@ -1,32 +1,100 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect, useCallback } from 'react';
 import styled from 'styled-components';
 
 import { WindowDropDowns } from 'components';
 import dropDownData from './dropDownData';
+import { useVFS } from '../../../context/VFSContext';
+import { useDialog } from '../../../context/DialogContext';
+import { getBaseName } from '../../../context/vfsUtils';
+import { SPECIAL_FOLDERS } from '../../../context/vfsDefaults';
 
-export default function Notepad({ onClose }) {
+const MY_DOCS_PATH = SPECIAL_FOLDERS['My Documents'];
+
+export default function Notepad({ onClose, onSetTitle, filePath: initialFilePath }) {
+  const vfs = useVFS();
+  const dialog = useDialog();
+
   const [docText, setDocText] = useState('');
   const [wordWrap, setWordWrap] = useState(false);
   const [showStatusBar, setShowStatusBar] = useState(false);
   const [cursorPos, setCursorPos] = useState({ col: 1, line: 1 });
+  const [currentFilePath, setCurrentFilePath] = useState(initialFilePath || null);
 
-  // Ref for the invisible file input
+  // Ref for the invisible file input (native File API fallback)
   const fileInputRef = useRef(null);
 
-  function onClickOptionItem(item) {
+  const getTitle = useCallback(() => {
+    if (currentFilePath) {
+      return getBaseName(currentFilePath);
+    }
+    return 'Untitled';
+  }, [currentFilePath]);
+
+  // Update window title when file path changes
+  useEffect(() => {
+    if (onSetTitle) {
+      onSetTitle(`${getTitle()} - Notepad`);
+    }
+  }, [getTitle, onSetTitle]);
+
+  // Load file from VFS on mount if filePath is provided
+  useEffect(() => {
+    if (initialFilePath) {
+      const node = vfs.readFile(initialFilePath);
+      if (node && node.type === 'file') {
+        setDocText(node.content || '');
+        setCurrentFilePath(initialFilePath);
+      }
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // Save to VFS
+  const saveToVFS = useCallback(async () => {
+    if (currentFilePath) {
+      vfs.writeFile(currentFilePath, docText);
+    } else {
+      const name = await dialog.prompt({
+        title: 'Save As',
+        message: 'Enter filename:',
+        defaultValue: 'Untitled.txt',
+      });
+      if (name) {
+        const path = `${MY_DOCS_PATH}/${name}`;
+        vfs.writeFile(path, docText);
+        setCurrentFilePath(path);
+      }
+    }
+  }, [currentFilePath, docText, vfs, dialog]);
+
+  async function onClickOptionItem(item) {
     switch (item) {
       case 'Exit':
         onClose();
         break;
       case 'New':
         setDocText('');
+        setCurrentFilePath(null);
         break;
       case 'Open...':
         fileInputRef.current.click();
         break;
       case 'Save':
+        saveToVFS();
+        break;
       case 'Save As...':
-        downloadFile();
+        {
+          const name = await dialog.prompt({
+            title: 'Save As',
+            message: 'Enter filename:',
+            defaultValue: getTitle(),
+          });
+          if (name) {
+            const path = `${MY_DOCS_PATH}/${name}`;
+            vfs.writeFile(path, docText);
+            setCurrentFilePath(path);
+          }
+        }
         break;
       case 'Word Wrap':
         setWordWrap(!wordWrap);
@@ -35,79 +103,65 @@ export default function Notepad({ onClose }) {
         setShowStatusBar(!showStatusBar);
         break;
       case 'Time/Date':
-        const date = new Date();
-        const timeString = `${date.toLocaleTimeString()} ${date.toLocaleDateString()}`;
-        // Insert at end for simplicity, or could insert at cursor
-        setDocText(prev => prev + timeString);
+        {
+          const date = new Date();
+          const timeString = `${date.toLocaleTimeString()} ${date.toLocaleDateString()}`;
+          setDocText(prev => prev + timeString);
+        }
         break;
       case 'About Notepad':
-        alert(
-          'Notepad for Windows XP\nVersion 2026 (Web Remake)\n\nCreated by you!',
-        );
+        await dialog.alert({
+          title: 'About Notepad',
+          message: 'Notepad for Windows XP\nVersion 2026 (Web Remake)\n\nCreated by you!',
+          icon: 'info',
+        });
         break;
       default:
     }
   }
 
-  // Handle file opening
   const onFileChange = event => {
     const file = event.target.files[0];
     if (file) {
       const reader = new FileReader();
       reader.onload = e => {
         setDocText(e.target.result);
+        setCurrentFilePath(null);
       };
       reader.readAsText(file);
     }
-    // Reset input so you can open the same file twice if needed
     event.target.value = null;
   };
 
-  // Handle file saving
-  const downloadFile = () => {
-    const blob = new Blob([docText], { type: 'text/plain' });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.download = 'Untitled.txt';
-    link.href = url;
-    link.click();
-    URL.revokeObjectURL(url);
-  };
-
-  // Calculate cursor position for Status Bar
   const updateCursorPos = e => {
     const val = e.target.value;
     const sel = e.target.selectionStart;
-
-    // Split text up to the selection point to count lines
     const lines = val.substr(0, sel).split('\n');
     const currentLine = lines.length;
-    // Length of the last line segment is the column
     const currentCol = lines[lines.length - 1].length + 1;
-
     setCursorPos({ line: currentLine, col: currentCol });
   };
 
   function onTextAreaKeyDown(e) {
-    // Update cursor immediately on navigation keys
     updateCursorPos(e);
 
-    // handle tabs in text area
+    if ((e.ctrlKey || e.metaKey) && e.key === 's') {
+      e.preventDefault();
+      saveToVFS();
+      return;
+    }
+
     if (e.which === 9) {
       e.preventDefault();
       e.persist();
       var start = e.target.selectionStart;
       var end = e.target.selectionEnd;
-      const newText = `${docText.substring(0, start)}\t${docText.substring(
-        end,
-      )}`;
+      const newText = `${docText.substring(0, start)}\t${docText.substring(end)}`;
       setDocText(newText);
 
-      // asynchronously update textarea selection to include tab
       requestAnimationFrame(() => {
         e.target.selectionStart = start + 1;
         e.target.selectionEnd = start + 1;
-        // Update cursor again after insertion
         updateCursorPos({
           target: { value: newText, selectionStart: start + 1 },
         });
@@ -117,7 +171,6 @@ export default function Notepad({ onClose }) {
 
   return (
     <Div>
-      {/* Hidden File Input */}
       <input
         type="file"
         ref={fileInputRef}
@@ -157,7 +210,7 @@ export default function Notepad({ onClose }) {
 
 const Div = styled.div`
   height: 100%;
-  background: #edede5; /* Solid XP gray usually better than gradient for notepad, but keep preference */
+  background: #edede5;
   display: flex;
   flex-direction: column;
   align-items: stretch;
@@ -180,7 +233,7 @@ const StyledTextarea = styled.textarea`
   ${props => (props.wordWrap ? '' : 'white-space: nowrap; overflow-x: scroll;')}
   overflow-y: scroll;
   border: 1px solid #96abff;
-  border-top: none; /* Merges slightly better with toolbar */
+  border-top: none;
 `;
 
 const StatusBar = styled.div`

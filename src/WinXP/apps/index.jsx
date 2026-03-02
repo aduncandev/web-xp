@@ -9,6 +9,7 @@ import PictoChat from './PictoChat';
 import Egg from './Egg';
 import MediaPlayer from './MediaPlayer';
 import ErrorBox from './ErrorBox';
+import RecycleBin from './RecycleBin';
 
 import MinesweeperComponent from './Minesweeper';
 import VoltorbFlipComponent from './VoltorbFlip';
@@ -37,6 +38,7 @@ import eggIcon from 'assets/windowsIcons/tree.gif';
 import eggIconLarge from 'assets/windowsIcons/tree.gif';
 import mediaPlayerIcon from 'assets/windowsIcons/846(16x16).png';
 import mediaPlayerIconLarge from 'assets/windowsIcons/846(32x32).png';
+import recycleBinIcon from 'assets/windowsIcons/302(16x16).png';
 
 const isMobileUA = () => {
   if (typeof window === 'undefined') return false;
@@ -215,6 +217,14 @@ export const defaultIconState = [
   },
   {
     id: genId(),
+    icon: recycleBinIcon,
+    title: 'Recycle Bin',
+    component: RecycleBin,
+    isFocus: false,
+    appName: 'RecycleBin',
+  },
+  {
+    id: genId(),
     icon: eggIconLarge,
     title: '???',
     component: Egg,
@@ -386,6 +396,17 @@ export const appSettings = {
     minWidth: 400,
     minHeight: 350,
   },
+  RecycleBin: {
+    name: 'RecycleBin',
+    header: { icon: recycleBinIcon, title: 'Recycle Bin' },
+    component: RecycleBin,
+    defaultSize: { width: 660, height: 500 },
+    defaultOffset: getCenter(660, 500),
+    resizable: true,
+    minimized: false,
+    maximized: shouldMaximize(660, 500, true),
+    multiInstance: false,
+  },
   MediaPlayer: {
     name: 'MediaPlayer',
     header: { icon: mediaPlayerIcon, title: 'Media Player', invisible: false },
@@ -415,4 +436,5 @@ export {
   PictoChat,
   Egg,
   MediaPlayer,
+  RecycleBin,
 };

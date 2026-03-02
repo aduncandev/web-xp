@@ -13,6 +13,8 @@ import xpShutdownSoundSrc from 'assets/sounds/xp_shutdown.wav';
 import xpErrorSoundSrc from 'assets/sounds/error.wav';
 
 import { VolumeProvider, useVolume } from './context/VolumeContext';
+import { VFSProvider } from './context/VFSContext';
+import { DialogProvider } from './context/DialogContext';
 
 function AppLogic() {
   const [screen, setScreen] = useState('boot');
@@ -180,7 +182,11 @@ function AppLogic() {
 function App() {
   return (
     <VolumeProvider>
-      <AppLogic />
+      <VFSProvider>
+        <DialogProvider>
+          <AppLogic />
+        </DialogProvider>
+      </VFSProvider>
     </VolumeProvider>
   );
 }

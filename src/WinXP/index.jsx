@@ -1,4 +1,4 @@
-import React, { useReducer, useRef, useCallback, useEffect } from 'react';
+import React, { useReducer, useRef, useCallback, useEffect, useState } from 'react';
 import styled, { keyframes } from 'styled-components';
 import useMouse from 'react-use/lib/useMouse';
 
@@ -15,6 +15,7 @@ import {
   END_SELECT,
   POWER_OFF,
   CANCEL_POWER_OFF,
+  SET_HEADER_TITLE,
 } from './constants/actions';
 import { FOCUSING, POWER_STATE } from './constants';
 import { appSettings } from './apps';
@@ -24,11 +25,15 @@ import Footer from './Footer';
 import Windows from './Windows';
 import Icons from './Icons';
 import { DashedBox } from 'components';
+import ContextMenu from 'components/ContextMenu';
 
 import xpLogoffSoundSrc from 'assets/sounds/xp_logoff.wav';
 import xpShutdownSoundSrc from 'assets/sounds/xp_shutdown.wav';
 import wallpaper from 'assets/windowsIcons/wallpaper.jpeg';
 import { useVolume } from '../context/VolumeContext';
+import { useVFS } from '../context/VFSContext';
+import { SPECIAL_FOLDERS } from '../context/vfsDefaults';
+import { normalizePath, generateUniqueName, getMimeType } from '../context/vfsUtils';
 
 const playSound = (soundSrc, applyVolume) => {
   if (!soundSrc) return;
@@ -51,12 +56,16 @@ const isMobile = () => {
   );
 };
 
+const DESKTOP_PATH = SPECIAL_FOLDERS['Desktop'];
+
 function WinXP({ onLogoff, onShutdown, onRestart, onSwitchUser }) {
   const [state, dispatch] = useReducer(reducer, initState);
   const ref = useRef(null);
   const mouse = useMouse(ref);
+  const [desktopMenu, setDesktopMenu] = useState(null);
 
   const { applyVolume } = useVolume();
+  const vfs = useVFS();
 
   const playSoundWithVolume = useCallback(
     soundSrc => {
@@ -92,6 +101,186 @@ function WinXP({ onLogoff, onShutdown, onRestart, onSwitchUser }) {
     }
   }, []);
 
+  const onOpenFile = useCallback(
+    filePath => {
+      const appName = vfs.getAssociatedApp(filePath);
+      const setting = appSettings[appName];
+      if (setting) {
+        dispatch({
+          type: ADD_APP,
+          payload: {
+            ...setting,
+            injectProps: { filePath },
+            multiInstance: true,
+          },
+        });
+      } else {
+        dispatch({
+          type: ADD_APP,
+          payload: {
+            ...appSettings.Notepad,
+            injectProps: { filePath },
+            multiInstance: true,
+          },
+        });
+      }
+    },
+    [vfs],
+  );
+
+  // --- Launch an app by name (used for shortcuts) ---
+  const launchApp = useCallback(
+    (appName, extraProps = {}) => {
+      const setting = appSettings[appName];
+      if (setting) {
+        const payload = appName === 'My Computer'
+          ? { ...setting, injectProps: { onOpenFile, onLaunchApp: launchApp, ...extraProps } }
+          : { ...setting, injectProps: extraProps };
+        dispatch({ type: ADD_APP, payload });
+      } else {
+        dispatch({
+          type: ADD_APP,
+          payload: {
+            ...appSettings.Error,
+            injectProps: {
+              message: `C:\\\nApplication '${appName}' not found`,
+            },
+          },
+        });
+      }
+    },
+    [onOpenFile],
+  );
+
+  // --- Desktop-level file drop from OS ---
+  const handleDesktopDragOver = useCallback(e => {
+    e.preventDefault();
+  }, []);
+
+  const handleDesktopDrop = useCallback(e => {
+    if (e.target !== e.currentTarget) return;
+    e.preventDefault();
+
+    // Handle VFS internal drag (from My Computer explorer → desktop)
+    const pathsJson = e.dataTransfer.getData('application/vfs-paths');
+    const vfsPaths = pathsJson ? JSON.parse(pathsJson) : [];
+    if (vfsPaths.length === 0) {
+      const single = e.dataTransfer.getData('application/vfs-path');
+      if (single) vfsPaths.push(single);
+    }
+    if (vfsPaths.length > 0) {
+      const operation = e.dataTransfer.getData('application/vfs-operation') || 'move';
+      for (const srcPath of vfsPaths) {
+        if (srcPath.startsWith(normalizePath(DESKTOP_PATH) + '/')) continue; // already on desktop
+        const srcNode = vfs.readFile(srcPath);
+        if (!srcNode) continue;
+        const destName = generateUniqueName(vfs.fs, DESKTOP_PATH, srcNode.name);
+        const destPath = normalizePath(`${DESKTOP_PATH}/${destName}`);
+        if (srcNode.type === 'file') {
+          vfs.writeFile(destPath, srcNode.content || '', srcNode.mimeType);
+        } else {
+          vfs.copyTree(srcPath, destPath);
+        }
+        if (operation === 'move') {
+          vfs.deleteNode(srcPath);
+        }
+      }
+      return;
+    }
+
+    // Handle OS file drop
+    if (!e.dataTransfer.files || e.dataTransfer.files.length === 0) return;
+    Array.from(e.dataTransfer.files).forEach(file => {
+      const reader = new FileReader();
+      const isText = file.type.startsWith('text/') || /\.(txt|log|ini|cfg|html?|css|js|json|xml|csv|md)$/i.test(file.name);
+      const mimeType = file.type || getMimeType(file.name);
+      if (isText) {
+        reader.onload = ev => {
+          const name = generateUniqueName(vfs.fs, DESKTOP_PATH, file.name);
+          vfs.writeFile(normalizePath(`${DESKTOP_PATH}/${name}`), ev.target.result, mimeType);
+        };
+        reader.readAsText(file);
+      } else {
+        reader.onload = ev => {
+          const name = generateUniqueName(vfs.fs, DESKTOP_PATH, file.name);
+          vfs.writeFile(normalizePath(`${DESKTOP_PATH}/${name}`), ev.target.result, mimeType);
+        };
+        reader.readAsArrayBuffer(file);
+      }
+    });
+  }, [vfs]);
+
+  const handleDesktopNewFolder = useCallback(() => {
+    const name = generateUniqueName(vfs.fs, DESKTOP_PATH, 'New Folder');
+    vfs.createDir(normalizePath(`${DESKTOP_PATH}/${name}`));
+  }, [vfs]);
+
+  const handleDesktopNewTextFile = useCallback(() => {
+    const name = generateUniqueName(vfs.fs, DESKTOP_PATH, 'New Text Document.txt');
+    vfs.writeFile(normalizePath(`${DESKTOP_PATH}/${name}`), '');
+  }, [vfs]);
+
+  const handleDesktopContextMenu = useCallback(
+    e => {
+      if (e.target !== e.currentTarget) return;
+      e.preventDefault();
+      setDesktopMenu({ x: e.clientX, y: e.clientY });
+    },
+    [],
+  );
+
+  // Handle double-click on VFS desktop file/directory (non-shortcut)
+  const onDoubleClickDesktopFile = useCallback(
+    filePath => {
+      const node = vfs.readFile(filePath);
+      if (!node) return;
+      if (node.type === 'directory') {
+        dispatch({
+          type: ADD_APP,
+          payload: {
+            ...appSettings['My Computer'],
+            injectProps: { onOpenFile, onLaunchApp: launchApp, initialPath: filePath },
+            multiInstance: true,
+          },
+        });
+      } else {
+        onOpenFile(filePath);
+      }
+    },
+    [vfs, onOpenFile, launchApp],
+  );
+
+  // Handle double-click on a shortcut → resolve to app
+  const onDoubleClickShortcut = useCallback(
+    (targetAppName, shortcutPath) => {
+      const node = shortcutPath ? vfs.readFile(shortcutPath) : null;
+      const extraProps = node?.targetArgs || {};
+
+      // Check if the target is a VFS path (directory or file)
+      if (targetAppName && vfs.exists(targetAppName)) {
+        const targetNode = vfs.readFile(targetAppName);
+        if (targetNode?.type === 'directory') {
+          dispatch({
+            type: ADD_APP,
+            payload: {
+              ...appSettings['My Computer'],
+              injectProps: { onOpenFile, initialPath: targetAppName },
+              multiInstance: true,
+            },
+          });
+          return;
+        } else if (targetNode) {
+          onOpenFile(targetAppName);
+          return;
+        }
+      }
+
+      // Otherwise treat as app name
+      launchApp(targetAppName, extraProps);
+    },
+    [vfs, onOpenFile, launchApp],
+  );
+
   const onFocusApp = useCallback(
     id => dispatch({ type: FOCUS_APP, payload: id }),
     [],
@@ -108,6 +297,10 @@ function WinXP({ onLogoff, onShutdown, onRestart, onSwitchUser }) {
     id => dispatch({ type: DEL_APP, payload: id }),
     [],
   );
+  const onSetTitle = useCallback(
+    (id, title) => dispatch({ type: SET_HEADER_TITLE, payload: { id, title } }),
+    [],
+  );
 
   function onMouseDownFooterApp(id) {
     const app = state.apps.find(a => a.id === id);
@@ -120,17 +313,6 @@ function WinXP({ onLogoff, onShutdown, onRestart, onSwitchUser }) {
     }
   }
 
-  function onMouseDownIcon(id) {
-    dispatch({ type: FOCUS_ICON, payload: id });
-  }
-  function onDoubleClickIcon(component) {
-    const appSetting = Object.values(appSettings).find(
-      setting => setting.component === component,
-    );
-    if (appSetting) {
-      dispatch({ type: ADD_APP, payload: appSetting });
-    }
-  }
   function onMouseDownFooter() {
     dispatch({ type: FOCUS_DESKTOP });
   }
@@ -138,37 +320,37 @@ function WinXP({ onLogoff, onShutdown, onRestart, onSwitchUser }) {
   function onClickMenuItem(itemName) {
     switch (itemName) {
       case 'Internet':
-        dispatch({ type: ADD_APP, payload: appSettings['Internet Explorer'] });
+        launchApp('Internet Explorer');
         break;
       case 'Minesweeper':
-        dispatch({ type: ADD_APP, payload: appSettings.Minesweeper });
+        launchApp('Minesweeper');
         break;
       case 'My Computer':
-        dispatch({ type: ADD_APP, payload: appSettings['My Computer'] });
+        launchApp('My Computer');
         break;
       case 'Notepad':
-        dispatch({ type: ADD_APP, payload: appSettings.Notepad });
+        launchApp('Notepad');
         break;
       case 'Winamp':
-        dispatch({ type: ADD_APP, payload: appSettings.Winamp });
+        launchApp('Winamp');
         break;
       case 'Paint':
-        dispatch({ type: ADD_APP, payload: appSettings.Paint });
+        launchApp('Paint');
         break;
       case 'About Me':
-        dispatch({ type: ADD_APP, payload: appSettings.AboutMe });
+        launchApp('AboutMe');
         break;
       case 'Voltorb Flip':
-        dispatch({ type: ADD_APP, payload: appSettings.VoltorbFlip });
+        launchApp('VoltorbFlip');
         break;
       case 'Pinball':
-        dispatch({ type: ADD_APP, payload: appSettings.Pinball });
+        launchApp('Pinball');
         break;
       case 'PictoChat':
-        dispatch({ type: ADD_APP, payload: appSettings.PictoChat });
+        launchApp('PictoChat');
         break;
       case 'Media Player':
-        dispatch({ type: ADD_APP, payload: appSettings.MediaPlayer });
+        launchApp('MediaPlayer');
         break;
       case 'Log Off':
         dispatch({ type: POWER_OFF, payload: POWER_STATE.LOG_OFF });
@@ -177,19 +359,25 @@ function WinXP({ onLogoff, onShutdown, onRestart, onSwitchUser }) {
         dispatch({ type: POWER_OFF, payload: POWER_STATE.TURN_OFF });
         break;
       default:
-        dispatch({
-          type: ADD_APP,
-          payload: {
-            ...appSettings.Error,
-            injectProps: {
-              message: `C:\\\nApplication '${itemName}' not found`,
+        // Try to launch by appName directly (for VFS-based Start Menu)
+        if (appSettings[itemName]) {
+          launchApp(itemName);
+        } else {
+          dispatch({
+            type: ADD_APP,
+            payload: {
+              ...appSettings.Error,
+              injectProps: {
+                message: `C:\\\nApplication '${itemName}' not found`,
+              },
             },
-          },
-        });
+          });
+        }
     }
   }
 
   function onMouseDownDesktop(e) {
+    setDesktopMenu(null);
     if (e.target === e.currentTarget) {
       dispatch({ type: FOCUS_DESKTOP });
       dispatch({
@@ -219,20 +407,16 @@ function WinXP({ onLogoff, onShutdown, onRestart, onSwitchUser }) {
         if (onSwitchUser) onSwitchUser();
         dispatch({ type: CANCEL_POWER_OFF });
       } else {
-        // Cancel
         dispatch({ type: CANCEL_POWER_OFF });
       }
     } else if (state.powerState === POWER_STATE.TURN_OFF) {
       if (buttonText === 'Turn Off') {
         playSoundWithVolume(xpShutdownSoundSrc);
         if (onShutdown) onShutdown();
-        // No CANCEL_POWER_OFF here, App.js handles screen change
       } else if (buttonText === 'Restart') {
         playSoundWithVolume(xpShutdownSoundSrc);
         if (onRestart) onRestart();
-        // No CANCEL_POWER_OFF here
       } else {
-        // Cancel or Stand By
         dispatch({ type: CANCEL_POWER_OFF });
       }
     } else {
@@ -249,17 +433,19 @@ function WinXP({ onLogoff, onShutdown, onRestart, onSwitchUser }) {
       ref={ref}
       onMouseUp={onMouseUpDesktop}
       onMouseDown={onMouseDownDesktop}
+      onContextMenu={handleDesktopContextMenu}
+      onDragOver={handleDesktopDragOver}
+      onDrop={handleDesktopDrop}
       state={state.powerState}
     >
       <Icons
-        icons={state.icons}
-        onMouseDown={onMouseDownIcon}
-        onDoubleClick={onDoubleClickIcon}
+        onDoubleClickShortcut={onDoubleClickShortcut}
+        onDoubleClickDesktopFile={onDoubleClickDesktopFile}
         displayFocus={state.focusing === FOCUSING.ICON}
-        appSettings={appSettings}
         mouse={mouse}
         selecting={state.selecting}
         setSelectedIcons={onIconsSelected}
+        vfs={vfs}
       />
       <DashedBox startPos={state.selecting} mouse={mouse} />
       <Windows
@@ -268,6 +454,7 @@ function WinXP({ onLogoff, onShutdown, onRestart, onSwitchUser }) {
         onClose={onCloseApp}
         onMinimize={onMinimizeWindow}
         onMaximize={onMaximizeWindow}
+        onSetTitle={onSetTitle}
         focusedAppId={focusedAppId}
       />
       <Footer
@@ -282,6 +469,31 @@ function WinXP({ onLogoff, onShutdown, onRestart, onSwitchUser }) {
           onClose={onModalClose}
           onClickButton={onClickModalButton}
           mode={state.powerState}
+        />
+      )}
+      {desktopMenu && (
+        <ContextMenu
+          position={{ x: desktopMenu.x, y: desktopMenu.y }}
+          onClose={() => setDesktopMenu(null)}
+          items={[
+            { type: 'submenu', label: 'Arrange Icons By', items: [
+              { type: 'item', label: 'Name', onClick: () => {} },
+              { type: 'item', label: 'Size', onClick: () => {} },
+              { type: 'item', label: 'Type', onClick: () => {} },
+              { type: 'item', label: 'Modified', onClick: () => {} },
+              { type: 'separator' },
+              { type: 'item', label: 'Auto Arrange', checked: true, onClick: () => {} },
+            ] },
+            { type: 'item', label: 'Refresh', onClick: () => {} },
+            { type: 'separator' },
+            { type: 'submenu', label: 'New', items: [
+              { type: 'item', label: 'Folder', onClick: handleDesktopNewFolder },
+              { type: 'separator' },
+              { type: 'item', label: 'Text Document', onClick: handleDesktopNewTextFile },
+            ] },
+            { type: 'separator' },
+            { type: 'item', label: 'Properties', disabled: true },
+          ]}
         />
       )}
     </Container>
