@@ -9,16 +9,13 @@ import characterMap from 'assets/windowsIcons/127(16x16).png';
 import cleanDisk from 'assets/windowsIcons/128(16x16).png';
 import wordPad from 'assets/windowsIcons/153(16x16).png';
 import winExplorer from 'assets/windowsIcons/156(16x16).png';
-import MSN from 'assets/windowsIcons/159(16x16).png';
 import sync from 'assets/windowsIcons/182(16x16).png';
 import security from 'assets/windowsIcons/214(16x16).png';
 import access from 'assets/windowsIcons/227(16x16).png';
 import wireless from 'assets/windowsIcons/234(16x16).png';
 import accessibility from 'assets/windowsIcons/238(16x16).png';
-import connection from 'assets/windowsIcons/309(16x16).png';
 import update from 'assets/windowsIcons/322(16x16).png';
 import notepad from 'assets/windowsIcons/327(16x16).png';
-import networkAssistance from 'assets/windowsIcons/357(16x16).png';
 import menu from 'assets/windowsIcons/358(16x16).png';
 import transfer from 'assets/windowsIcons/367(16x16).png';
 import defragmenter from 'assets/windowsIcons/374(16x16).png';
@@ -54,24 +51,40 @@ import narrator from 'assets/windowsIcons/narrator.ico';
 import pinball from 'assets/windowsIcons/pinball.png';
 import restore from 'assets/windowsIcons/restore.ico';
 import mine from 'assets/minesweeper/mine-icon.png';
+import winamp from 'assets/windowsIcons/winamp.png';
+import voltorbflip from 'assets/windowsIcons/voltorb.png';
+
+import aboutMeIcon from 'assets/windowsIcons/676(16x16).png';
+
+import { EXE_PATHS } from '../../context/vfsConstants';
+
+// 16px icons for Start Menu program rows keyed by executable path
+// (small-icon mode and pinned/MFU fallbacks). Programs without an entry
+// fall back to their PROGRAMS registry header icon.
+export const PROGRAM_ICONS_16 = {
+  [EXE_PATHS.IEXPLORE]: ie,
+  'C:/Program Files/Outlook Express/msimn.exe': outlook,
+  [EXE_PATHS.WINMINE]: mine,
+  [EXE_PATHS.NOTEPAD]: notepad,
+  [EXE_PATHS.WINAMP]: winamp,
+  [EXE_PATHS.MSPAINT]: painter,
+  [EXE_PATHS.WMPLAYER]: mediaPlayer,
+  [EXE_PATHS.MPLAYER2]: mediaPlayer,
+  [EXE_PATHS.CMD]: cmd,
+  [EXE_PATHS.PINBALL]: pinball,
+  [EXE_PATHS.VOLTORB]: voltorbflip,
+  [EXE_PATHS.TOUR]: aboutMeIcon,
+  [EXE_PATHS.EXPLORER]: winExplorer,
+  'C:/WINDOWS/system32/calc.exe': calculator,
+  'C:/WINDOWS/system32/sol.exe': solitaire,
+  'C:/Program Files/Windows NT/Accessories/wordpad.exe': wordPad,
+};
 
 export const MyRecentDocuments = [
   {
     type: 'item',
     icon: empty,
     text: '(Empty)',
-  },
-];
-export const ConnectTo = [
-  {
-    type: 'item',
-    icon: MSN,
-    text: 'MSN',
-  },
-  {
-    type: 'item',
-    icon: connection,
-    text: 'Show all connections',
   },
 ];
 export const AllPrograms = [
@@ -184,6 +197,7 @@ export const AllPrograms = [
             type: 'item',
             icon: mediaPlayer,
             text: 'Windows Media Player',
+            action: 'Media Player',
           },
         ],
       },
@@ -357,6 +371,11 @@ export const AllPrograms = [
         icon: spider,
         text: 'Spider Solitaire',
       },
+      {
+        type: 'item',
+        icon: voltorbflip,
+        text: 'Voltorb Flip',
+      },
     ],
   },
   {
@@ -383,13 +402,14 @@ export const AllPrograms = [
   },
   {
     type: 'item',
-    icon: networkAssistance,
-    text: 'Remote Assistance',
+    icon: aboutMeIcon,
+    text: 'About Me',
   },
   {
     type: 'item',
     icon: mediaPlayer,
     text: 'Windows Media Player',
+    action: 'Media Player',
   },
   {
     type: 'item',
@@ -400,5 +420,10 @@ export const AllPrograms = [
     type: 'item',
     icon: movieMaker,
     text: 'Windows Movie Maker',
+  },
+  {
+    type: 'item',
+    icon: winamp,
+    text: 'Winamp',
   },
 ];

@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16">
+  <rect x="0.5" y="0.5" width="15" height="15" rx="1.5" fill="#0a2f0a" stroke="#4c5a4c"/>
+  <rect x="2" y="2" width="12" height="12" fill="#000000"/>
+  <g stroke="#005f00" stroke-width="1">
+    <line x1="2" y1="5" x2="14" y2="5"/>
+    <line x1="2" y1="8" x2="14" y2="8"/>
+    <line x1="2" y1="11" x2="14" y2="11"/>
+  </g>
+  <g fill="#22cc22">
+    <rect x="3" y="9" width="2" height="5"/>
+    <rect x="6" y="6" width="2" height="8"/>
+    <rect x="9" y="3" width="2" height="11"/>
+    <rect x="12" y="7" width="2" height="7"/>
+  </g>
+  <polyline points="2,10 5,8 8,9 11,4 14,6" fill="none" stroke="#66ff66" stroke-width="1"/>
+</svg>

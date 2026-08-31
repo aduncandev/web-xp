@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" type="text/css" href="main.css">
+    <link rel="stylesheet" type="text/css" href="animate.css">
+    <base href="/voltorb_flip/">
+    <link rel="shortcut icon" href="favicon.co">
+    <title>Voltorb Flip</title>
+</head>
+
+<body>
+
+
+    <!-- ... (rest of your game HTML, unchanged) ... -->
+    <div class="score-container">
+        <div class="level-container">Level: <span id="level">1</span></div>
+        <div class="total-coins">Total Coins: <span id="total-coins">00000</span></div>
+        <div class="current-coins">Coins collected this level: <span id="current-coins">00000</span></div>
+    </div>
+    <div class="game-container">
+        <div class="game-row">
+            <div class="board-container">
+                <div class="board-row">
+                    <div class="tile">
+                        <div class="tile_face tile_front"></div>
+                        <div class="tile_face tile_back"></div>
+                    </div>
+                    <div class="tile">
+                        <div class="tile_face tile_front"></div>
+                        <div class="tile_face tile_back"></div>
+                    </div>
+                    <div class="tile">
+                        <div class="tile_face tile_front"></div>
+                        <div class="tile_face tile_back"></div>
+                    </div>
+                    <div class="tile">
+                        <div class="tile_face tile_front"></div>
+                        <div class="tile_face tile_back"></div>
+                    </div>
+                    <div class="tile">
+                        <div class="tile_face tile_front"></div>
+                        <div class="tile_face tile_back"></div>
+                    </div>
+                </div>
+                <div class="board-row">
+                    <div class="tile">
+                        <div class="tile_face tile_front"></div>
+                        <div class="tile_face tile_back"></div>
+                    </div>
+                    <div class="tile">
+                        <div class="tile_face tile_front"></div>
+                        <div class="tile_face tile_back"></div>
+                    </div>
+                    <div class="tile">
+                        <div class="tile_face tile_front"></div>
+                        <div class="tile_face tile_back"></div>
+                    </div>
+                    <div class="tile">
+                        <div class="tile_face tile_front"></div>
+                        <div class="tile_face tile_back"></div>
+                    </div>
+                    <div class="tile">
+                        <div class="tile_face tile_front"></div>
+                        <div class="tile_face tile_back"></div>
+                    </div>
+                </div>
+                <div class="board-row">
+                    <div class="tile">
+                        <div class="tile_face tile_front"></div>
+                        <div class="tile_face tile_back"></div>
+                    </div>
+                    <div class="tile">
+                        <div class="tile_face tile_front"></div>
+                        <div class="tile_face tile_back"></div>
+                    </div>
+                    <div class="tile">
+                        <div class="tile_face tile_front"></div>
+                        <div class="tile_face tile_back"></div>
+                    </div>
+                    <div class="tile">
+                        <div class="tile_face tile_front"></div>
+                        <div class="tile_face tile_back"></div>
+                    </div>
+                    <div class="tile">
+                        <div class="tile_face tile_front"></div>
+                        <div class="tile_face tile_back"></div>
+                    </div>
+                </div>
+                <div class="board-row">
+                    <div class="tile">
+                        <div class="tile_face tile_front"></div>
+                        <div class="tile_face tile_back"></div>
+                    </div>
+                    <div class="tile">
+                        <div class="tile_face tile_front"></div>
+                        <div class="tile_face tile_back"></div>
+                    </div>
+                    <div class="tile">
+                        <div class="tile_face tile_front"></div>
+                        <div class="tile_face tile_back"></div>
+                    </div>
+                    <div class="tile">
+                        <div class="tile_face tile_front"></div>
+                        <div class="tile_face tile_back"></div>
+                    </div>
+                    <div class="tile">
+                        <div class="tile_face tile_front"></div>
+                        <div class="tile_face tile_back"></div>
+                    </div>
+                </div>
+                <div class="board-row">
+                    <div class="tile">
+                        <div class="tile_face tile_front"></div>
+                        <div class="tile_face tile_back"></div>
+                    </div>
+                    <div class="tile">
+                        <div class="tile_face tile_front"></div>
+                        <div class="tile_face tile_back"></div>
+                    </div>
+                    <div class="tile">
+                        <div class="tile_face tile_front"></div>
+                        <div class="tile_face tile_back"></div>
+                    </div>
+                    <div class="tile">
+                        <div class="tile_face tile_front"></div>
+                        <div class="tile_face tile_back"></div>
+                    </div>
+                    <div class="tile">
+                        <div class="tile_face tile_front"></div>
+                        <div class="tile_face tile_back"></div>
+                    </div>
+                </div>
+                <div class="game-message hidden"></div>
+            </div>
+
+            <div class="info_container info_rows">
+                <div class="info info-1">
+                    <div class="info_points"></div>
+                    <div class="info_bombs"></div>
+                </div>
+                <div class="info info-2">
+                    <div class="info_points"></div>
+                    <div class="info_bombs"></div>
+                </div>
+                <div class="info info-3">
+                    <div class="info_points"></div>
+                    <div class="info_bombs"></div>
+                </div>
+                <div class="info info-4">
+                    <div class="info_points"></div>
+                    <div class="info_bombs"></div>
+                </div>
+                <div class="info info-5">
+                    <div class="info_points"></div>
+                    <div class="info_bombs"></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="game-row">
+            <div class="info_container info_cols">
+                <div class="info info-1">
+                    <div class="info_points"></div>
+                    <div class="info_bombs"></div>
+                </div>
+                <div class="info info-2">
+                    <div class="info_points"></div>
+                    <div class="info_bombs"></div>
+                </div>
+                <div class="info info-3">
+                    <div class="info_points"></div>
+                    <div class="info_bombs"></div>
+                </div>
+                <div class="info info-4">
+                    <div class="info_points"></div>
+                    <div class="info_bombs"></div>
+                </div>
+                <div class="info info-5">
+                    <div class="info_points"></div>
+                    <div class="info_bombs"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="code/jquery-3.3.1.min.js"></script>
+    <script src="code/chance.min.js"></script>
+    <script src="code/levels.js"></script>
+    <script src="code/info.js"></script>
+    <script src="code/tile.js"></script>
+    <script src="code/board.js"></script>
+    <script src="code/htmlManager.js"></script>
+    <script src="code/gameManager.js"></script>
+    <script src="code/application.js"></script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // Music: a gapless Web Audio loop — the old <audio loop> element
+            // dropped a beat of silence every lap of the Game Corner theme.
+            // The parent window drives everything by postMessage, unchanged:
+            // VOLTORB_FLIP_FOCUS_CHANGE fades the music in/out and
+            // VOLTORB_FLIP_VOLUME_CHANGE carries the mixer volume, which the
+            // game's sound effects also read via window.vfSfxVolume.
+            const MAX_GAME_VOLUME = 0.25; // music sits under the SFX
+            let parentVolume = 0.5;
+            let globalMuted = false;
+            let isCurrentlyFocused = false;
+            window.vfSfxVolume = parentVolume;
+
+            let ctx = null;
+            let gain = null;
+            const ensureMusic = () => {
+                if (ctx) return;
+                const Ctx = window.AudioContext || window.webkitAudioContext;
+                if (!Ctx) return;
+                ctx = new Ctx();
+                gain = ctx.createGain();
+                gain.gain.value = 0;
+                gain.connect(ctx.destination);
+                fetch('voltorbflipsounds/gamecorner.mp3')
+                    .then(r => r.arrayBuffer())
+                    .then(b => ctx.decodeAudioData(b))
+                    .then(buffer => {
+                        const source = ctx.createBufferSource();
+                        source.buffer = buffer;
+                        source.loop = true;
+                        source.connect(gain);
+                        source.start(0);
+                    })
+                    .catch(() => {});
+            };
+            const resumeMusic = () => {
+                if (ctx && ctx.state === 'suspended') ctx.resume().catch(() => {});
+            };
+            // The autoplay policy holds the context until a gesture lands in
+            // THIS document; the first click or key inside the game frees it.
+            ['pointerdown', 'keydown'].forEach(evt =>
+                window.addEventListener(evt, () => { ensureMusic(); resumeMusic(); }, true));
+
+            const fadeTo = target => {
+                ensureMusic();
+                if (!gain) return;
+                if (target > 0) resumeMusic();
+                gain.gain.setTargetAtTime(target, ctx.currentTime, 0.08);
+            };
+            const musicTarget = () =>
+                isCurrentlyFocused && !globalMuted ? parentVolume * MAX_GAME_VOLUME : 0;
+
+            function handleFocusChange(focused) {
+                isCurrentlyFocused = focused;
+                fadeTo(musicTarget());
+            }
+
+            let currentExpectedParentOrigin = '*';
+            if (document.referrer && document.referrer !== "") {
+                try {
+                    currentExpectedParentOrigin = new URL(document.referrer).origin;
+                } catch (e) {
+                    currentExpectedParentOrigin = '*';
+                }
+            } else if (window.location.ancestorOrigins && window.location.ancestorOrigins.length > 0) {
+                currentExpectedParentOrigin = window.location.ancestorOrigins[0];
+            }
+
+            window.addEventListener('message', (event) => {
+                if (currentExpectedParentOrigin !== '*' && event.origin !== currentExpectedParentOrigin) {
+                    return;
+                }
+                const d = event.data;
+                if (!d || typeof d !== 'object') return;
+                if (d.type === 'VOLTORB_FLIP_FOCUS_CHANGE' && typeof d.focused === 'boolean') {
+                    handleFocusChange(d.focused);
+                } else if (d.type === 'VOLTORB_FLIP_VOLUME_CHANGE') {
+                    if (typeof d.volume === 'number') parentVolume = d.volume;
+                    if (typeof d.muted === 'boolean') globalMuted = d.muted;
+                    window.vfSfxVolume = globalMuted ? 0 : parentVolume;
+                    fadeTo(musicTarget());
+                }
+            });
+
+            if (window.parent && window.parent !== window) {
+                window.parent.postMessage({ type: 'VOLTORB_FLIP_IFRAME_READY' }, currentExpectedParentOrigin);
+            } else {
+                // Local fallback outside the site
+                if (document.hasFocus()) handleFocusChange(true);
+                window.addEventListener('focus', () => handleFocusChange(true));
+                window.addEventListener('blur', () => handleFocusChange(false));
+            }
+        });
+    </script>
+</body>
+
+</html>
+

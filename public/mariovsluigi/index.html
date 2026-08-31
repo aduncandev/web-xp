@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en-us">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <title>NSMB-MarioVsLuigi</title>
+    <script>
+      // The XP mixer's reach extends into Unity: every AudioContext the
+      // engine creates gets a hidden master GainNode spliced in front of
+      // its destination, and the parent window drives that gain with
+      // MVL_VOLUME messages (master volume x Wave channel). Patched before
+      // the Unity loader runs so the engine's context is born wrapped.
+      (function () {
+        var masterGains = [];
+        var currentVolume = 1;
+        function wrap(Ctx) {
+          if (!Ctx) return Ctx;
+          function Wrapped() {
+            var ctx = arguments.length
+              ? new Ctx(arguments[0])
+              : new Ctx();
+            try {
+              var real = ctx.destination;
+              var gain = ctx.createGain();
+              gain.gain.value = currentVolume;
+              gain.connect(real);
+              Object.defineProperty(ctx, 'destination', {
+                value: gain,
+                configurable: true,
+              });
+              masterGains.push({ ctx: ctx, gain: gain });
+            } catch (e) {
+              /* if the splice fails, audio still works, just unmixed */
+            }
+            return ctx;
+          }
+          Wrapped.prototype = Ctx.prototype;
+          return Wrapped;
+        }
+        window.AudioContext = wrap(window.AudioContext);
+        window.webkitAudioContext = wrap(window.webkitAudioContext);
+        window.addEventListener('message', function (event) {
+          if (event.origin !== window.location.origin) return;
+          var d = event.data;
+          if (!d || d.type !== 'MVL_VOLUME' || typeof d.volume !== 'number')
+            return;
+          currentVolume = Math.min(1, Math.max(0, d.volume));
+          for (var i = 0; i < masterGains.length; i++) {
+            var g = masterGains[i];
+            g.gain.gain.setTargetAtTime(
+              currentVolume,
+              g.ctx.currentTime,
+              0.03
+            );
+          }
+        });
+      })();
+    </script>
+    <style>
+      /* Full-bleed shell: the game canvas always fills whatever size the
+         hosting window gives the iframe, and follows every resize. Unity's
+         loader keeps the WebGL backing store matched to the canvas's CSS
+         size, so resizing stays crisp. */
+      html, body {
+        margin: 0;
+        padding: 0;
+        width: 100%;
+        height: 100%;
+        overflow: hidden;
+        background: #000;
+      }
+      #unity-canvas {
+        position: absolute;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+        background: #000;
+        outline: none;
+      }
+
+      /* Loading screen in the language of the machine it lives on: the
+         game's icon over the XP Luna progress bar — white capsule track
+         with the #7f9db9 ring the site's own dialogs use, filling with
+         green 8px chiclets as Unity actually loads. */
+      #loading {
+        position: absolute;
+        inset: 0;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 30px;
+        background: #000;
+      }
+      #loading img {
+        width: 96px;
+        height: 96px;
+        image-rendering: pixelated;
+      }
+      #bar {
+        width: 280px;
+        height: 16px;
+        box-sizing: border-box;
+        padding: 1px;
+        border: 1px solid #7f9db9;
+        border-radius: 2px;
+        background: #fff;
+      }
+      #fill {
+        display: block;
+        width: 0%;
+        height: 100%;
+        transition: width 150ms linear;
+        background: repeating-linear-gradient(
+            to right,
+            transparent 0 8px,
+            #fff 8px 10px
+          ),
+          linear-gradient(
+            180deg,
+            #9be89b 0%,
+            #58d858 18%,
+            #2fb92f 50%,
+            #58d858 82%,
+            #9be89b 100%
+          );
+      }
+      #status {
+        min-height: 16px;
+        color: #b2b2b2;
+        font: 12px Tahoma, sans-serif;
+        text-align: center;
+        max-width: 80%;
+      }
+    </style>
+  </head>
+  <body>
+    <canvas id="unity-canvas" width="960" height="540" tabindex="-1"></canvas>
+    <div id="loading">
+      <img src="TemplateData/game-icon.png" alt="">
+      <div id="bar"><span id="fill"></span></div>
+      <div id="status"></div>
+    </div>
+    <script src="Build/MarioVsLuigi-WebGL.loader.js"></script>
+    <script>
+      var canvas = document.querySelector("#unity-canvas");
+      var loading = document.querySelector("#loading");
+      var status = document.querySelector("#status");
+      var fill = document.querySelector("#fill");
+
+      createUnityInstance(canvas, {
+        arguments: [],
+        dataUrl: "Build/MarioVsLuigi-WebGL.data.unityweb",
+        frameworkUrl: "Build/MarioVsLuigi-WebGL.framework.js.unityweb",
+        codeUrl: "Build/MarioVsLuigi-WebGL.wasm.unityweb",
+        streamingAssetsUrl: "StreamingAssets",
+        companyName: "ipodtouch0218",
+        productName: "NSMB-MarioVsLuigi",
+        productVersion: "2.1.1.0",
+      }, function (progress) {
+        fill.style.width = (progress * 100) + "%";
+      }).then(function () {
+        loading.style.display = "none";
+        canvas.focus();
+      }).catch(function (message) {
+        status.textContent = message;
+      });
+
+      // Keyboard input needs the canvas focused inside the iframe
+      window.addEventListener("pointerdown", function () { canvas.focus(); });
+    </script>
+  </body>
+</html>

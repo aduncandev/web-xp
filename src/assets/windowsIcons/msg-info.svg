@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32">
+  <defs>
+    <radialGradient id="infoBody" cx="0.35" cy="0.28" r="0.95">
+      <stop offset="0" stop-color="#8fbdf5"/>
+      <stop offset="0.45" stop-color="#3a76d4"/>
+      <stop offset="1" stop-color="#12408e"/>
+    </radialGradient>
+    <linearGradient id="infoShine" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#ffffff" stop-opacity="0.85"/>
+      <stop offset="1" stop-color="#ffffff" stop-opacity="0"/>
+    </linearGradient>
+  </defs>
+  <circle cx="16" cy="16" r="14.3" fill="url(#infoBody)" stroke="#0d3a86" stroke-width="1"/>
+  <ellipse cx="16" cy="8.6" rx="9.8" ry="5.6" fill="url(#infoShine)"/>
+  <circle cx="16" cy="9.6" r="2.35" fill="#ffffff"/>
+  <path d="M12.9 14.2 h5 v8.6 h2.2 v2.7 h-8.2 v-2.7 h2.2 v-5.9 h-1.2 z" fill="#ffffff"/>
+</svg>

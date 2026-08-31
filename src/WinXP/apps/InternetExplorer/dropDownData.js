@@ -242,14 +242,12 @@ const View = [
     items: [
       {
         type: 'item',
-        disable: true,
-        text: 'Back',
+        text: 'Back', // No longer disabled
         hotkey: 'Alt+Left Arrow',
       },
       {
         type: 'item',
-        disable: true,
-        text: 'Forward',
+        text: 'Forward', // No longer disabled
         hotkey: 'Alt+Right Arrow',
       },
       {
@@ -265,7 +263,7 @@ const View = [
       },
       {
         type: 'item',
-        text: 'Cannot find server',
+        text: 'Cannot find server', // This might be dynamic based on iframe state if implemented
         symbol: 'check',
       },
     ],
@@ -548,4 +546,6 @@ const Help = [
     text: 'About Internet Explorer',
   },
 ];
-export default { File, Edit, View, Favorites, Tools, Help };
+// Ensure the default export name matches what's imported in index.js
+const dropDownData = { File, Edit, View, Favorites, Tools, Help };
+export default dropDownData;

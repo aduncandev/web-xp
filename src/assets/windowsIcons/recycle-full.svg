@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32">
+  <!-- XP-style full recycle bin -->
+  <!-- Paper sticking out -->
+  <path d="M10 2 L9 7 L14 6 Z" fill="#FFFFEE" stroke="#B0B0B0" stroke-width="0.5"/>
+  <path d="M17 1 L16 7 L21 5 Z" fill="#FFFFF5" stroke="#B0B0B0" stroke-width="0.5"/>
+  <path d="M22 3 L23 7 L19 7 Z" fill="#FFFFEE" stroke="#B0B0B0" stroke-width="0.5"/>
+  <!-- Lid (slightly askew) -->
+  <rect x="5" y="5" width="22" height="3" rx="1" fill="#8B8B8B" stroke="#5A5A5A" stroke-width="0.5" transform="rotate(-2 16 6.5)"/>
+  <!-- Can body -->
+  <path d="M8 8 L7 27 Q7 29 9 29 L23 29 Q25 29 25 27 L24 8 Z" fill="#C0C0C0" stroke="#6D6D6D" stroke-width="0.7"/>
+  <!-- Vertical lines on can -->
+  <line x1="12" y1="11" x2="11.5" y2="26" stroke="#9A9A9A" stroke-width="0.8"/>
+  <line x1="16" y1="11" x2="16" y2="26" stroke="#9A9A9A" stroke-width="0.8"/>
+  <line x1="20" y1="11" x2="20.5" y2="26" stroke="#9A9A9A" stroke-width="0.8"/>
+  <!-- Highlight -->
+  <path d="M9 9 L8.2 26 Q8.5 28 10 28" fill="none" stroke="rgba(255,255,255,0.4)" stroke-width="1"/>
+</svg>

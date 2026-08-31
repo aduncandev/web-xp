@@ -1,22 +1,18 @@
 const File = [
   {
     type: 'item',
-    disable: true,
     text: 'New',
   },
   {
     type: 'item',
-    disable: true,
     text: 'Open...',
   },
   {
     type: 'item',
-    disable: true,
     text: 'Save',
   },
   {
     type: 'item',
-    disable: true,
     text: 'Save As...',
   },
   {
@@ -24,7 +20,7 @@ const File = [
   },
   {
     type: 'item',
-    disable: true,
+    disable: true, // Printing is hard in web, keeping disabled
     text: 'Page Setup...',
   },
   {
@@ -40,6 +36,7 @@ const File = [
     text: 'Exit',
   },
 ];
+
 const Edit = [
   {
     type: 'item',
@@ -97,7 +94,6 @@ const Edit = [
   },
   {
     type: 'item',
-    disable: true,
     text: 'Select All',
   },
   {
@@ -105,6 +101,7 @@ const Edit = [
     text: 'Time/Date',
   },
 ];
+
 const Format = [
   {
     type: 'item',
@@ -116,13 +113,14 @@ const Format = [
     text: 'Font...',
   },
 ];
+
 const View = [
   {
     type: 'item',
-    disable: true,
     text: 'Status Bar',
   },
 ];
+
 const Help = [
   {
     type: 'item',
@@ -131,8 +129,8 @@ const Help = [
   },
   {
     type: 'item',
-    disable: true,
     text: 'About Notepad',
   },
 ];
+
 export default { File, Edit, Format, View, Help };

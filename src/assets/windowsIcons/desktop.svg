@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="32" height="32">
+  <defs>
+    <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#7ec0f7"/>
+      <stop offset="0.55" stop-color="#b8ddfb"/>
+      <stop offset="0.55" stop-color="#8cc63f"/>
+      <stop offset="1" stop-color="#4f9a1c"/>
+    </linearGradient>
+    <linearGradient id="frame" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#f4f3ee"/>
+      <stop offset="1" stop-color="#b8b5a9"/>
+    </linearGradient>
+  </defs>
+  <!-- Monitor frame -->
+  <rect x="3" y="4" width="26" height="19" rx="2" fill="url(#frame)" stroke="#6e6b60" stroke-width="1"/>
+  <!-- Screen -->
+  <rect x="5.5" y="6.5" width="21" height="14" fill="url(#sky)" stroke="#4a71a5" stroke-width="0.75"/>
+  <!-- Stand neck -->
+  <rect x="13.5" y="23" width="5" height="3" fill="#c8c5b9" stroke="#6e6b60" stroke-width="0.75"/>
+  <!-- Base -->
+  <path d="M8 29 L24 29 L21.5 26 L10.5 26 Z" fill="url(#frame)" stroke="#6e6b60" stroke-width="1"/>
+</svg>

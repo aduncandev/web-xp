@@ -1,0 +1,20 @@
+{
+  "name": "guestbook",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Guest book backend for aduncan.dev — storage, spam/illegal-content filtering, and Discord-driven moderation",
+  "type": "module",
+  "main": "src/index.js",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "start": "node src/index.js",
+    "register-commands": "node scripts/register-commands.js",
+    "purge": "node scripts/purge.js",
+    "check-discord": "node scripts/check-discord.js"
+  },
+  "optionalDependencies": {
+    "@anthropic-ai/sdk": "^0.122.0"
+  }
+}

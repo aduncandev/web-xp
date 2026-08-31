@@ -1,3 +1,58 @@
 #root {
   height: 100%;
 }
+
+/*
+ * Luna check boxes and radio buttons, applied globally so portalled dialogs
+ * get them too. The four sprites are genuine 13x13 crops from real XP
+ * screenshots (see src/assets/xp/README.md) — the browser's own controls read
+ * as a web page and break the illusion everywhere they appear.
+ */
+input[type='checkbox'],
+input[type='radio'] {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 13px;
+  height: 13px;
+  min-width: 13px;
+  min-height: 13px;
+  margin: 0 3px 0 0;
+  padding: 0;
+  border: none;
+  outline: none;
+  background-color: transparent;
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: 13px 13px;
+  vertical-align: middle;
+  cursor: default;
+  flex-shrink: 0;
+}
+
+input[type='checkbox'] {
+  background-image: url('./assets/xp/checkbox.png');
+}
+input[type='checkbox']:checked {
+  background-image: url('./assets/xp/checkbox-checked.png');
+}
+input[type='radio'] {
+  background-image: url('./assets/xp/radio.png');
+}
+input[type='radio']:checked {
+  background-image: url('./assets/xp/radio-checked.png');
+}
+
+/* XP greys the whole control out; the label beside it is dimmed by its own
+   rule wherever a dialog marks a row disabled. */
+input[type='checkbox']:disabled,
+input[type='radio']:disabled {
+  filter: grayscale(1) contrast(0.45) brightness(1.35);
+}
+
+@font-face {
+  font-family: 'DeterminationMono';
+  src: url('/fonts/DeterminationMonoWeb.woff') format('woff');
+  font-weight: normal;
+  font-style: normal;
+  font-display: block;
+}

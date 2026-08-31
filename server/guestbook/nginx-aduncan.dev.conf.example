@@ -1,0 +1,57 @@
+# Section 3 of /etc/nginx/sites-enabled/aduncan.dev.conf, with the guest book
+# added. Everything outside this server block is unchanged.
+#
+# The site is Apache on :7080; nginx routes by path in front of it, so `/gb/`
+# never reaches Apache and Apache needs no configuration of its own.
+
+# ==========================================
+# 3. Main Website (Public - No Auth)
+# ==========================================
+server {
+    server_name aduncan.dev;
+
+    include /etc/nginx/snippets/security_headers.conf;
+    include /etc/nginx/snippets/block_sensitive.conf;
+
+    location ~ /(manifest\.json|asset-manifest\.json)$ {
+        root /var/www/web-xp/dist;
+        try_files $uri =404;
+    }
+
+    # ---- guest book API (Node, systemd unit `guestbook`) ----
+    # `^~` stops any regex location from ever intercepting this path.
+    # The trailing slash on proxy_pass is load-bearing: it rewrites
+    # /gb/api/entries -> /api/entries, which is what the server serves.
+    # No Upgrade/Connection headers: this is plain HTTP, no websockets.
+    location ^~ /gb/ {
+        proxy_pass http://localhost:8787/;
+        proxy_http_version 1.1;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+
+        # The app caps bodies at 64k itself; this rejects oversized ones at
+        # the edge so they never reach Node.
+        client_max_body_size 64k;
+    }
+
+    location / {
+        proxy_pass http://localhost:7080;
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection 'upgrade';
+        proxy_set_header Host $host;
+        proxy_cache_bypass $http_upgrade;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+
+    listen 443 ssl;
+    listen [::]:443 ssl;
+    ssl_certificate /etc/letsencrypt/live/aduncan.dev/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/aduncan.dev/privkey.pem;
+    include /etc/letsencrypt/options-ssl-nginx.conf;
+    ssl_dhparam /etc/letsencrypt/ssl-dhparams.pem;
+}
