@@ -1,8 +1,8 @@
-# Skillz's Computer
+# webXP
 
-A personal portfolio website disguised as a fully interactive Windows XP desktop, built with React.
+An attempt at a fully interactive Windows XP desktop, built with React.
 
-## [Try it live](https://aduncan.dev)
+## [Try it live](https://webxp.net) (mirrored at [aduncan.dev](https://aduncan.dev))
 
 ## Features
 
@@ -38,7 +38,7 @@ A personal portfolio website disguised as a fully interactive Windows XP desktop
 - The Guest account can be turned on and off from Control Panel, like real XP
 - Control Panel > User Accounts > "Skip the startup screen" boots straight to
   the login screen on later visits
-- [aduncan.dev/?guest](https://aduncan.dev/?guest) skips setup entirely: it makes
+- [webxp.net/?guest](https://webxp.net/?guest) skips setup entirely: it makes
   a Guest account and drops you at the login screen
 
 ### Filesystem
@@ -78,7 +78,7 @@ A personal portfolio website disguised as a fully interactive Windows XP desktop
 | **3D Pinball** | Space Cadet pinball via the [98.js.org](https://98.js.org) WebAssembly port. |
 | **Voltorb Flip** | The Pokemon HG/SS card game, based on [steiner26/voltorbflip](https://github.com/steiner26/voltorbflip) with added sound and music. |
 | **PictoChat** | Self-hosted, lightly modified [ayunpictojava](https://github.com/ayunami2000/ayunpictojava) at [chat.aduncan.dev](https://chat.aduncan.dev). |
-| **aduncan.dev Tour** | Guided tour of the site in the style of "Take a tour of Windows XP". |
+| **webXP Tour** | Guided tour of the site in the style of "Take a tour of Windows XP". |
 | **???** | egg... open it and find out... |
 
 The XP Shop has more: Mario vs Luigi
@@ -184,6 +184,6 @@ If something of yours is in here and credited wrong or not at all, open an issue
 
 The code is [MIT](LICENSE): copyright 2019 Shizuku Yang (winXP), copyright 2025-2026 Aaron Duncan (everything since).
 
-The license does not cover my personal content: the original music, personal images and text, and the aduncan.dev / Skillz identity. Replace those in forks.
+The license does not cover my personal content: the original music, personal images and text, and the webxp.net / aduncan.dev / Skillz identity. Replace those in forks.
 
 Microsoft and Nintendo material appears here as part of a non-commercial fan recreation. This project is not affiliated with or approved by Microsoft or Nintendo.

@@ -33,7 +33,7 @@ const README = `WINDOWS BACKUP
 ==============
 
 This archive holds the files and settings that were stored on your
-computer at aduncan.dev — documents, pictures, downloads, and the
+computer at webxp.net — documents, pictures, downloads, and the
 ntuser.dat file inside each profile folder (that one holds your
 settings, XP Points, and eggs).
 

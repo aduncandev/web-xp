@@ -30,7 +30,7 @@ import styled from 'styled-components';
  * so the one live row is also the only one that makes sense to click.
  */
 const DEVICES = [
-  { id: 'cd', label: 'ATAPI CD:', name: 'aduncan.dev Setup Disc', boots: true },
+  { id: 'cd', label: 'ATAPI CD:', name: 'webXP Setup Disc', boots: true },
   { id: 'hdd', label: 'ATA HDD:', name: 'No operating system found' },
   { id: 'net', label: 'Network:', name: 'Realtek RTL8139 PXE' },
 ];

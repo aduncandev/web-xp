@@ -124,7 +124,7 @@ export const EXE_PATHS = {
   PINBALL: 'C:/Program Files/Windows NT/Pinball/pinball.exe',
   PICTOCHAT: 'C:/Program Files/PictoChat/pictochat.exe',
   VOLTORB: 'C:/Program Files/Voltorb Flip/voltorbflip.exe',
-  TOUR: 'C:/Program Files/aduncan.dev/tour.exe',
+  TOUR: 'C:/Program Files/webxp.net/tour.exe',
   // A third-party tagger, the way anyone with a music folder ended up
   // installing one — XP itself could only edit tags a file at a time.
   TAGEDITOR: 'C:/Program Files/Media Tag Editor/tageditor.exe',
@@ -145,7 +145,7 @@ export const EXE_PATHS = {
   // The guest book. The only program here that talks to a server of its own
   // (server/guestbook), which is why it lives under the site's own folder
   // rather than pretending to be something Microsoft shipped.
-  GUESTBOOK: 'C:/Program Files/aduncan.dev/guestbook.exe',
+  GUESTBOOK: 'C:/Program Files/webxp.net/guestbook.exe',
 };
 
 /** Extensions the shell treats as launchable. */

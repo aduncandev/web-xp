@@ -210,7 +210,7 @@ function GuestBook({ onClose }) {
             `${total} ${total === 1 ? 'entry' : 'entries'} signed.`,
             '',
             'Entries are checked before they appear.',
-            'Copyright (C) aduncan.dev',
+            'Copyright (C) webxp.net',
           ].join('\n'),
           'About Guest Book',
           { icon: 'info' },
@@ -264,7 +264,7 @@ function GuestBook({ onClose }) {
               <p className="gb__message">{entry.message}</p>
               {entry.reply && (
                 <div className="gb__reply">
-                  <span className="gb__replyWho">Aaron replied:</span>
+                  <span className="gb__replyWho">Administrator replied:</span>
                   <p>{entry.reply}</p>
                 </div>
               )}

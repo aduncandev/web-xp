@@ -32,7 +32,6 @@ import recent from 'assets/windowsIcons/716(16x16).png';
 import compatibility from 'assets/windowsIcons/747(16x16).png';
 import magnifier from 'assets/windowsIcons/817(16x16).png';
 import mediaPlayer from 'assets/windowsIcons/846(16x16).png';
-import tour from 'assets/windowsIcons/853(32x32).png';
 import outlook from 'assets/windowsIcons/887(16x16).png';
 import spade from 'assets/windowsIcons/888(16x16).png';
 import reversi from 'assets/windowsIcons/889(16x16).png';
@@ -296,11 +295,6 @@ export const AllPrograms = [
       },
       {
         type: 'item',
-        icon: tour,
-        text: 'Tour Windows XP',
-      },
-      {
-        type: 'item',
         icon: winExplorer,
         text: 'Windows Explorer',
       },
@@ -399,11 +393,6 @@ export const AllPrograms = [
     type: 'item',
     icon: outlook,
     text: 'Outlook Express',
-  },
-  {
-    type: 'item',
-    icon: aboutMeIcon,
-    text: 'About Me',
   },
   {
     type: 'item',

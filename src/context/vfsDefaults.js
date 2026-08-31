@@ -557,7 +557,6 @@ function addMachineSystem(add) {
   add(makeExe(`${SYSTEM32}/mobsync.exe`, 141312, { iconKey: 'sm-sync' }));
   add(makeExe(`${SYSTEM32}/sndrec32.exe`, 138752, { iconKey: 'sm-sound' }));
   add(makeExe(`${SYSTEM32}/sndvol32.exe`, 141824, { iconKey: 'sm-volume' }));
-  add(makeExe(`${SYSTEM32}/tourstart.exe`, 24064, { iconKey: 'sm-tour' }));
   add(makeExe(`${SYSTEM32}/netsetup.exe`, 305664, { iconKey: 'sm-netsetup' }));
   add(makeExe(`${SYSTEM32}/msconfig.exe`, 158208));
   add(makeExe(`${SYSTEM32}/control.exe`, 110592, { iconKey: 'sm-access' }));
@@ -736,10 +735,9 @@ function addMachineSystem(add) {
       system: false,
     }),
   );
-  add(makeFolder(`${PROGRAM_FILES}/aduncan.dev`, {}));
-  add(
-    makeExe(EXE_PATHS.TOUR, 425984, { iconKey: 'desk-aboutme', system: false }),
-  );
+  add(makeFolder(`${PROGRAM_FILES}/webxp.net`, {}));
+  // tour.exe (the webXP Tour) is shelved for a rework: the app code and its
+  // registry entry are kept, but nothing seeds the exe or its shortcuts.
   add(
     makeExe(EXE_PATHS.GUESTBOOK, 118784, {
       iconKey: 'desk-guestbook',
@@ -828,9 +826,6 @@ function addUserMenus(add, ctx) {
   add(makeFolder(SHOP_APPS, { iconKey: 'menu-folder' }));
   add(makeFolder(`${SHOP_APPS}/Games`, { iconKey: 'menu-folder' }));
   add(makeFolder(`${SHOP_APPS}/XPWare`, { iconKey: 'menu-folder' }));
-  add(
-    makeShortcut(`${SHOP_APPS}/XPWare/About Me`, EXE_PATHS.TOUR, 'sm-aboutme'),
-  );
   add(
     makeShortcut(
       `${SHOP_APPS}/XPWare/PictoChat`,
@@ -1076,13 +1071,6 @@ function addUserMenus(add, ctx) {
     ),
   );
   add(makeShortcut(`${ACC}/Synchronize`, `${SYSTEM32}/mobsync.exe`, 'sm-sync'));
-  add(
-    makeShortcut(
-      `${ACC}/Tour Windows XP`,
-      `${SYSTEM32}/tourstart.exe`,
-      'sm-tour',
-    ),
-  );
   add(
     makeShortcut(
       `${ACC}/Windows Explorer`,

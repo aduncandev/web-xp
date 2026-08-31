@@ -60,7 +60,14 @@ import { buildBackupZip, isUserFile, storedNodeBytes } from './vfsBackup';
 // 4: privacy.txt moved from system32 to My Documents, beside readme.txt,
 // and its wording corrected. Both the location and the contents are baked
 // in at seed time, so an existing disk keeps the old copy without this.
-const VFS_SCHEMA_VERSION = '4';
+// 5: Program Files/aduncan.dev renamed to Program Files/webxp.net (site
+// rebrand). tour.exe and guestbook.exe live there, and every seeded
+// shortcut carries the old absolute target, so an existing disk would
+// keep launching into a folder the code no longer knows about.
+// 6: tour.exe, tourstart.exe and their shortcuts unseeded (the tour is
+// shelved for a rework; the app code stays). An existing disk keeps the
+// exes and shortcuts without this.
+const VFS_SCHEMA_VERSION = '6';
 const SCHEMA_KEY = 'winxp_vfs_schema';
 const SCHEMA_SENTINEL = '::schema';
 

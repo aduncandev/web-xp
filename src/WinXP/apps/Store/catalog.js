@@ -14,7 +14,6 @@ import pictochatIcon from 'assets/windowsIcons/pictochat.png';
 import voltorbIcon from 'assets/windowsIcons/voltorb.png';
 import tagEditorIcon from 'assets/windowsIcons/shell32-2(32x32).png';
 import winampIcon from 'assets/windowsIcons/winamp.png';
-import tourIcon from 'assets/windowsIcons/touricon.png';
 import mediaPlayerIcon from 'assets/windowsIcons/846(32x32).png';
 import mvlIcon from 'assets/windowsIcons/mariovsluigi.png';
 import climbRaceIcon from 'assets/windowsIcons/climbrace.gif';
@@ -34,7 +33,7 @@ export const CATALOG = [
   {
     id: 'pictochat',
     name: 'PictoChat',
-    publisher: 'aduncan.dev',
+    publisher: 'webxp.net',
     category: 'Communication',
     icon: pictochatIcon,
     sizeBytes: 524288,
@@ -53,7 +52,7 @@ export const CATALOG = [
   {
     id: 'voltorb',
     name: 'Voltorb Flip',
-    publisher: 'aduncan.dev',
+    publisher: 'webxp.net',
     category: 'Puzzle',
     icon: voltorbIcon,
     sizeBytes: 786432,
@@ -72,7 +71,7 @@ export const CATALOG = [
   {
     id: 'tageditor',
     name: 'Media Tag Editor',
-    publisher: 'aduncan.dev',
+    publisher: 'webxp.net',
     category: 'Multimedia',
     icon: tagEditorIcon,
     sizeBytes: 372736,
@@ -130,24 +129,6 @@ export const CATALOG = [
     isNew: false,
   },
   {
-    id: 'tour',
-    name: 'aduncan.dev Tour',
-    publisher: 'aduncan.dev',
-    category: 'Internet',
-    icon: tourIcon,
-    sizeBytes: 425984,
-    blurb: 'A guided tour of the site',
-    description: 'A guided tour of aduncan.dev and how it works.',
-    exePath: EXE_PATHS.TOUR,
-    folder: 'C:/Program Files/aduncan.dev',
-    shortcutName: 'About Me',
-    shortcutIconKey: 'sm-aboutme',
-    shelf: 'xpware',
-    released: '01/2026',
-    players: 'For 1 player',
-    isNew: false,
-  },
-  {
     id: 'mariovsluigi',
     name: 'Mario vs Luigi',
     publisher: 'ipodtouch0218',
@@ -169,7 +150,7 @@ export const CATALOG = [
   {
     id: 'deltascend',
     name: 'DELTASCEND',
-    publisher: 'aduncan.dev',
+    publisher: 'webxp.net',
     category: 'Action',
     icon: climbRaceIcon,
     sizeBytes: 2097152,
