@@ -264,7 +264,7 @@ function GuestBook({ onClose }) {
               <p className="gb__message">{entry.message}</p>
               {entry.reply && (
                 <div className="gb__reply">
-                  <span className="gb__replyWho">Skillz replied:</span>
+                  <span className="gb__replyWho">Aaron replied:</span>
                   <p>{entry.reply}</p>
                 </div>
               )}
