@@ -6,6 +6,7 @@ import {
   musCastletownSrc,
   musKikkySrc,
   musBirdnoiseSrc,
+  musRaceSrc,
   smileSrc,
 } from './sounds';
 import { generateLevel } from './levelgen';
@@ -174,6 +175,47 @@ function buildGenerated(def) {
   };
 }
 
+// the flood mode: an endless wall grown on the fly, cells added to the
+// live sets as the camera rises
+const ENDLESS_ROWS = 2200;
+function buildEndless(seed) {
+  const h = (ENDLESS_ROWS + 8) * TILE;
+  const baseRow = ENDLESS_ROWS;
+  const alwaysCells = new Set();
+  for (let c = 6; c <= 10; c++) alwaysCells.add(cellKey(c, baseRow));
+  return {
+    kind: 'endless',
+    seed,
+    w: VIEW_W,
+    h,
+    bg: 4278190080,
+    solids: [],
+    alwaysCells,
+    glowCells: new Set(),
+    glowRects: [],
+    glowCellList: [],
+    brittleMap: new Map(),
+    appearGroups: [],
+    coins: [],
+    generators: [],
+    buckets: [],
+    landing: { x: 0, y: Infinity, w: 0 },
+    zones: {
+      bottom: { xMin: 0, xMax: VIEW_W, yMin: h - 80, yMax: h, floorY: h - 40 },
+      top: { xMin: 0, xMax: VIEW_W, yMin: 0, yMax: 40, floorY: 20 },
+    },
+    spawn: { x: 8 * TILE + 20, y: h - 60 },
+    // no ground under this wall: park the dismount line out of reach
+    mountStarter: { x: 8 * TILE, y: 1e9 },
+    topStarter: { x: 0, y: -1e9 },
+    startTrig: { x: -9999, y: -9999, w: 1, h: 1 },
+    finishTrig: { x: -9999, y: -9999, w: 1, h: 1 },
+    decor: {},
+    bestKey: 'endless',
+    par: 0,
+  };
+}
+
 export function createGame(canvas, opts) {
   const ctx = canvas.getContext('2d');
   ctx.imageSmoothingEnabled = false;
@@ -207,6 +249,8 @@ export function createGame(canvas, opts) {
     () => getVolume() * 0.5,
   );
   const kikkyMusic = createMusicLoop(musKikkySrc, () => getVolume() * 0.5);
+  // the dog tower race loops this at 0.7 of full volume
+  const raceMusic = createMusicLoop(musRaceSrc, () => getVolume() * 0.35);
   const birdMusic = createMusicLoop(musBirdnoiseSrc, () => 0);
   const droneLoop = createMusicLoop(smileSrc, () => 0, 0.15);
 
@@ -449,7 +493,12 @@ export function createGame(canvas, opts) {
     resetToGround();
     camX = clampCamX(L.spawn.x - VIEW_W / 2);
     camY = clampCamY(L.spawn.y - VIEW_H / 2 - 80);
-    backdrop = L.kind === 'church' ? bake : buildBackdrop(L);
+    backdrop =
+      L.kind === 'church'
+        ? bake
+        : L.kind === 'endless'
+        ? null
+        : buildBackdrop(L);
     phase = 'game';
   }
 
@@ -937,6 +986,11 @@ export function createGame(canvas, opts) {
       clearPressed();
       return;
     }
+    if (phase === 'endresults') {
+      stepEndResults();
+      clearPressed();
+      return;
+    }
     if (phase === 'secret') {
       stepSecret();
       clearPressed();
@@ -949,6 +1003,11 @@ export function createGame(canvas, opts) {
         return;
       }
       mixer.stopCharge();
+      if (endless) {
+        raceMusic.stop();
+        startMusic();
+        endless = null;
+      }
       phase = 'menu';
       clearPressed();
       return;
@@ -1051,6 +1110,11 @@ export function createGame(canvas, opts) {
       return;
     }
 
+    if (L.kind === 'endless' && endless && endless.cd) {
+      stepCountdown();
+      clearPressed();
+      return;
+    }
     if (running) {
       elapsed += 1;
       if (kris.state !== 'fall' && inRect(L.startTrig, kris.x, kris.y)) {
@@ -1060,13 +1124,25 @@ export function createGame(canvas, opts) {
         }
         elapsed = 0;
       }
-      if (elapsed >= FULLTIME) endRunAndDrop();
+      if (elapsed >= FULLTIME && L.kind !== 'endless') endRunAndDrop();
     }
     if (running && held.cancel && kris.state === 'neutral') {
       holdExitT += 1;
       if (holdExitT >= 30) {
         holdExitT = 0;
-        endRunAndDrop();
+        if (L.kind === 'endless') {
+          // letting go here can't end the run: just drop into the water
+          mixer.stopCharge();
+          kris.chargeAmt = 0;
+          kris.state = 'fall';
+          kris.fallV = 0;
+          kris.fallT = 0;
+          kris.noGrab = true;
+          kris.grabDelay = 10;
+          play('fall', 0.5, 1.1);
+        } else {
+          endRunAndDrop();
+        }
         clearPressed();
         return;
       }
@@ -1099,6 +1175,7 @@ export function createGame(canvas, opts) {
     if (kris && mode === 'wall') {
       stepHazards();
       stepCoins();
+      if (L.kind === 'endless') stepEndless();
       if (
         (kris.state === 'neutral' ||
           kris.state === 'charge' ||
@@ -1130,7 +1207,7 @@ export function createGame(canvas, opts) {
     clearPressed();
   }
 
-  const MENU_ITEMS = ['CHURCH WALL', 'RANDOM SEED', 'ENTER SEED'];
+  const MENU_ITEMS = ['CHURCH WALL', 'RANDOM SEED', 'ENTER SEED', 'THE FLOOD'];
   function stepMenu() {
     if (pressed.up) {
       menuSel = (menuSel + MENU_ITEMS.length - 1) % MENU_ITEMS.length;
@@ -1147,9 +1224,11 @@ export function createGame(canvas, opts) {
       } else if (menuSel === 1) {
         lastSeed = String(Math.floor(Math.random() * 10000)).padStart(4, '0');
         loadLevel(buildGenerated(generateLevel(lastSeed)));
-      } else {
+      } else if (menuSel === 2) {
         codeEntry = createCodeEntry(4, lastSeed);
         phase = 'codeentry';
+      } else {
+        startEndless();
       }
     }
   }
@@ -1189,6 +1268,383 @@ export function createGame(canvas, opts) {
       play('menumove', 0.8, 0.8);
       phase = 'menu';
     }
+  }
+
+  let endless = null;
+  let endlessStrip = null;
+
+  function endlessRng(seed) {
+    let s = seed >>> 0;
+    return () => {
+      s = (s + 0x6d2b79f5) >>> 0;
+      let t = Math.imul(s ^ (s >>> 15), 1 | s);
+      t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+      return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+    };
+  }
+
+  const endlessBest = () => Number(saveData.best.endless) || 0;
+
+  function endlessAddCell(c, r, canEmber) {
+    c = Math.max(1, Math.min(14, c));
+    const k = cellKey(c, r);
+    if (L.glowCells.has(k) || L.alwaysCells.has(k)) return c;
+    L.glowCells.add(k);
+    L.glowCellList.push({ c, r, k, x: c * TILE, y: r * TILE });
+    // ambers roll here; reds are promoted afterwards, only onto cells the
+    // line provably continues past (never a jump's sole landing)
+    if (canEmber && endless.rng() < 0.14) {
+      L.brittleMap.set(k, { c, r, dangerous: false, con: 0, timer: 0 });
+    }
+    return c;
+  }
+
+  function endlessStepTrack(t, other) {
+    const e = endless;
+    const depth = e.baseRow - t.r;
+    const canEmber = depth > 14;
+    const roll = e.rng();
+    if (roll < 0.38) {
+      t.r -= 1;
+      t.c = endlessAddCell(t.c, t.r, canEmber);
+      // with the line contiguous above and below, the previous cell may go
+      // red: a charge jump clears it, it is never the only landing
+      if (t.run >= 1 && t.prev && canEmber && e.rng() < 0.22) {
+        L.brittleMap.set(cellKey(t.prev.c, t.prev.r), {
+          c: t.prev.c,
+          r: t.prev.r,
+          dangerous: true,
+          con: 0,
+          timer: 0,
+        });
+        t.prev = null;
+      } else {
+        t.prev = { c: t.c, r: t.r };
+      }
+      t.run += 1;
+    } else if (roll < 0.68 && depth > 6) {
+      // a vertical gap sized for a charge jump, so the landing stays in line
+      t.r -= e.rng() < 0.68 ? 2 : 3;
+      t.c = endlessAddCell(t.c, t.r, canEmber);
+      t.run = 0;
+      t.prev = null;
+    } else {
+      let dir = e.rng() < 0.5 ? 1 : -1;
+      if (Math.abs(t.c - other.c) < 3) dir = t.c >= other.c ? 1 : -1;
+      if (t.c + dir * 2 < 1 || t.c + dir * 2 > 14) dir = -dir;
+      const len = 1 + Math.floor(e.rng() * 2);
+      for (let i = 1; i <= len; i++)
+        endlessAddCell(t.c + dir * i, t.r, canEmber);
+      t.c = Math.max(1, Math.min(14, t.c + dir * len));
+      t.r -= 1;
+      t.c = endlessAddCell(t.c, t.r, canEmber);
+      t.run = 0;
+      t.prev = null;
+    }
+  }
+
+  function endlessEnsureRows(targetRow) {
+    const e = endless;
+    let guard = 0;
+    while (
+      (e.tracks[0].r > targetRow || e.tracks[1].r > targetRow) &&
+      guard++ < 4000
+    ) {
+      for (const t of e.tracks) {
+        if (t.r > targetRow)
+          endlessStepTrack(t, t === e.tracks[0] ? e.tracks[1] : e.tracks[0]);
+      }
+      if (e.rng() < 0.1 && Math.abs(e.tracks[0].r - e.tracks[1].r) <= 1) {
+        const r = Math.min(e.tracks[0].r, e.tracks[1].r);
+        const [a, b] = [e.tracks[0].c, e.tracks[1].c].sort((x, y) => x - y);
+        if (b - a > 2 && b - a < 9)
+          for (let c = a; c <= b; c++) endlessAddCell(c, r, false);
+      }
+      const highest = Math.min(e.tracks[0].r, e.tracks[1].r);
+      if (highest <= e.nextGenRow) {
+        // a dispenser pouring straight down one of the climbing lines,
+        // bucket at the bottom, timed like the generated walls
+        const t = e.tracks[Math.floor(e.rng() * 2)];
+        const span = 4 + Math.floor(e.rng() * 3);
+        const spoutRow = t.r - 1;
+        const bucketRow = t.r + span;
+        L.generators.push({
+          x: t.c * TILE,
+          y: spoutRow * TILE,
+          endY: bucketRow * TILE + 20,
+          waittime: 90 + Math.floor(e.rng() * 40),
+          waitoff: 5 + Math.floor(e.rng() * 40),
+        });
+        L.buckets.push({ x: t.c * TILE, y: bucketRow * TILE + 20 });
+        e.nextGenRow = highest - (12 + Math.floor(e.rng() * 8));
+      }
+    }
+  }
+
+  function endlessPrune() {
+    const cutRow = Math.floor(endless.floodY / TILE) + 1;
+    if (L.glowCellList.some(cell => cell.r > cutRow)) {
+      L.glowCellList = L.glowCellList.filter(cell => {
+        if (cell.r <= cutRow) return true;
+        L.glowCells.delete(cell.k);
+        L.brittleMap.delete(cell.k);
+        brokenCells.delete(cell.k);
+        return false;
+      });
+    }
+    L.generators = L.generators.filter(g => g.y <= endless.floodY);
+    L.buckets = L.buckets.filter(b => b.y <= endless.floodY + 40);
+  }
+
+  function startEndless() {
+    loadLevel(buildEndless((Math.random() * 0x7fffffff) | 0));
+    const baseRow = Math.round(L.h / TILE) - 8;
+    stopMusic();
+    raceMusic.stop();
+    endless = {
+      rng: endlessRng(L.seed),
+      baseRow,
+      tracks: [
+        { c: 7, r: baseRow, run: 0, prev: null },
+        { c: 9, r: baseRow, run: 0, prev: null },
+      ],
+      nextGenRow: baseRow - 14,
+      floodY: (baseRow + 3) * TILE,
+      cd: { t: 0, text: 3 },
+      started: false,
+      t: 0,
+      maxRow: baseRow,
+      height: 0,
+      over: false,
+      overT: 0,
+      splashT: 0,
+      knockT: 0,
+      finalBest: false,
+    };
+    mountAt({ c: 8, r: baseRow });
+    mode = 'wall';
+    running = true;
+    glowTarget = 1;
+    glowAlpha = 1;
+    endlessEnsureRows(baseRow - 30);
+    camX = clampCamX(kris.x - VIEW_W / 2);
+    camY = clampCamY(kris.y - VIEW_H / 2 - 40);
+  }
+
+  // obj_dw_countdown: a number every 30 frames with a rising orchestra
+  // hit, the bell at zero, then 30 more black frames before the reveal
+  function stepCountdown() {
+    const cd = endless.cd;
+    cd.t += 1;
+    if (cd.t === 1) play('orchhit', 0.9, 1);
+    if (cd.t % 30 === 0 && cd.text > 0) {
+      cd.text -= 1;
+      if (cd.text <= 0) play('bell', 0.9);
+      else play('orchhit', 0.9, 1 + (4 - cd.text - 1) / 16);
+    }
+    if (cd.t >= 120) {
+      endless.cd = null;
+      endless.started = true;
+      raceMusic.start();
+    }
+  }
+
+  function stepEndless() {
+    const e = endless;
+    if (!e) return;
+    e.t += 1;
+    if (e.over) {
+      e.overT += 1;
+      // mus_volume(song, 0, 30): the gameover fades the track, no hard cut
+      if (e.musFade > 0) {
+        e.musFade -= 1;
+        raceMusic.setVolume(getVolume() * 0.35 * (e.musFade / 30));
+        if (e.musFade === 0) raceMusic.stop();
+      }
+      if (e.overT === 10) play('swallow', 0.8, 0.5);
+      if (e.overT === 55) phase = 'endresults';
+      return;
+    }
+    if (kris.lastTile.r < e.maxRow && kris.state !== 'fall') {
+      e.maxRow = kris.lastTile.r;
+      e.height = e.baseRow - e.maxRow;
+    }
+    if (e.started) {
+      // rubber band: the chase speed saturates below a good climber's pace,
+      // but banking a big lead makes the water surge back to the leash
+      const gap = e.floodY - kris.y;
+      const chase = Math.min(2.7, 0.9 + e.height * 0.004);
+      const catchup = Math.min(6, Math.max(0, (gap - 360) * 0.012));
+      e.floodY -= chase + catchup;
+    }
+    endlessEnsureRows(Math.floor(camY / TILE) - 8);
+    if (e.t % 32 === 0) endlessPrune();
+    e.splashT -= 1;
+    if (e.started && e.splashT <= 0) {
+      e.splashT = 12 + Math.floor(Math.random() * 16);
+      anims.push({
+        spr: 'bucketSplash',
+        frame: 0,
+        speed: 1 / 3,
+        x: Math.random() * (VIEW_W - 40),
+        y: e.floodY,
+        vx: 0,
+        vy: 0,
+      });
+    }
+    if (e.knockT > 0) e.knockT -= 1;
+    // the water only takes you in neutral or charge, same as the streams
+    if (
+      (kris.state === 'neutral' || kris.state === 'charge') &&
+      kris.y + 14 > e.floodY
+    ) {
+      mixer.stopCharge();
+      kris.chargeAmt = 0;
+      kris.jumping = false;
+      kris.arc = 0;
+      kris.state = 'fall';
+      kris.fallV = 0;
+      kris.fallT = 0;
+      kris.noGrab = false;
+      kris.grabDelay = WATER_GRAB_DELAY;
+      if (e.knockT === 0) {
+        play('splash', 0.9);
+        e.knockT = 30;
+      }
+    }
+    if (kris.y > e.floodY + 26) {
+      e.over = true;
+      e.overT = 0;
+      e.musFade = 30;
+      mixer.stopCharge();
+      kris.noGrab = true;
+      running = false;
+      play('splash', 0.9, 0.8);
+      for (let i = 0; i < 6; i++) {
+        anims.push({
+          spr: 'bucketSplash',
+          frame: 0,
+          speed: 1 / 3,
+          x: kris.x - 20 + (Math.random() * 80 - 40),
+          y: e.floodY,
+          vx: 0,
+          vy: 0,
+        });
+      }
+      const prev = endlessBest();
+      e.finalBest = e.height > prev;
+      if (e.finalBest) {
+        saveData.best.endless = e.height;
+        persist();
+      }
+    }
+  }
+
+  function stepEndResults() {
+    if (pressed.jump) {
+      play('menumove', 0.8, 1.2);
+      startEndless();
+    } else if (pressed.cancel || pressed.menu) {
+      play('menumove', 0.8, 0.8);
+      raceMusic.stop();
+      startMusic();
+      endless = null;
+      phase = 'menu';
+    }
+  }
+
+  function endlessBackdropStrip() {
+    if (endlessStrip) return endlessStrip;
+    const cnv = document.createElement('canvas');
+    cnv.width = VIEW_W;
+    cnv.height = 960;
+    const g = cnv.getContext('2d');
+    g.imageSmoothingEnabled = false;
+    const meta = { tileW: 40, tileH: 40, borderX: 2, borderY: 2, cols: 24 };
+    const ts = sprites.churchTileset.img;
+    const BRICK = 271;
+    const WINDOW = [264, 270, 276];
+    for (let c = 0; c < 16; c++)
+      for (let r = 0; r < 24; r++)
+        drawTileInto(g, ts, meta, BRICK, c * TILE, r * TILE);
+    [
+      [3, 4],
+      [11, 15],
+    ].forEach(([wc, wr]) => {
+      [wc, wc + 3].forEach(cc =>
+        WINDOW.forEach((idx, i) =>
+          drawTileInto(g, ts, meta, idx, cc * TILE, (wr + i) * TILE),
+        ),
+      );
+    });
+    endlessStrip = cnv;
+    return cnv;
+  }
+
+  function drawEndlessBackdrop() {
+    const strip = endlessBackdropStrip();
+    const y0 = Math.floor(camY / 960) * 960;
+    for (let y = y0; y < camY + VIEW_H; y += 960) ctx.drawImage(strip, 0, y);
+    // tile 273 = the church's own start/exit anchor brick
+    const meta = { tileW: 40, tileH: 40, borderX: 2, borderY: 2, cols: 24 };
+    L.alwaysCells.forEach(k => {
+      const [c, r] = k.split(',').map(Number);
+      drawTileInto(
+        ctx,
+        sprites.churchTileset.img,
+        meta,
+        273,
+        c * TILE,
+        r * TILE,
+      );
+    });
+  }
+
+  function drawFlood() {
+    if (!endless) return;
+    const s = sprites.watertile;
+    const fy = endless.floodY;
+    const viewBot = camY + VIEW_H;
+    if (fy > viewBot + 20) return;
+    const colindex = Math.floor(siner / 3) % 4;
+    ctx.save();
+    ctx.globalCompositeOperation = 'lighter';
+    ctx.globalAlpha = Math.max(
+      0,
+      Math.min(0.8, 0.62 + Math.sin(siner / 6) * 0.12),
+    );
+    ctx.fillStyle = WATER_COLS[colindex];
+    const bodyTop = Math.max(fy, camY - 8);
+    if (viewBot - bodyTop > 0)
+      ctx.fillRect(0, bodyTop, VIEW_W, viewBot - bodyTop + 8);
+    if (fy > camY - 20)
+      for (let x = 0; x < VIEW_W; x += 40)
+        ctx.drawImage(s.img, colindex * 20, 0, 20, 8, x, fy - 16, 40, 16);
+    ctx.restore();
+  }
+
+  function drawEndResults() {
+    drawGame();
+    ctx.fillStyle = 'rgba(0,0,0,0.35)';
+    ctx.fillRect(0, 0, VIEW_W, VIEW_H);
+    drawDarkBox(ctx, sprites, 110, 90, 530, 390, siner);
+    pixelText('THE FLOOD', VIEW_W / 2, 145, 24, 'rgb(250,219,2)', 'center');
+    const row = (label, value, y, col) => {
+      pixelText(label, 170, y, 18, '#fff');
+      pixelText(value, 470, y, 18, col || '#fff', 'right');
+    };
+    row('HEIGHT', `${endless ? endless.height : 0}m`, 210);
+    if (endless && endless.finalBest)
+      pixelText('NEW BEST!', 470, 227, 12, 'rgb(250,219,2)', 'right');
+    row('BEST', `${endlessBest()}m`, 260, '#9f9fc9');
+    pixelText(
+      '[Z] CLIMB AGAIN   [X] MENU',
+      VIEW_W / 2,
+      355,
+      13,
+      '#9f9fc9',
+      'center',
+    );
   }
 
   let secret = null;
@@ -2768,6 +3224,8 @@ export function createGame(canvas, opts) {
   const clampCamY = v => Math.max(0, Math.min((L ? L.h : VIEW_H) - VIEW_H, v));
   function updateCam() {
     if (phase === 'menu' || phase === 'codeentry' || !L) return;
+    // the camera stays at the surface while kris sinks
+    if (L.kind === 'endless' && endless && endless.over) return;
     const onWall = mode === 'wall' || mode === 'finish';
     const fx = onWall ? kris.x : walker.x;
     const fy = onWall ? kris.y : walker.y;
@@ -3185,35 +3643,67 @@ export function createGame(canvas, opts) {
     let x = Math.round(board.x);
     let y = Math.round(board.y);
     if (y > camY + VIEW_H + 60) return;
-    let time = 0;
-    if (running) time = elapsed;
-    if (thisTime !== -1) time = thisTime;
-    const tenths = Math.floor(time / 3);
-    const num = formatDigits(tenths);
+    const isEndless = L.kind === 'endless';
     const pulse = Math.round((0.5 + Math.sin(board.siner / 15) * 0.5) * 8) / 8;
     let col = `rgb(255,255,${Math.round(lerp(194, 255, pulse))})`;
-    if (tenths >= 999) {
-      const prog =
-        Math.round(
-          Math.max(0, Math.min(1, (tenths - 999) / (9000 - 999))) * 16,
-        ) / 16;
-      col = `rgb(${Math.round(lerp(255, 135, prog))},${Math.round(
-        lerp(0, 129, prog),
-      )},${Math.round(lerp(0, 190, prog))})`;
+    let num;
+    if (isEndless) {
+      // the same board, repurposed: meters climbed instead of tenths
+      const ds = [];
+      let v = endless ? Math.max(0, Math.floor(endless.height)) : 0;
+      do {
+        ds.unshift(v % 10);
+        v = Math.floor(v / 10);
+      } while (v > 0);
+      while (ds.length < 3) ds.unshift(0);
+      num = ds;
+      if (endless && endless.over) col = 'rgb(250,219,2)';
+    } else {
+      let time = 0;
+      if (running) time = elapsed;
+      if (thisTime !== -1) time = thisTime;
+      const tenths = Math.floor(time / 3);
+      num = formatDigits(tenths);
+      if (tenths >= 999) {
+        const prog =
+          Math.round(
+            Math.max(0, Math.min(1, (tenths - 999) / (9000 - 999))) * 16,
+          ) / 16;
+        col = `rgb(${Math.round(lerp(255, 135, prog))},${Math.round(
+          lerp(0, 129, prog),
+        )},${Math.round(lerp(0, 190, prog))})`;
+      }
+      if (tenths >= 9000) {
+        x += Math.round(Math.random() * 2 - 1);
+        y += Math.round(Math.random() * 2 - 1);
+      }
+      if (tenths === 0 && thisTime === -1) col = 'rgb(18,18,18)';
+      if (thisTime !== -1) col = 'rgb(250,219,2)';
     }
-    if (tenths >= 9000) {
-      x += Math.round(Math.random() * 2 - 1);
-      y += Math.round(Math.random() * 2 - 1);
-    }
-    if (tenths === 0 && thisTime === -1) col = 'rgb(18,18,18)';
-    if (thisTime !== -1) col = 'rgb(250,219,2)';
+    // endless keeps a lane on the right for the meters label
+    const extraW = (num.length - 3) * 20 + (isEndless ? 20 : 0);
     const s = sprites.timerBox;
-    ctx.drawImage(s.img, 0, 0, 42, 40, x, y, 84, 80);
+    if (extraW === 0) {
+      ctx.drawImage(s.img, 0, 0, 42, 40, x, y, 84, 80);
+    } else {
+      // stretch the frame's middle band so extra digits fit
+      ctx.drawImage(s.img, 0, 0, 21, 40, x, y, 42, 80);
+      ctx.drawImage(s.img, 18, 0, 6, 40, x + 42, y, extraW, 80);
+      ctx.drawImage(s.img, 21, 0, 21, 40, x + 42 + extraW, y, 42, 80);
+    }
     ctx.fillStyle = 'rgba(0,0,0,0.5)';
-    ctx.fillRect(x + 9, y + 9, 66, 32);
+    ctx.fillRect(x + 9, y + 9, 66 + extraW, 32);
     const digitTint = tinted.digits(col);
-    for (let i = 0; i < 3; i++) {
-      const bon = i === 2 ? 4 : 0;
+    ctx.save();
+    if (isEndless) {
+      // the digit sprites bleed unlit segments rightward: keep the label
+      // lane clean
+      ctx.beginPath();
+      ctx.rect(x + 2, y + 2, 73 + (num.length - 3) * 20, 76);
+      ctx.clip();
+    }
+    for (let i = 0; i < num.length; i++) {
+      const bon = !isEndless && i === 2 ? 4 : 0;
       const f = num[i];
       ctx.drawImage(
         digitTint,
@@ -3227,8 +3717,17 @@ export function createGame(canvas, opts) {
         70,
       );
     }
-    ctx.fillStyle = col;
-    ctx.fillRect(x + 50, y + 36, 4, 4);
+    ctx.restore();
+    if (isEndless) {
+      ctx.save();
+      ctx.translate(x + 78 + (num.length - 3) * 20, y + 35);
+      ctx.scale(2, 2);
+      pixelText('m', 0, 0, 16, col);
+      ctx.restore();
+    } else {
+      ctx.fillStyle = col;
+      ctx.fillRect(x + 50, y + 36, 4, 4);
+    }
     const ff = Math.floor(board.siner / 2) % 2;
     ctx.drawImage(
       sprites.timerFire.img,
@@ -3247,12 +3746,12 @@ export function createGame(canvas, opts) {
       0,
       7,
       10,
-      x + 64,
+      x + 64 + extraW,
       y + 50,
       14,
       20,
     );
-    if (thisTime !== -1 && newBest) {
+    if (!isEndless && thisTime !== -1 && newBest) {
       pixelText('NEW BEST!', x + 92, y + 30, 14, 'rgb(250,219,2)');
     }
   }
@@ -3271,6 +3770,7 @@ export function createGame(canvas, opts) {
       if (sw > 0 && sh > 0)
         ctx.drawImage(backdrop, sx, sy, sw, sh, sx, sy, sw, sh);
     }
+    if (L.kind === 'endless') drawEndlessBackdrop();
     if (L.kind === 'church') {
       const best = loadBest();
       const dec = L.decor;
@@ -3306,7 +3806,7 @@ export function createGame(canvas, opts) {
       }
     }
     L.generators.forEach(g => drawSprite('dispenser', 0, g.x, g.y));
-    if (L.kind === 'generated')
+    if (L.kind !== 'church')
       L.buckets.forEach(b => drawSprite('bucket', 0, b.x, b.y));
     drawGlow();
     if (L.kind === 'generated') {
@@ -3362,6 +3862,7 @@ export function createGame(canvas, opts) {
       drawSprite('krisBall', Math.floor(mount.t / 2) % 4, walker.x, walker.y);
     else if (kris) drawKris();
     drawWater();
+    if (L.kind === 'endless') drawFlood();
     drawBoard();
     confetti.forEach(p => {
       ctx.globalAlpha = Math.min(1, p.life / 15);
@@ -3395,6 +3896,16 @@ export function createGame(canvas, opts) {
         'right',
       );
     }
+    if (L.kind === 'endless' && endless && endlessBest() > 0) {
+      pixelText(
+        `BEST ${endlessBest()}m`,
+        VIEW_W - 12,
+        22,
+        14,
+        '#9f9fc9',
+        'right',
+      );
+    }
     if (mode === 'ground') {
       const best = loadBest();
       if (best) {
@@ -3407,6 +3918,24 @@ export function createGame(canvas, opts) {
         );
       }
       pixelText('[ESC] Menu', 14, VIEW_H - 34, 14, '#9f9fc9', 'left', 0.55);
+    }
+    if (L.kind === 'endless' && endless && endless.cd) {
+      ctx.fillStyle = '#000';
+      ctx.fillRect(0, 0, VIEW_W, VIEW_H);
+      if (endless.cd.text > 0 && fonts) {
+        ctx.save();
+        ctx.translate(VIEW_W / 2, VIEW_H / 2 - 50);
+        ctx.scale(6, 6);
+        pixelText(
+          String(endless.cd.text),
+          0,
+          Math.round(fonts.main.em * 0.85),
+          16,
+          '#fff',
+          'center',
+        );
+        ctx.restore();
+      }
     }
     if (dialog) drawDialog();
   }
@@ -3483,9 +4012,9 @@ export function createGame(canvas, opts) {
     ctx.fillRect(0, 0, VIEW_W, VIEW_H);
     drawDarkBox(ctx, sprites, 120, 70, 520, 180, siner);
     pixelText('DELTASCEND', VIEW_W / 2, 138, 40, '#fff', 'center');
-    drawDarkBox(ctx, sprites, 160, 210, 480, 400, siner);
+    drawDarkBox(ctx, sprites, 160, 210, 480, 424, siner);
     for (let i = 0; i < MENU_ITEMS.length; i++) {
-      const y = 265 + i * 44;
+      const y = 259 + i * 44;
       const sel = i === menuSel;
       pixelText(MENU_ITEMS[i], 250, y, 20, sel ? '#FFFF00' : '#fff');
       if (sel) blit('heart', 0, 250 - 26, y - 11, 1);
@@ -3576,6 +4105,7 @@ export function createGame(canvas, opts) {
     if (phase === 'menu') drawMenu();
     else if (phase === 'codeentry') drawCode();
     else if (phase === 'results') drawResults();
+    else if (phase === 'endresults') drawEndResults();
     else if (phase === 'secret') drawSecret();
     else if (L) drawGame();
   }
@@ -3689,6 +4219,7 @@ export function createGame(canvas, opts) {
       stopMusic();
       castleMusic.stop();
       kikkyMusic.stop();
+      raceMusic.stop();
       birdMusic.stop();
       droneLoop.stop();
     },
@@ -3696,6 +4227,7 @@ export function createGame(canvas, opts) {
       music.setVolume(getVolume() * 0.5);
       castleMusic.setVolume(getVolume() * 0.5);
       kikkyMusic.setVolume(getVolume() * 0.5);
+      raceMusic.setVolume(getVolume() * 0.35);
     },
   };
 }

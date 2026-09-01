@@ -31,7 +31,9 @@ import badexplosionSrc from 'assets/sounds/deltarune/climb/snd_badexplosion.wav'
 import smileSrc from 'assets/sounds/deltarune/climb/snd_smile.wav';
 import dooropenSrc from 'assets/sounds/deltarune/climb/snd_dooropen.wav';
 import impactSrc from 'assets/sounds/deltarune/climb/snd_impact.wav';
+import orchhitSrc from 'assets/sounds/deltarune/climb/snd_orchhit.wav';
 import musClimbSrc from 'assets/sounds/deltarune/climb/mus_climb.ogg';
+import musRaceSrc from 'assets/sounds/deltarune/climb/mus_race.ogg';
 import musCastletownSrc from 'assets/sounds/deltarune/climb/mus_castletown.ogg';
 import musKikkySrc from 'assets/sounds/deltarune/climb/mus_kikky_upgrade.ogg';
 import musBirdnoiseSrc from 'assets/sounds/deltarune/climb/mus_birdnoise.ogg';
@@ -69,6 +71,7 @@ const SRC = {
   smile: smileSrc,
   dooropen: dooropenSrc,
   impact: impactSrc,
+  orchhit: orchhitSrc,
   passing: passingSrc,
 };
 
@@ -77,6 +80,7 @@ export {
   musCastletownSrc,
   musKikkySrc,
   musBirdnoiseSrc,
+  musRaceSrc,
   smileSrc,
 };
 
