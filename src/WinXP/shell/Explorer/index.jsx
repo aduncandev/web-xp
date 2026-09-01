@@ -700,7 +700,11 @@ export default function Explorer({
       deletable.forEach(remove);
       setSelectedPaths([]);
     },
-    [vfs, dlg, hideExt],
+    // inRecycleBin and recycle decide which of the two delete paths runs.
+    // Leaving them out meant the closure kept whichever value was current
+    // when it was last built, so navigating into or out of the Recycle Bin
+    // could send a delete down the wrong branch entirely.
+    [vfs, dlg, hideExt, inRecycleBin, recycle],
   );
 
   const createNew = useCallback(
@@ -1372,7 +1376,10 @@ export default function Explorer({
       });
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [inFolder, vfs.clipboard, viewMode, sortBy, archive],
+    // inRecycleBin gates the "Empty Recycle Bin" entry and items decides
+    // whether it is greyed out; without them the menu describes wherever
+    // this callback was last rebuilt rather than where you actually are.
+    [inFolder, vfs.clipboard, viewMode, sortBy, archive, inRecycleBin, items],
   );
 
   const handleContextAction = useCallback(

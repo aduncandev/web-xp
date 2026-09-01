@@ -43,11 +43,7 @@ import {
   removeFromMfu,
   MFU_SEEDS,
 } from '../startMenuConfig';
-import {
-  AllPrograms,
-  MyRecentDocuments,
-  PROGRAM_ICONS_16,
-} from './FooterMenuData';
+import { MyRecentDocuments, PROGRAM_ICONS_16 } from './FooterMenuData';
 
 const OUTLOOK_EXE = 'C:/Program Files/Outlook Express/msimn.exe';
 
@@ -438,7 +434,7 @@ function FooterMenu({
           <SubMenu
             left="143px"
             bottom="5px"
-            data={allProgramsData || AllPrograms}
+            data={allProgramsData || []}
             onClick={onClick}
             onItemContextMenu={onAllProgramsContextMenu}
           />

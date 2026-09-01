@@ -16,7 +16,10 @@
     "start": "vite",
     "build": "vite build",
     "preview": "vite preview",
-    "lint": "eslint src"
+    "lint": "eslint src",
+    "test": "playwright test",
+    "test:smoke": "playwright test --grep @smoke",
+    "test:ui": "playwright test --ui"
   },
   "eslintConfig": {
     "extends": [
@@ -31,6 +34,7 @@
     "not op_mini all"
   ],
   "devDependencies": {
+    "@playwright/test": "^1.62.1",
     "@vitejs/plugin-react": "^4.3.4",
     "eslint": "^8.0.0",
     "eslint-config-prettier": "^6.3.0",

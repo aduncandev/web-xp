@@ -35,6 +35,8 @@ export default defineConfig({
   },
   server: {
     port: 3000,
-    open: true,
+    // PW is set by the Playwright webServer, so a test run does not pop a
+    // real browser window every time it cold-starts the dev server.
+    open: !process.env.PW,
   },
 });

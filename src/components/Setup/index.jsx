@@ -27,6 +27,8 @@ import navClickSrc from 'assets/sounds/Windows Navigation Start.wav';
 import sparkleSrc from 'assets/sounds/deltarune/snd_sparkle_glock.wav';
 import powerSrc from 'assets/sounds/deltarune/snd_power.wav';
 
+import { validateFileName } from '../../context/vfsUtils';
+
 // Windows XP first-run setup (OOBE, "Welcome to Microsoft Windows").
 // Layout sampled from refkit/shots/realxp/oobe-welcome.png (800x600), and
 // the chrome is the real msoobe artwork: the header band with the logo,
@@ -405,7 +407,14 @@ export default function SetupWizard({ onComplete }) {
         return null;
       }
       seen.add(name.toLowerCase());
-      if (/[\\/:*?"<>|]/.test(name)) {
+      /*
+       * Ask the real validator rather than keeping a second copy of its
+       * rules here. The hand-copied version missed the all-dots case, so
+       * a name like "..." passed Setup and then failed createUserProfile,
+       * finishing OOBE with no accounts and stranding the user on an
+       * empty logon screen.
+       */
+      if (validateFileName(name)) {
         setError(
           `A user's name cannot contain any of the following characters:  \\ / : * ? " < > |`,
         );

@@ -152,6 +152,7 @@ export function VFSProvider({ children }) {
       if (node) toSave.push(node);
     }
     const toDelete = [...deletedPaths.current];
+    const claimed = [...dirtyPaths.current];
     dirtyPaths.current.clear();
     deletedPaths.current.clear();
 
@@ -159,7 +160,17 @@ export function VFSProvider({ children }) {
       if (toSave.length > 0) await saveManyMeta(db, toSave);
       if (toDelete.length > 0) await deleteManyMeta(db, toDelete);
     } catch (err) {
-      console.warn('VFS: IDB persist failed', err);
+      /*
+       * Put the work back. The sets are cleared before the write so that
+       * mutations arriving during it are not lost, but that means a
+       * failed write — quota exhausted, private-mode eviction — used to
+       * drop its batch for good while the in-memory tree carried on
+       * showing files that had never reached the disk. Re-queuing means
+       * the next persist, including the one on unload, tries again.
+       */
+      for (const p of claimed) dirtyPaths.current.add(p);
+      for (const p of toDelete) deletedPaths.current.add(p);
+      console.warn('VFS: IDB persist failed, changes re-queued', err);
     }
     refreshDriveStatsRef.current();
   }, []);
@@ -890,10 +901,18 @@ export function VFSProvider({ children }) {
           pendingBlobs.current.delete(updated.blobId);
           refreshDriveStatsRef.current();
         } catch (err) {
-          // Usually QuotaExceededError — report failure so callers can
-          // clean up instead of leaving a contentless shell
-          console.warn('VFS: blob save failed', err);
+          /*
+           * Usually QuotaExceededError. Roll the node back to what it was.
+           * It is marked as binary before the save is attempted, so
+           * failing here used to leave a file claiming content that
+           * existed nowhere — and most callers ignore the false we
+           * return, so nothing downstream ever repaired it. Restoring the
+           * previous node keeps the old content instead of inventing a
+           * broken one.
+           */
+          console.warn('VFS: blob save failed, file left unchanged', err);
           pendingBlobs.current.delete(updated.blobId);
+          setNode(existing);
           return false;
         }
       }
@@ -1539,15 +1558,33 @@ export function VFSProvider({ children }) {
   /**
    * Seed a profile tree (Desktop, My Documents, Start Menu, Favorites) for
    * a newly created account into the live filesystem. Existing nodes are
-   * left untouched, so re-running for an old profile is harmless.
+   * left untouched, so re-running for an old profile only fills in what a
+   * later version of the seed added.
    */
   const createUserProfile = useCallback(
     name => {
       if (!name || !String(name).trim()) return { ok: false, error: 'invalid' };
       const profile = buildUserProfile(String(name).trim());
+
+      /*
+       * Deleting to the Recycle Bin MOVES the node to C:/RECYCLER, which
+       * leaves its old path free — and logon re-runs this for every
+       * account, every time. So a seeded file the user threw away came
+       * back on their next login, while a copy of it still sat in the
+       * bin. Anything the bin remembers the original location of still
+       * counts as occupying that path.
+       */
+      const recycledFrom = new Set();
+      for (const node of nodesRef.current.values()) {
+        if (node.originalPath) {
+          recycledFrom.add(normalizePath(node.originalPath).toLowerCase());
+        }
+      }
+
       let added = 0;
       for (const node of profile) {
         if (findNodeCI(node.path)) continue;
+        if (recycledFrom.has(normalizePath(node.path).toLowerCase())) continue;
         nodesRef.current.set(node.path, node);
         markDirty(node.path);
         added += 1;
@@ -1679,17 +1716,33 @@ export function VFSProvider({ children }) {
         if (changed) setUserConfigFor(name, key, next);
       }
 
-      // Desktop icon positions are keyed by the path of what they point at.
+      /*
+       * Desktop icon positions are keyed by the path of what they point
+       * at, and they sit one level down under `.positions` — the hive
+       * holds { positions, autoArrange, alignToGrid }. This used to
+       * iterate the top level, where the only keys are those three names,
+       * so `moved` never matched, nothing was ever rewritten, and every
+       * icon returned to its default slot when an account was renamed.
+       */
       const layout = getUserConfigFor(name, 'desktopLayout', null);
-      if (layout && typeof layout === 'object' && !Array.isArray(layout)) {
+      const positions =
+        layout && typeof layout === 'object' && !Array.isArray(layout)
+          ? layout.positions
+          : null;
+      if (positions && typeof positions === 'object') {
         let changed = false;
         const next = {};
-        for (const [entry, value] of Object.entries(layout)) {
+        for (const [entry, value] of Object.entries(positions)) {
           const target = moved(entry, newPath);
           if (target !== null) changed = true;
           next[target !== null ? target : entry] = value;
         }
-        if (changed) setUserConfigFor(name, 'desktopLayout', next);
+        if (changed) {
+          setUserConfigFor(name, 'desktopLayout', {
+            ...layout,
+            positions: next,
+          });
+        }
       }
     },
     [getUserConfigFor, setUserConfigFor],

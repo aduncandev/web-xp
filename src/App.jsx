@@ -144,8 +144,17 @@ function AppLogic() {
       setScreen('bsod');
     };
 
-    const onError = (message, source, lineno, colno, error) =>
-      handleGlobalError(message);
+    /*
+     * addEventListener hands the listener a single ErrorEvent, not
+     * window.onerror's five arguments. Written for the latter, this used
+     * to pass the event object itself through as the "message", so the
+     * BSOD's stop code read [OBJECT_ERROREVENT] and the real error never
+     * reached the screen the whole feature exists to show it on.
+     */
+    const onError = event =>
+      handleGlobalError(
+        event?.error?.message || event?.message || 'Unknown Error',
+      );
     window.addEventListener('error', onError);
     window.addEventListener('unhandledrejection', handlePromiseRejection);
 
