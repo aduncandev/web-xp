@@ -24,6 +24,7 @@ import {
   TILE_WINDOWS_VERTICALLY,
   TOGGLE_MAXIMIZE_APP,
 } from '../constants/actions';
+import { TASKBAR_HEIGHT } from '../constants';
 
 import { useVolume } from '../../context/VolumeContext';
 import { useVFS } from '../../context/VFSContext';
@@ -224,7 +225,7 @@ function Footer({
   }
   const workArea = () => ({
     width: window.innerWidth,
-    height: window.innerHeight - 30,
+    height: window.innerHeight - TASKBAR_HEIGHT,
   });
   function onTaskbarMenuAction(action) {
     switch (action) {
@@ -548,7 +549,7 @@ function FooterWindow({
 }
 
 const Container = styled.footer`
-  height: 30px;
+  height: ${TASKBAR_HEIGHT}px;
   background: linear-gradient(
     to bottom,
     #1f2f86 0,

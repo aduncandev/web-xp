@@ -17,10 +17,8 @@ import {
   TILE_WINDOWS_HORIZONTALLY,
   TILE_WINDOWS_VERTICALLY,
 } from './constants/actions';
-import { FOCUSING, POWER_STATE } from './constants';
+import { FOCUSING, POWER_STATE, TASKBAR_HEIGHT } from './constants';
 import { defaultAppState } from './apps';
-
-const TASKBAR_HEIGHT = 30;
 
 // Desktop work area for window-arrangement actions; dispatchers may pass
 // their own { width, height } payload

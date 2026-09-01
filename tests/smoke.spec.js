@@ -72,6 +72,21 @@ test('@smoke focus moves between two windows', async ({ page }) => {
   expect(page.__errors).toEqual([]);
 });
 
+test('the pinned Internet row launches Internet Explorer', async ({ page }) => {
+  await bootToDesktop(page);
+
+  /*
+   * The pinned Internet and Shop rows are hand-rendered, so they reach the
+   * shell by a different route than the generated program rows the other
+   * tests exercise. Both now carry an explicit 'open:<path>' action; this
+   * keeps that true.
+   */
+  await startMenu(page, 'Internet');
+  await expect(
+    page.locator('.app__header__title', { hasText: 'Internet Explorer' }),
+  ).toBeVisible();
+});
+
 test('All Programs is built from the filesystem, not the static fallback', async ({ page }) => {
   await bootToDesktop(page);
   await startButton(page).click();

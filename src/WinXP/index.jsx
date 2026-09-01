@@ -263,6 +263,9 @@ function WinXP({
         id: app.id,
         title: app.header.title,
         icon: app.header.icon,
+        // Which program this window is. Shell surfaces (folder windows,
+        // My Computer) have no registry entry and so carry none.
+        exePath: app.exePath || null,
         minimized: !!app.minimized,
         focused: app.id === focusedAppId,
       })),
@@ -637,17 +640,6 @@ function WinXP({
       return;
     }
     switch (itemName) {
-      case 'Internet':
-      case 'Internet Explorer':
-        shellOpen(EXE_PATHS.IEXPLORE);
-        break;
-      case 'E-mail':
-      case 'Outlook Express':
-        shellOpen('C:/Program Files/Outlook Express/msimn.exe');
-        break;
-      case 'Minesweeper':
-        shellOpen(EXE_PATHS.WINMINE);
-        break;
       case 'My Computer':
         shellOpen('My Computer');
         break;
@@ -659,36 +651,6 @@ function WinXP({
         break;
       case 'My Music':
         shellOpen(SPECIAL_FOLDERS.MY_MUSIC);
-        break;
-      case 'Notepad':
-        shellOpen(EXE_PATHS.NOTEPAD);
-        break;
-      case 'Winamp':
-        shellOpen(EXE_PATHS.WINAMP);
-        break;
-      case 'Paint':
-        shellOpen(EXE_PATHS.MSPAINT);
-        break;
-      case 'About Me':
-        shellOpen(EXE_PATHS.TOUR);
-        break;
-      case 'Voltorb Flip':
-        shellOpen(EXE_PATHS.VOLTORB);
-        break;
-      case 'Pinball':
-        shellOpen(EXE_PATHS.PINBALL);
-        break;
-      case 'PictoChat':
-        shellOpen(EXE_PATHS.PICTOCHAT);
-        break;
-      case 'Media Player':
-        shellOpen(EXE_PATHS.WMPLAYER);
-        break;
-      case 'Command Prompt':
-        shellOpen(EXE_PATHS.CMD);
-        break;
-      case 'Windows Explorer':
-        shellOpen(EXE_PATHS.EXPLORER);
         break;
       case 'Control Panel':
         shellOpen('C:/WINDOWS/system32/control.exe');

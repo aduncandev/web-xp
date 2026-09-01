@@ -48,6 +48,96 @@ async function survey(page) {
   });
 }
 
+test('seeded nodes carry the same fields as user-created ones', async ({
+  page,
+}) => {
+  await page.goto('/');
+  const r = await page.evaluate(async () => {
+    const [{ buildDefaultFileSystem }, { makeVfsNode }] = await Promise.all([
+      import('/src/context/vfsDefaults.js'),
+      import('/src/context/vfsUtils.js'),
+    ]);
+    const nodes = buildDefaultFileSystem(['Guest']);
+    const expected = Object.keys(makeVfsNode('C:/x', 'file', { at: 0 }));
+    const missing = {};
+    for (const n of nodes) {
+      for (const k of expected) {
+        if (!(k in n)) (missing[k] = missing[k] || []).push(n.path);
+      }
+    }
+    const drive = nodes.find(n => n.path === 'C:/');
+    return {
+      missingFields: Object.keys(missing),
+      driveName: drive ? drive.name : null,
+    };
+  });
+
+  /*
+   * The seeder and the live filesystem build nodes from one shared
+   * factory. They used to keep separate copies of the field list, which
+   * drifted — seeded shortcuts were missing the four fields the
+   * Properties dialog edits, holding `undefined` where a user-created
+   * shortcut held `null`.
+   */
+  expect(r.missingFields).toEqual([]);
+  // Drive roots name themselves differently from every other node.
+  expect(r.driveName).toBe('C:');
+});
+
+test('the Store and the program registry describe programs the same way', async ({
+  page,
+}) => {
+  await page.goto('/');
+  const result = await page.evaluate(async () => {
+    const [apps, store, defaults] = await Promise.all([
+      import('/src/WinXP/apps/index.jsx'),
+      import('/src/WinXP/apps/Store/catalog.js'),
+      import('/src/context/vfsDefaults.js'),
+    ]);
+    const sizeByPath = new Map(
+      defaults
+        .buildDefaultFileSystem(['Guest'])
+        .filter(n => n.type === 'file')
+        .map(n => [n.path.toLowerCase(), n.size]),
+    );
+
+    const out = [];
+    let compared = 0;
+    for (const title of store.CATALOG) {
+      if (!title.exePath) continue; // media titles are not programs
+      const program = apps.PROGRAMS[title.exePath];
+      if (!program) continue;
+      compared += 1;
+      const registryName = program.displayName || program.name;
+      if (registryName !== title.name) {
+        out.push(`${title.id}: name "${title.name}" vs "${registryName}"`);
+      }
+      if (program.publisher && program.publisher !== title.publisher) {
+        out.push(
+          `${title.id}: publisher "${title.publisher}" vs "${program.publisher}"`,
+        );
+      }
+      const seeded = sizeByPath.get(title.exePath.toLowerCase());
+      if (seeded !== undefined && seeded !== title.sizeBytes) {
+        out.push(`${title.id}: size ${title.sizeBytes} vs seeded ${seeded}`);
+      }
+    }
+    return { mismatches: out, compared };
+  });
+
+  /*
+   * A shop title and its registry entry are the same program described
+   * twice — name, publisher and advertised size. Nothing keeps the two in
+   * step, and Properties reads one while the shop reads the other.
+   *
+   * The `compared` count is asserted too: without it this test would pass
+   * just as happily if the two sets stopped overlapping and it silently
+   * checked nothing.
+   */
+  expect(result.compared).toBeGreaterThan(5);
+  expect(result.mismatches, result.mismatches.join('\n  ')).toEqual([]);
+});
+
 test('no seeded shortcut points at a file that does not exist', async ({ page }) => {
   const r = await survey(page);
   expect(r.nodeCount).toBeGreaterThan(100);

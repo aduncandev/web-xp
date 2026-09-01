@@ -9,7 +9,7 @@ import {
   getProfileRootFor,
   DOCS_AND_SETTINGS,
 } from './vfsConstants';
-import { guessMimeType } from './vfsUtils';
+import { guessMimeType, makeVfsNode } from './vfsUtils';
 
 import recycleEmptyDrawn from 'assets/windowsIcons/recycle-empty.svg';
 import { getArt } from '../xpArt';
@@ -216,37 +216,16 @@ export function resolveNodeIcons(node) {
 // --- Node factory helpers ---
 
 function baseNode(path, type) {
-  return {
-    path,
+  return makeVfsNode(path, type, {
+    // Drive roots must come out as "C:", which getBaseName does not do —
+    // it returns '' for "C:/". Seeded paths are already canonical, so
+    // they are used as written rather than normalized.
     name: path.split('/').pop() || path.replace('/', ''),
-    type,
-    content: null,
-    hasBinaryContent: false,
-    blobId: null,
-    sourceUrl: null,
-    mimeType: null,
-    size: 0,
-    icon: null,
-    iconLarge: null,
-    iconKey: null,
-    createdAt: EPOCH,
-    modifiedAt: EPOCH,
-    readOnly: false,
-    system: false,
-    hidden: false,
-    target: null,
-    targetArgs: null,
-    driveLabel: null,
-    fileSystemType: null,
-    totalSpace: null,
-    freeSpace: null,
-    originalPath: null,
-    deletedAt: null,
-    specialFolder: null,
-  };
+    at: EPOCH,
+  });
 }
 
-function finishIcons(node) {
+export function finishIcons(node) {
   const icons = resolveNodeIcons(node);
   node.icon = icons.icon;
   node.iconLarge = icons.iconLarge;

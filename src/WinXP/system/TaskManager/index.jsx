@@ -192,7 +192,7 @@ export default function TaskManager({ onClose, onSetHeader, isFocus }) {
       windowId: null,
     }));
     for (const w of windows) {
-      const exe = mapWindowExe(w.title);
+      const exe = mapWindowExe(w);
       if (!exe) continue;
       rows.push({
         key: `w${w.id}`,

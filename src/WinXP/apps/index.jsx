@@ -697,6 +697,19 @@ export const PROGRAMS = {
 };
 
 // Case-insensitive lookup map (Windows paths are case-insensitive)
+/*
+ * Give every entry its own path.
+ *
+ * A program's path is otherwise only the object KEY, which lookup throws
+ * away — so a launched window never knew which program it was, and Task
+ * Manager had to keyword-match window titles to guess. Derived from the
+ * keys here rather than written into each entry by hand, so it cannot
+ * drift the way a second copy would.
+ */
+for (const [exePath, entry] of Object.entries(PROGRAMS)) {
+  entry.exePath = exePath;
+}
+
 const PROGRAMS_CI = new Map(
   Object.keys(PROGRAMS).map(k => [k.toLowerCase(), PROGRAMS[k]]),
 );

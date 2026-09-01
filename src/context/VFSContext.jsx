@@ -22,6 +22,8 @@ import {
   buildMachineFileSystem,
   buildUserProfile,
   resolveNodeIcons,
+  // The same two-line helper existed here verbatim as `applyIcons`.
+  finishIcons as applyIcons,
 } from './vfsDefaults';
 import { listUsers, subscribeUsers, getCurrentUserName } from './users';
 import { openRemoteFile } from './remoteFile';
@@ -37,6 +39,7 @@ import {
   isDescendantOf,
   guessMimeType,
   validateFileName,
+  makeVfsNode,
 } from './vfsUtils';
 import {
   EXE_PATHS,
@@ -68,6 +71,35 @@ import { buildBackupZip, isUserFile, storedNodeBytes } from './vfsBackup';
 // shelved for a rework; the app code stays). An existing disk keeps the
 // exes and shortcuts without this.
 const VFS_SCHEMA_VERSION = '6';
+
+/*
+ * Migration tables for stores seeded by an older build. Kept at module
+ * scope because they are fixed data about the past, not something the boot
+ * sequence computes — they were rebuilt on every mount, buried forty lines
+ * inside the init effect, which is nobody's idea of where to look for
+ * "which programs have ever moved".
+ */
+
+// System exes that moved (the joke programs relocated to D:). Persisted
+// shortcuts still point at the old paths — repoint them so e.g. the
+// desktop '???' keeps opening after the move.
+const MIGRATED_TARGETS = new Map([
+  ['c:/windows/system32/room_man.exe', EXE_PATHS.MISSINGNO],
+  ['c:/windows/system32/dogwindow.exe', EXE_PATHS.DOGWINDOW],
+]);
+
+// System nodes that have since been renamed away. Without this the
+// additive seeding pass adds the new name and leaves the old one orphaned
+// in system32 forever.
+const RETIRED_SYSTEM_PATHS = [
+  'c:/windows/system32/missingno.exe',
+  // was seeded before the legacy player became a Store title; a
+  // Store-installed copy is system: false and survives this pass
+  'c:/program files/windows media player/mplayer2.exe',
+  // the joke programs moved to the D: "CD" (see MIGRATED_TARGETS)
+  'c:/windows/system32/room_man.exe',
+  'c:/windows/system32/dogwindow.exe',
+];
 const SCHEMA_KEY = 'winxp_vfs_schema';
 const SCHEMA_SENTINEL = '::schema';
 
@@ -237,13 +269,6 @@ export function VFSProvider({ children }) {
           const defaultsByPath = new Map(
             buildDefaultFileSystem(registeredUserNames()).map(n => [n.path, n]),
           );
-          // System exes that moved (the joke programs relocated to D:).
-          // Persisted shortcuts still point at the old paths — repoint them
-          // so e.g. the desktop '???' keeps opening after the move.
-          const MIGRATED_TARGETS = new Map([
-            ['c:/windows/system32/room_man.exe', EXE_PATHS.MISSINGNO],
-            ['c:/windows/system32/dogwindow.exe', EXE_PATHS.DOGWINDOW],
-          ]);
           for (const node of stored) {
             if (node.type === 'shortcut' && node.target) {
               const moved = MIGRATED_TARGETS.get(node.target.toLowerCase());
@@ -279,18 +304,6 @@ export function VFSProvider({ children }) {
           // The shell never lets system items be deleted, so a missing one
           // always means "newer than the store" — seed just those, leaving
           // user data untouched.
-          // System nodes that have since been renamed away. Without this
-          // the additive pass below seeds the new name and leaves the old
-          // one orphaned in system32 forever.
-          const RETIRED_SYSTEM_PATHS = [
-            'c:/windows/system32/missingno.exe',
-            // was seeded before the legacy player became a Store title; a
-            // Store-installed copy is system: false and survives this pass
-            'c:/program files/windows media player/mplayer2.exe',
-            // the joke programs moved to the D: "CD" (see MIGRATED_TARGETS)
-            'c:/windows/system32/room_man.exe',
-            'c:/windows/system32/dogwindow.exe',
-          ];
           for (const dead of RETIRED_SYSTEM_PATHS) {
             for (const n of stored) {
               if (n.path.toLowerCase() === dead && n.system) {
@@ -612,50 +625,10 @@ export function VFSProvider({ children }) {
     [markDirty, bump],
   );
 
-  const makeNode = useCallback((path, type) => {
-    const p = normalizePath(path);
-    const now = Date.now();
-    return {
-      path: p,
-      name: getBaseName(p),
-      type,
-      content: null,
-      hasBinaryContent: false,
-      blobId: null,
-      sourceUrl: null,
-      mimeType: null,
-      size: 0,
-      icon: null,
-      iconLarge: null,
-      iconKey: null,
-      createdAt: now,
-      modifiedAt: now,
-      readOnly: false,
-      system: false,
-      hidden: false,
-      target: null,
-      targetArgs: null,
-      // Shortcut-only fields, editable from Properties > Shortcut
-      comment: null,
-      startIn: null,
-      runMode: null,
-      customIcon: false,
-      driveLabel: null,
-      fileSystemType: null,
-      totalSpace: null,
-      freeSpace: null,
-      originalPath: null,
-      deletedAt: null,
-      specialFolder: null,
-    };
-  }, []);
-
-  const applyIcons = node => {
-    const icons = resolveNodeIcons(node);
-    node.icon = icons.icon;
-    node.iconLarge = icons.iconLarge;
-    return node;
-  };
+  const makeNode = useCallback(
+    (path, type) => makeVfsNode(normalizePath(path), type, { at: Date.now() }),
+    [],
+  );
 
   const createFile = useCallback(
     (path, content = '', mimeType) => {
@@ -1041,6 +1014,45 @@ export function VFSProvider({ children }) {
     [isProtectedSystemNode, systemChangesAllowed],
   );
 
+  /**
+   * Move every descendant of `fromPath` so it sits under `toPath`.
+   *
+   * Renaming a folder, deleting one to the Recycle Bin and restoring one
+   * back out are all the same operation on the subtree underneath, and
+   * each used to carry its own hand-written copy of this loop.
+   *
+   * The matches are collected before anything is written: the node map is
+   * being mutated as we go, and deleting keys from a Map while iterating
+   * it is exactly the kind of thing that works until it doesn't.
+   *
+   * `decorate(oldKey)` supplies whatever extra fields the caller needs on
+   * each moved node — the Recycle Bin records where every piece came from,
+   * and restoring clears that again.
+   */
+  const relocateDescendants = useCallback(
+    (fromPath, toPath, decorate) => {
+      const prefix = fromPath + '/';
+      const moving = [];
+      for (const [key, child] of nodesRef.current) {
+        if (key.startsWith(prefix)) moving.push([key, child]);
+      }
+      for (const [key, child] of moving) {
+        nodesRef.current.delete(key);
+        markDeleted(key);
+        const newKey = toPath + key.slice(fromPath.length);
+        nodesRef.current.set(newKey, {
+          ...child,
+          path: newKey,
+          name: getBaseName(newKey),
+          ...(decorate ? decorate(key) : null),
+        });
+        markDirty(newKey);
+      }
+      return moving.length;
+    },
+    [markDeleted, markDirty],
+  );
+
   const relocate = useCallback(
     (op, np, extraPatch = {}) => {
       const node = nodesRef.current.get(op);
@@ -1059,28 +1071,12 @@ export function VFSProvider({ children }) {
       nodesRef.current.set(np, updated);
       markDirty(np);
 
-      if (node.type === 'folder') {
-        const prefix = op + '/';
-        const toMove = [];
-        for (const [key, child] of nodesRef.current) {
-          if (key.startsWith(prefix)) {
-            toMove.push([key, child]);
-          }
-        }
-        for (const [key, child] of toMove) {
-          nodesRef.current.delete(key);
-          markDeleted(key);
-          const newKey = np + key.slice(op.length);
-          const updatedChild = { ...child, path: newKey };
-          nodesRef.current.set(newKey, updatedChild);
-          markDirty(newKey);
-        }
-      }
+      if (node.type === 'folder') relocateDescendants(op, np);
 
       // Settings filed under the old path have to follow it there
       repathConfigRef.current(op, np);
     },
-    [markDirty, markDeleted],
+    [markDirty, markDeleted, relocateDescendants],
   );
 
   /**
@@ -1296,28 +1292,12 @@ export function VFSProvider({ children }) {
       nodesRef.current.set(destPath, recycled);
       markDirty(destPath);
 
-      // Move descendants if folder
+      // The bin remembers where each piece of the subtree came from.
       if (node.type === 'folder') {
-        const prefix = p + '/';
-        const toMove = [];
-        for (const [key, child] of nodesRef.current) {
-          if (key.startsWith(prefix)) {
-            toMove.push([key, child]);
-          }
-        }
-        for (const [key, child] of toMove) {
-          nodesRef.current.delete(key);
-          markDeleted(key);
-          const newKey = destPath + key.slice(p.length);
-          const movedChild = {
-            ...child,
-            path: newKey,
-            originalPath: key,
-            deletedAt: now,
-          };
-          nodesRef.current.set(newKey, movedChild);
-          markDirty(newKey);
-        }
+        relocateDescendants(p, destPath, key => ({
+          originalPath: key,
+          deletedAt: now,
+        }));
       }
 
       bump();
@@ -1330,6 +1310,7 @@ export function VFSProvider({ children }) {
       existsCI,
       isProtectedSystemNode,
       systemChangesAllowed,
+      relocateDescendants,
     ],
   );
 
@@ -1464,35 +1445,26 @@ export function VFSProvider({ children }) {
       nodesRef.current.set(restorePath, restored);
       markDirty(restorePath);
 
-      // Restore descendants under the restored folder
+      // Out of the bin, so the descendants stop being recycled items.
       if (node.type === 'folder') {
-        const prefix = p + '/';
-        const toRestore = [];
-        for (const [key, child] of nodesRef.current) {
-          if (key.startsWith(prefix)) {
-            toRestore.push([key, child]);
-          }
-        }
-        for (const [key, child] of toRestore) {
-          const restoredChildPath = restorePath + key.slice(p.length);
-          nodesRef.current.delete(key);
-          markDeleted(key);
-          const restoredChild = {
-            ...child,
-            path: restoredChildPath,
-            name: getBaseName(restoredChildPath),
-            originalPath: null,
-            deletedAt: null,
-          };
-          nodesRef.current.set(restoredChildPath, restoredChild);
-          markDirty(restoredChildPath);
-        }
+        relocateDescendants(p, restorePath, () => ({
+          originalPath: null,
+          deletedAt: null,
+        }));
       }
 
       bump();
       return { ok: true };
     },
-    [markDirty, markDeleted, bump, ensureAncestors, findNodeCI, hasSystemNodes],
+    [
+      markDirty,
+      markDeleted,
+      bump,
+      ensureAncestors,
+      findNodeCI,
+      hasSystemNodes,
+      relocateDescendants,
+    ],
   );
 
   const emptyRecycleBin = useCallback(() => {
@@ -1674,8 +1646,30 @@ export function VFSProvider({ children }) {
    */
 
   /** Repaths one account's own path-keyed settings after its profile moves. */
+  // Stores that file things by path: maps keyed by a file's path, and
+  // lists that hold paths outright — the Media Player's library among
+  // them. `lower` marks a store whose keys are kept lower-cased.
+  const PATH_KEYED_CONFIG = [
+    { key: 'fileSummaries', lower: false },
+    { key: 'mediaTagEdits', lower: true },
+  ];
+  const PATH_LIST_CONFIG = ['mediaLibrary', 'mediaLibraryDeleted'];
+
+  /**
+   * Rewrite every stored setting that files things by path, for one account.
+   *
+   * Both a file rename and an account rename need exactly this, and each
+   * used to carry its own copy of the algorithm — which had already
+   * drifted, since only this one ever learned about desktop layout.
+   *
+   * `withDesktopLayout` is the one real difference and stays explicit.
+   * Renaming an account moves the whole profile root while the desktop
+   * component knows nothing about it, so the layout must be rewritten
+   * here. Renaming a single file is different: that component repaths its
+   * own state and then persists it, so doing it here too would race it.
+   */
   const repathConfigFor = useCallback(
-    (name, oldPath, newPath) => {
+    (name, oldPath, newPath, { withDesktopLayout = true } = {}) => {
       const fromLc = String(oldPath).toLowerCase();
       const prefixLc = `${fromLc}/`;
       const moved = (entry, to) => {
@@ -1686,10 +1680,7 @@ export function VFSProvider({ children }) {
         return null;
       };
 
-      for (const { key, lower } of [
-        { key: 'fileSummaries', lower: false },
-        { key: 'mediaTagEdits', lower: true },
-      ]) {
+      for (const { key, lower } of PATH_KEYED_CONFIG) {
         const map = getUserConfigFor(name, key, null);
         if (!map || typeof map !== 'object' || Array.isArray(map)) continue;
         const to = lower ? String(newPath).toLowerCase() : newPath;
@@ -1703,7 +1694,7 @@ export function VFSProvider({ children }) {
         if (changed) setUserConfigFor(name, key, next);
       }
 
-      for (const key of ['mediaLibrary', 'mediaLibraryDeleted']) {
+      for (const key of PATH_LIST_CONFIG) {
         const list = getUserConfigFor(name, key, null);
         if (!Array.isArray(list)) continue;
         let changed = false;
@@ -1715,6 +1706,8 @@ export function VFSProvider({ children }) {
         });
         if (changed) setUserConfigFor(name, key, next);
       }
+
+      if (!withDesktopLayout) return;
 
       /*
        * Desktop icon positions are keyed by the path of what they point
@@ -1815,69 +1808,16 @@ export function VFSProvider({ children }) {
     [setUserConfigFor],
   );
 
-  /**
-   * Settings the profile files under a file's path — the Summary fields and
-   * the media tag edits. Renaming or moving a file has to carry them along,
-   * or what the user typed about it is orphaned the moment it is renamed.
-   * `lower` says whether that store lower-cases its keys.
+  /*
+   * A file rename or move rewrites the same path-keyed settings, for
+   * whoever is logged in. Desktop layout is left out: the desktop
+   * component repaths its own positions on rename and then persists
+   * them, so rewriting them here as well would race it.
    */
-  // Maps keyed by a file's path, and lists that hold paths outright — the
-  // Media Player's library among them. `lower` marks a store whose keys are
-  // kept lower-cased.
-  const PATH_KEYED_CONFIG = [
-    { key: 'fileSummaries', lower: false },
-    { key: 'mediaTagEdits', lower: true },
-  ];
-  const PATH_LIST_CONFIG = ['mediaLibrary', 'mediaLibraryDeleted'];
-
-  repathConfigRef.current = (oldPath, newPath) => {
-    const fromLc = String(oldPath).toLowerCase();
-    const prefixLc = `${fromLc}/`;
-    // one path rewritten the way the store spells it
-    const moved = (entry, to) => {
-      const entryLc = entry.toLowerCase();
-      if (entryLc === fromLc) return to;
-      if (entryLc.startsWith(prefixLc))
-        // a renamed folder takes everything filed under it
-        return to + entry.slice(oldPath.length);
-      return null;
-    };
-    for (const { key, lower } of PATH_KEYED_CONFIG) {
-      let map;
-      try {
-        map = getUserConfig(key, null);
-      } catch {
-        map = null;
-      }
-      if (!map || typeof map !== 'object' || Array.isArray(map)) continue;
-      const to = lower ? String(newPath).toLowerCase() : newPath;
-      let changed = false;
-      const next = {};
-      for (const [entry, value] of Object.entries(map)) {
-        const target = moved(entry, to);
-        if (target !== null) changed = true;
-        next[target !== null ? target : entry] = value;
-      }
-      if (changed) setUserConfig(key, next);
-    }
-    for (const key of PATH_LIST_CONFIG) {
-      let list;
-      try {
-        list = getUserConfig(key, null);
-      } catch {
-        list = null;
-      }
-      if (!Array.isArray(list)) continue;
-      let changed = false;
-      const next = list.map(entry => {
-        if (typeof entry !== 'string') return entry;
-        const target = moved(entry, newPath);
-        if (target !== null) changed = true;
-        return target !== null ? target : entry;
-      });
-      if (changed) setUserConfig(key, next);
-    }
-  };
+  repathConfigRef.current = (oldPath, newPath) =>
+    repathConfigFor(getCurrentUserName(), oldPath, newPath, {
+      withDesktopLayout: false,
+    });
 
   // --- Clipboard ---
 

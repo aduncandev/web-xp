@@ -1308,7 +1308,7 @@ function processRows(env) {
     w => !/task manager/i.test(w.title || ''),
   );
   for (const w of wins) {
-    const name = mapWindowExe(w.title);
+    const name = mapWindowExe(w);
     if (!name) continue;
     rows.push({
       name,

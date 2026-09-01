@@ -61,35 +61,10 @@ const PROGRAM_ICONS_32 = {
   [EXE_PATHS.PICTOCHAT]: messenger,
 };
 
-// Click actions the WinXP onClickMenuItem switch already understands;
-// anything else launches through the 'open:<path>' passthrough.
-const LEGACY_ACTIONS = {
-  [EXE_PATHS.IEXPLORE]: 'Internet Explorer',
-  [OUTLOOK_EXE]: 'Outlook Express',
-  [EXE_PATHS.WINMINE]: 'Minesweeper',
-  [EXE_PATHS.NOTEPAD]: 'Notepad',
-  [EXE_PATHS.WINAMP]: 'Winamp',
-  [EXE_PATHS.MSPAINT]: 'Paint',
-  [EXE_PATHS.WMPLAYER]: 'Media Player',
-  [EXE_PATHS.PICTOCHAT]: 'PictoChat',
-  [EXE_PATHS.TOUR]: 'About Me',
-  [EXE_PATHS.VOLTORB]: 'Voltorb Flip',
-  [EXE_PATHS.PINBALL]: 'Pinball',
-  [EXE_PATHS.CMD]: 'Command Prompt',
-  [EXE_PATHS.EXPLORER]: 'Windows Explorer',
-};
-
-// Display-name overrides where the Start Menu label differs from the
-// program registry's displayName.
-const LEGACY_LABELS = {
-  [EXE_PATHS.TOUR]: 'About Me',
-};
-
-// Menu label/action -> program exe, for resolving right-clicked entries in
-// the All Programs cascade (which only carries display text).
+// Menu label -> program exe, for resolving right-clicked entries in the
+// All Programs cascade (which only carries display text).
 const TEXT_TO_EXE = (() => {
   const m = {};
-  for (const [exe, action] of Object.entries(LEGACY_ACTIONS)) m[action] = exe;
   for (const [exe, p] of Object.entries(PROGRAMS)) {
     const label = p.displayName || p.name;
     if (label && !(label in m)) m[label] = exe;
@@ -126,8 +101,12 @@ function programEntry(exePath, small) {
   return {
     exePath,
     icon,
-    text: LEGACY_LABELS[exePath] || program.displayName || program.name,
-    action: LEGACY_ACTIONS[exePath] || `open:${exePath}`,
+    text: program.displayName || program.name,
+    // Every launch goes through the shell's 'open:<path>' passthrough. A
+    // program used to need a third identity — a display-name "action"
+    // string — that the shell then translated straight back into the exe
+    // path the caller already had.
+    action: `open:${exePath}`,
   };
 }
 
@@ -291,6 +270,7 @@ function FooterMenu({
             <Item
               onClick={onClick}
               text="Internet"
+              action={`open:${EXE_PATHS.IEXPLORE}`}
               bold
               icon={small ? PROGRAM_ICONS_16[EXE_PATHS.IEXPLORE] || ie : ie}
             >

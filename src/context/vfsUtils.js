@@ -14,6 +14,55 @@ export function normalizePath(p) {
   return out;
 }
 
+/**
+ * Every field a VFS node has, in one place.
+ *
+ * The live filesystem and the seeder both build nodes, and each used to
+ * carry its own copy of this list. They drifted: seeded nodes never got
+ * the four shortcut fields the Properties dialog edits, so a seeded
+ * shortcut held `undefined` where a user-created one held `null`.
+ *
+ * The two things callers legitimately differ on are passed in. The seeder
+ * derives drive names its own way — `getBaseName('C:/')` is `''` where a
+ * drive node needs `'C:'` — and stamps a fixed epoch so that a freshly
+ * seeded disk is identical every time.
+ */
+export function makeVfsNode(path, type, { name, at } = {}) {
+  return {
+    path,
+    name: name !== undefined ? name : getBaseName(path),
+    type,
+    content: null,
+    hasBinaryContent: false,
+    blobId: null,
+    sourceUrl: null,
+    mimeType: null,
+    size: 0,
+    icon: null,
+    iconLarge: null,
+    iconKey: null,
+    createdAt: at,
+    modifiedAt: at,
+    readOnly: false,
+    system: false,
+    hidden: false,
+    target: null,
+    targetArgs: null,
+    // Shortcut-only fields, editable from Properties > Shortcut
+    comment: null,
+    startIn: null,
+    runMode: null,
+    customIcon: false,
+    driveLabel: null,
+    fileSystemType: null,
+    totalSpace: null,
+    freeSpace: null,
+    originalPath: null,
+    deletedAt: null,
+    specialFolder: null,
+  };
+}
+
 /** Get parent directory path. "C:/foo/bar" → "C:/foo" */
 export function getParentPath(p) {
   const normalized = normalizePath(p);

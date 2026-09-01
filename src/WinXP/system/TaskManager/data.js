@@ -54,9 +54,23 @@ const EXE_KEYWORDS = [
   ['documents', null],
 ];
 
-/** Map an open window's title to a process image name (null = no own row). */
-export function mapWindowExe(title) {
-  const t = String(title || '');
+// Programs that already appear in the static process list above, so an
+// open window of theirs must not add a second row.
+const ALREADY_LISTED = new Set(['taskmgr.exe']);
+
+/**
+ * Map an open window to a process image name (null = no own row).
+ *
+ * Prefers the exe path the shell publishes with each window. The title
+ * keywords below are the fallback for shell surfaces — folder windows, My
+ * Computer, the Recycle Bin — which are not registry programs and live
+ * inside explorer.exe. Accepts a bare title string too, for callers that
+ * only have one.
+ */
+export function mapWindowExe(win) {
+  const w = typeof win === 'string' ? { title: win } : win || {};
+  const t = String(w.title || '');
+
   // cmd windows are titled with the full path (or a custom `title` string)
   if (/\\/.test(t) && /\.exe$/i.test(t)) {
     return t
@@ -64,6 +78,14 @@ export function mapWindowExe(title) {
       .pop()
       .toLowerCase();
   }
+
+  if (w.exePath) {
+    const image = String(w.exePath)
+      .split('/')
+      .pop();
+    return ALREADY_LISTED.has(image.toLowerCase()) ? null : image;
+  }
+
   const lower = t.toLowerCase();
   for (const [kw, exe] of EXE_KEYWORDS) {
     if (lower.includes(kw)) return exe;
