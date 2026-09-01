@@ -35,7 +35,7 @@ import {
   QUICK_LAUNCH_SHOW_DESKTOP,
 } from '../startMenuConfig';
 import { PROGRAMS } from '../apps';
-import { PROGRAM_ICONS_16 } from './FooterMenuData';
+import { programIcon16 } from '../apps/programMeta';
 import OpenWithDialog from '../../components/OpenWithDialog';
 import genericAppIcon from 'assets/windowsIcons/shell32-2(16x16).png';
 import VolumeSlider from '../../components/VolumeSlider';
@@ -141,9 +141,7 @@ function Footer({
       // the generic-application icon — so it can be right-clicked and
       // reassigned instead of silently vanishing from the bar.
       icon:
-        PROGRAM_ICONS_16[slot] ||
-        (program && program.header.icon) ||
-        genericAppIcon,
+        programIcon16(slot) || (program && program.header.icon) || genericAppIcon,
       label: program
         ? program.displayName || program.name
         : String(slot)

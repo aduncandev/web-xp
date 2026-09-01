@@ -31,23 +31,17 @@ export const STATIC_PROCESSES = [
   { name: 'taskmgr.exe', user: null, memK: 4576 },
 ];
 
-// Keyword → image name for windows the shell has open. Explorer windows and
-// the Recycle Bin live inside explorer.exe, so they map to null (no own row).
+/*
+ * Title keywords for the windows that are NOT registered programs.
+ *
+ * Every registered program's window carries its own exe path now, so this
+ * is only reached by the shell's own surfaces — folder windows, My
+ * Computer, the Recycle Bin — which live inside explorer.exe and get no
+ * process row of their own. There used to be a row here for each program
+ * too, which meant adding an app also meant teaching Task Manager to
+ * recognise its window title.
+ */
 const EXE_KEYWORDS = [
-  ['notepad', 'notepad.exe'],
-  ['paint', 'mspaint.exe'],
-  ['minesweeper', 'winmine.exe'],
-  ['internet explorer', 'iexplore.exe'],
-  ['internetexplorer', 'iexplore.exe'],
-  ['windows media player', 'wmplayer.exe'],
-  ['media player', 'mplayer2.exe'],
-  ['winamp', 'winamp.exe'],
-  ['pinball', 'pinball.exe'],
-  ['voltorb', 'voltorbflip.exe'],
-  ['pictochat', 'pictochat.exe'],
-  ['tour', 'tour.exe'],
-  ['???', 'ROOM_MAN.exe'],
-  ['task manager', null],
   ['my computer', null],
   ['recycle bin', null],
   ['local disk', null],

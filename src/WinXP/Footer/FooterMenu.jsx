@@ -9,10 +9,6 @@ import {
   SUBMENU_SHOW_DELAY_MS,
 } from 'components/menuFade';
 import ie from 'assets/windowsIcons/ie.png';
-import mine from 'assets/minesweeper/mine-icon.png';
-import outlook from 'assets/windowsIcons/887(32x32).png';
-import mediaPlayer from 'assets/windowsIcons/846(32x32).png';
-import messenger from 'assets/windowsIcons/pictochat.png';
 import documents from 'assets/windowsIcons/308(32x32).png';
 import recentDocuments from 'assets/windowsIcons/301(32x32).png';
 import pictures from 'assets/windowsIcons/307(32x32).png';
@@ -20,7 +16,6 @@ import music from 'assets/windowsIcons/550(32x32).png';
 import computer from 'assets/windowsIcons/676(32x32).png';
 import controlPanel from 'assets/windowsIcons/300(32x32).png';
 import printer from 'assets/windowsIcons/549(32x32).png';
-import paint from 'assets/windowsIcons/680(32x32).png';
 import help from 'assets/windowsIcons/747(32x32).png';
 import search from 'assets/windowsIcons/299(32x32).png';
 import run from 'assets/windowsIcons/743(32x32).png';
@@ -29,8 +24,6 @@ import user from 'assets/userIcons/skillz.bmp';
 import { getCurrentUserName, getUser, getAvatar } from '../../context/users';
 import shut from 'assets/windowsIcons/310(32x32).png';
 import allProgramsIcon from 'assets/windowsIcons/all-programs.ico';
-import winamp from 'assets/windowsIcons/winamp.png';
-import notepad from 'assets/windowsIcons/327(32x32).png';
 import storeBag from 'assets/store/bag.gif';
 import empty from 'assets/empty.png';
 
@@ -43,23 +36,12 @@ import {
   removeFromMfu,
   MFU_SEEDS,
 } from '../startMenuConfig';
-import { MyRecentDocuments, PROGRAM_ICONS_16 } from './FooterMenuData';
+import { programIcon16, programIcon32 } from '../apps/programMeta';
+
+/** What My Recent Documents shows before anything has been opened. */
+const MyRecentDocuments = [{ type: 'item', icon: empty, text: '(Empty)' }];
 
 const OUTLOOK_EXE = 'C:/Program Files/Outlook Express/msimn.exe';
-
-// 32px icons for the large-icon left column, keyed by exe path. The
-// small-icon variants live in FooterMenuData's PROGRAM_ICONS_16.
-const PROGRAM_ICONS_32 = {
-  [EXE_PATHS.IEXPLORE]: ie,
-  [OUTLOOK_EXE]: outlook,
-  [EXE_PATHS.WINMINE]: mine,
-  [EXE_PATHS.NOTEPAD]: notepad,
-  [EXE_PATHS.WINAMP]: winamp,
-  [EXE_PATHS.MSPAINT]: paint,
-  [EXE_PATHS.WMPLAYER]: mediaPlayer,
-  [EXE_PATHS.MPLAYER2]: mediaPlayer,
-  [EXE_PATHS.PICTOCHAT]: messenger,
-};
 
 // Menu label -> program exe, for resolving right-clicked entries in the
 // All Programs cascade (which only carries display text).
@@ -94,9 +76,7 @@ function programEntry(exePath, small) {
   const program = PROGRAMS[exePath];
   if (!program) return null;
   const icon =
-    (small
-      ? PROGRAM_ICONS_16[exePath]
-      : PROGRAM_ICONS_32[exePath] || PROGRAM_ICONS_16[exePath]) ||
+    (small ? programIcon16(exePath) : programIcon32(exePath)) ||
     program.header.icon;
   return {
     exePath,
@@ -272,7 +252,11 @@ function FooterMenu({
               text="Internet"
               action={`open:${EXE_PATHS.IEXPLORE}`}
               bold
-              icon={small ? PROGRAM_ICONS_16[EXE_PATHS.IEXPLORE] || ie : ie}
+              icon={
+                (small
+                  ? programIcon16(EXE_PATHS.IEXPLORE)
+                  : programIcon32(EXE_PATHS.IEXPLORE)) || ie
+              }
             >
               {!small && (
                 <div className="menu__item__subtext">Internet Explorer</div>

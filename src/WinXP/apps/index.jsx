@@ -34,6 +34,7 @@ import VoltorbFlipComponent from './VoltorbFlip';
 import PinballComponent from './Pinball';
 
 import { EXE_PATHS } from '../../context/vfsConstants';
+import { PROGRAM_META } from './programMeta';
 
 import iePaper from 'assets/windowsIcons/ie-paper.png';
 import mine from 'assets/minesweeper/mine-icon.png';
@@ -246,7 +247,6 @@ export const PROGRAMS = {
   },
   [EXE_PATHS.WINAMP]: {
     name: 'Winamp',
-    displayName: 'Winamp',
     description: 'Winamp media player',
     commandNames: ['winamp'],
     header: { icon: winampIcon, title: 'Winamp', invisible: true },
@@ -262,9 +262,7 @@ export const PROGRAMS = {
   },
   [EXE_PATHS.MVL]: {
     name: 'MarioVsLuigi',
-    displayName: 'Mario vs Luigi',
     description: 'NSMB-MarioVsLuigi online multiplayer',
-    publisher: 'ipodtouch0218',
     commandNames: ['mariovsluigi'],
     header: { icon: mvlIcon, title: 'Mario vs Luigi' },
     component: WrappedMarioVsLuigi,
@@ -279,9 +277,7 @@ export const PROGRAMS = {
   },
   [EXE_PATHS.DELTASCEND]: {
     name: 'DELTASCEND',
-    displayName: 'DELTASCEND',
     description: 'The chapter 5 wall climb, plus a wall for every seed',
-    publisher: 'webxp.net',
     commandNames: ['climbrace', 'deltaclimb', 'deltascend'],
     header: { icon: climbRaceIcon, title: 'DELTASCEND' },
     component: ClimbRaceComponent,
@@ -359,9 +355,7 @@ export const PROGRAMS = {
   },
   [EXE_PATHS.VOLTORB]: {
     name: 'VoltorbFlip',
-    displayName: 'Voltorb Flip',
     description: 'Voltorb Flip',
-    publisher: 'webxp.net',
     commandNames: ['voltorbflip'],
     header: { icon: voltorbFlipIcon, title: 'Voltorb Flip' },
     component: WrappedVoltorb,
@@ -399,9 +393,7 @@ export const PROGRAMS = {
   },
   [EXE_PATHS.PICTOCHAT]: {
     name: 'PictoChat',
-    displayName: 'PictoChat',
     description: 'PictoChat',
-    publisher: 'webxp.net',
     commandNames: ['pictochat'],
     header: { icon: pictoChatIcon, title: 'PictoChat' },
     component: PictoChat,
@@ -494,7 +486,6 @@ export const PROGRAMS = {
   },
   [EXE_PATHS.TAGEDITOR]: {
     name: 'TagEditor',
-    displayName: 'Media Tag Editor',
     description: 'Media Tag Editor',
     commandNames: ['tageditor'],
     header: { icon: tagEditorIcon, title: 'Media Tag Editor' },
@@ -530,7 +521,6 @@ export const PROGRAMS = {
   // functional, just not a recreation of any particular Microsoft release.
   [EXE_PATHS.MPLAYER2]: {
     name: 'MediaPlayer',
-    displayName: 'Media Player',
     description: 'Windows Media Player',
     commandNames: ['mplayer2'],
     header: { icon: mediaPlayerIcon, title: 'Media Player', invisible: false },
@@ -708,6 +698,14 @@ export const PROGRAMS = {
  */
 for (const [exePath, entry] of Object.entries(PROGRAMS)) {
   entry.exePath = exePath;
+  /*
+   * Programs the shop also sells take their display name and publisher
+   * from programMeta, so the registry and the catalog cannot describe the
+   * same program differently. Their entries below deliberately omit those
+   * two fields.
+   */
+  const meta = PROGRAM_META[exePath];
+  if (meta) Object.assign(entry, meta);
 }
 
 const PROGRAMS_CI = new Map(

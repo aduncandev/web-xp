@@ -9,6 +9,7 @@
 import { EXE_PATHS, getProfileRootFor } from '../../../context/vfsConstants';
 import { listUsers } from '../../../context/users';
 import { START_MENU_DEFAULTS } from '../../startMenuConfig';
+import { PROGRAM_META } from '../programMeta';
 
 import pictochatIcon from 'assets/windowsIcons/pictochat.png';
 import voltorbIcon from 'assets/windowsIcons/voltorb.png';
@@ -32,8 +33,6 @@ export const SHELF_LABELS = {
 export const CATALOG = [
   {
     id: 'pictochat',
-    name: 'PictoChat',
-    publisher: 'webxp.net',
     category: 'Communication',
     icon: pictochatIcon,
     sizeBytes: 524288,
@@ -51,8 +50,6 @@ export const CATALOG = [
   },
   {
     id: 'voltorb',
-    name: 'Voltorb Flip',
-    publisher: 'webxp.net',
     category: 'Puzzle',
     icon: voltorbIcon,
     sizeBytes: 786432,
@@ -70,8 +67,6 @@ export const CATALOG = [
   },
   {
     id: 'tageditor',
-    name: 'Media Tag Editor',
-    publisher: 'webxp.net',
     category: 'Multimedia',
     icon: tagEditorIcon,
     sizeBytes: 372736,
@@ -89,8 +84,6 @@ export const CATALOG = [
   },
   {
     id: 'winamp',
-    name: 'Winamp',
-    publisher: 'Nullsoft',
     category: 'Multimedia',
     icon: winampIcon,
     sizeBytes: 1198592,
@@ -108,8 +101,6 @@ export const CATALOG = [
   },
   {
     id: 'mplayer2',
-    name: 'Media Player',
-    publisher: 'Microsoft',
     category: 'Multimedia',
     icon: mediaPlayerIcon,
     sizeBytes: 917504,
@@ -130,8 +121,6 @@ export const CATALOG = [
   },
   {
     id: 'mariovsluigi',
-    name: 'Mario vs Luigi',
-    publisher: 'ipodtouch0218',
     category: 'Action',
     icon: mvlIcon,
     sizeBytes: 53500000,
@@ -149,8 +138,6 @@ export const CATALOG = [
   },
   {
     id: 'deltascend',
-    name: 'DELTASCEND',
-    publisher: 'webxp.net',
     category: 'Action',
     icon: climbRaceIcon,
     sizeBytes: 2097152,
@@ -240,6 +227,19 @@ export const CATALOG = [
     isNew: true,
   },
 ];
+
+/*
+ * Display name and publisher come from programMeta, so the shop and the
+ * program registry cannot describe the same program differently. Media
+ * titles are not programs and keep their own.
+ */
+for (const title of CATALOG) {
+  const meta = title.exePath && PROGRAM_META[title.exePath];
+  if (meta) {
+    title.name = meta.displayName;
+    title.publisher = meta.publisher;
+  }
+}
 
 /**
  * Shop news, newest first. The welcome page's Important Info panel shows

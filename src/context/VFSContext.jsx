@@ -360,7 +360,36 @@ export function VFSProvider({ children }) {
           // Error Recovery screen: they can download their files first,
           // proceed, or close the page and leave the store untouched (the
           // promise then simply never resolves).
-          const userFiles = hasTree ? stored.filter(isUserFile) : [];
+          /*
+           * The seeder plants ordinary non-system files — readme.txt,
+           * privacy.txt, the two Favorites shortcuts — which isUserFile
+           * cannot tell apart from something the user made. So a schema
+           * bump used to hold the boot on the Windows Error Recovery
+           * screen for people who had never created anything, offering to
+           * back up a readme they had never opened.
+           *
+           * Seeded nodes carry a fixed epoch timestamp, so a file still at
+           * both its seeded path and its seeded timestamp is untouched.
+           * Edit one and it counts as yours again.
+           */
+          const untouchedSeed = new Set(
+            buildDefaultFileSystem(registeredUserNames())
+              .filter(n => n.type === 'file')
+              .map(n => `${n.path.toLowerCase()}|${n.modifiedAt}`),
+          );
+          /*
+           * ntuser.dat is excluded too. It is a real file at a seeded
+           * path, but the system rewrites it on its own — icon layout,
+           * recent documents, XP points — so its timestamp always differs
+           * and it would trigger the screen on every single bump. It is
+           * still written into the backup; it is just not, by itself,
+           * evidence that anyone made anything.
+           */
+          const isUsersOwnWork = n =>
+            isUserFile(n) &&
+            getBaseName(n.path).toLowerCase() !== 'ntuser.dat' &&
+            !untouchedSeed.has(`${n.path.toLowerCase()}|${n.modifiedAt}`);
+          const userFiles = hasTree ? stored.filter(isUsersOwnWork) : [];
           if (userFiles.length > 0) {
             console.info(
               `VFS: offering recovery backup (${userFiles.length} user files)`,
