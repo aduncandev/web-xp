@@ -3,7 +3,11 @@ import styled, { keyframes } from 'styled-components';
 
 import winLoginLogo from 'assets/windowsIcons/xplogo.png';
 import offIcon from 'assets/windowsIcons/310(32x32).png';
-import adminAvatar from 'assets/userIcons/dog.bmp';
+
+// The hidden Administrator: the picture is the same avatar key its account
+// gets, so the tile and the account cannot drift apart
+const ADMIN_AVATAR_KEY = 'dog';
+const ADMIN_BOOTSTRAP_PASSWORD = 'ILoveFemboys';
 import arrowIcon from 'assets/windowsIcons/290.ico';
 import errorIcon from 'assets/windowsIcons/897(16x16).png';
 
@@ -14,6 +18,7 @@ import {
   userHasPassword,
   getPasswordHint,
   verifyUserPassword,
+  setUserPassword,
 } from '../../context/users';
 import { getArt } from '../../xpArt';
 import XPTooltip from '../XPTooltip';
@@ -886,9 +891,19 @@ const LogonUI = ({
 
   const handleAdminPasswordSubmit = e => {
     e.preventDefault();
-    if (adminPassword === 'ILoveFemboys') {
-      // The hidden Administrator account becomes real on first login
-      if (!getUser('Administrator')) createUser('Administrator', 'dog');
+    // Until the account exists the built-in secret opens it; afterwards its
+    // password is the account's own, changeable like anyone else's
+    const admin = getUser('Administrator');
+    const accepted = admin
+      ? verifyUserPassword('Administrator', adminPassword)
+      : adminPassword === ADMIN_BOOTSTRAP_PASSWORD;
+    if (accepted) {
+      // The hidden Administrator account becomes real on first login, with
+      // the secret as its password
+      if (!admin) {
+        createUser('Administrator', ADMIN_AVATAR_KEY);
+        setUserPassword('Administrator', ADMIN_BOOTSTRAP_PASSWORD, '');
+      }
       captureTileRect('administrator');
       if (getUser('Administrator') && onLogin) onLogin('Administrator');
     } else {
@@ -923,7 +938,7 @@ const LogonUI = ({
   const welcomeAvatarSrc = welcomeUser
     ? welcomeUser.name.toLowerCase() === 'administrator' &&
       !getUser('Administrator')
-      ? adminAvatar
+      ? getAvatar(ADMIN_AVATAR_KEY)
       : getAvatar(welcomeUser.avatarKey)
     : null;
 
@@ -953,7 +968,7 @@ const LogonUI = ({
                 >
                   <AvatarIcon $selected={selectedUser === 'administrator'}>
                     <img
-                      src={adminAvatar}
+                      src={getAvatar(ADMIN_AVATAR_KEY)}
                       alt="Admin"
                       onError={e => {
                         e.target.style.display = 'none';

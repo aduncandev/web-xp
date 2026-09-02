@@ -22,11 +22,6 @@ import winamp from 'assets/windowsIcons/winamp.png';
 import voltorb16 from 'assets/windowsIcons/voltorb.png';
 import pictochat32 from 'assets/windowsIcons/pictochat.png';
 
-const OUTLOOK_EXE = 'C:/Program Files/Outlook Express/msimn.exe';
-const CALC_EXE = 'C:/WINDOWS/system32/calc.exe';
-const SOL_EXE = 'C:/WINDOWS/system32/sol.exe';
-const WORDPAD_EXE = 'C:/Program Files/Windows NT/Accessories/wordpad.exe';
-
 /**
  * Facts about a program that more than one surface needs to agree on,
  * keyed by the program's executable path.
@@ -49,7 +44,7 @@ const WORDPAD_EXE = 'C:/Program Files/Windows NT/Accessories/wordpad.exe';
  */
 export const PROGRAM_META = {
   [EXE_PATHS.IEXPLORE]: { icon16: ie16, icon32: ie32 },
-  [OUTLOOK_EXE]: { icon16: outlook16, icon32: outlook32 },
+  [EXE_PATHS.MSIMN]: { icon16: outlook16, icon32: outlook32 },
   [EXE_PATHS.WINMINE]: { icon16: mine, icon32: mine },
   [EXE_PATHS.NOTEPAD]: { icon16: notepad16, icon32: notepad32 },
   [EXE_PATHS.MSPAINT]: { icon16: paint16, icon32: paint32 },
@@ -57,9 +52,9 @@ export const PROGRAM_META = {
   [EXE_PATHS.EXPLORER]: { icon16: winExplorer16 },
   [EXE_PATHS.PINBALL]: { icon16: pinball16 },
   [EXE_PATHS.TOUR]: { icon16: tour16 },
-  [CALC_EXE]: { icon16: calculator16 },
-  [SOL_EXE]: { icon16: solitaire16 },
-  [WORDPAD_EXE]: { icon16: wordPad16 },
+  [EXE_PATHS.CALC]: { icon16: calculator16 },
+  [EXE_PATHS.SOL]: { icon16: solitaire16 },
+  [EXE_PATHS.WORDPAD]: { icon16: wordPad16 },
 
   [EXE_PATHS.WMPLAYER]: { icon16: mediaPlayer16, icon32: mediaPlayer32 },
 

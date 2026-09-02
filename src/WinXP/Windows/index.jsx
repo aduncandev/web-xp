@@ -15,7 +15,9 @@ import {
   setCloseInterceptor,
   getCloseInterceptor,
 } from '../shellBus';
+import { TASKBAR_HEIGHT, WINDOW_FRAME_PADDING } from '../constants';
 import HeaderButtons from './HeaderButtons';
+import ProgramErrorBoundary from './ProgramErrorBoundary';
 
 const FLY_MS = 180;
 const MAX_MS = 150;
@@ -28,6 +30,7 @@ function Windows({
   onMaximize,
   onShellOpen,
   onSetAppHeader,
+  onSetGeometry,
   focusedAppId,
 }) {
   return (
@@ -43,6 +46,7 @@ function Windows({
           onMouseUpMaximize={onMaximize}
           onShellOpen={onShellOpen}
           onSetAppHeader={onSetAppHeader}
+          onSetGeometry={onSetGeometry}
           isFocus={focusedAppId === app.id}
           {...app}
         />
@@ -60,15 +64,18 @@ const Window = memo(function({
   onMouseUpMaximize,
   onShellOpen,
   onSetAppHeader,
+  onSetGeometry,
   header,
-  defaultSize,
-  defaultOffset,
+  size: storedSize,
+  offset: storedOffset,
   resizable,
   maximized,
   minimized,
   minWidth,
   minHeight,
-  component,
+  // The program's component, rendered as an element so its hooks belong to
+  // its own fiber rather than the frame's
+  component: Program,
   zIndex,
   isFocus,
   className,
@@ -115,14 +122,20 @@ const Window = memo(function({
   const ref = useRef(null);
   const { width: windowWidth, height: windowHeight } = useWindowSize();
 
+  const onCommitGeometry = useCallback(
+    geometry => onSetGeometry(id, geometry),
+    [onSetGeometry, id],
+  );
   const { offset, size } = useElementResize(ref, {
     dragRef,
-    defaultOffset,
-    defaultSize,
+    offset: storedOffset,
+    size: storedSize,
+    onCommit: onCommitGeometry,
+    // Windows may be dragged anywhere above the taskbar
     boundary: {
       top: 1,
       right: windowWidth - 1,
-      bottom: windowHeight - 31,
+      bottom: windowHeight - TASKBAR_HEIGHT - 1,
       left: 1,
     },
     resizable,
@@ -133,10 +146,12 @@ const Window = memo(function({
 
   let width, height, x, y;
   if (maximized) {
-    width = windowWidth + 6;
-    height = windowHeight - 24;
-    x = -3;
-    y = -3;
+    // Fill the work area with the frame pulled just off-screen, so only
+    // the content shows and the bottom edge lands on the taskbar
+    width = windowWidth + 2 * WINDOW_FRAME_PADDING;
+    height = windowHeight - TASKBAR_HEIGHT + 2 * WINDOW_FRAME_PADDING;
+    x = -WINDOW_FRAME_PADDING;
+    y = -WINDOW_FRAME_PADDING;
   } else {
     width = size.width;
     height = size.height;
@@ -249,15 +264,17 @@ const Window = memo(function({
           />
         </header>
         <div className="app__content">
-          {component({
-            onClose: _onMouseUpClose,
-            onMinimize: _onMouseUpMinimize,
-            onShellOpen,
-            onSetHeader,
-            registerCloseInterceptor,
-            isFocus,
-            ...injectProps,
-          })}
+          <ProgramErrorBoundary title={header.title} onClose={_onMouseUpClose}>
+            <Program
+              onClose={_onMouseUpClose}
+              onMinimize={_onMouseUpMinimize}
+              onShellOpen={onShellOpen}
+              onSetHeader={onSetHeader}
+              registerCloseInterceptor={registerCloseInterceptor}
+              isFocus={isFocus}
+              {...injectProps}
+            />
+          </ProgramErrorBoundary>
         </div>
       </div>
       {fly && (
@@ -282,7 +299,7 @@ const Window = memo(function({
 const StyledWindow = styled(Window)`
   display: ${({ show }) => (show ? 'flex' : 'none')};
   position: absolute;
-  padding: ${({ header }) => (header.invisible ? 0 : 3)}px;
+  padding: ${({ header }) => (header.invisible ? 0 : WINDOW_FRAME_PADDING)}px;
   background-color: ${({ isFocus }) => (isFocus ? '#0831d9' : '#6582f5')};
   flex-direction: column;
   border-top-left-radius: ${({ maximized }) => (maximized ? 0 : 8)}px;

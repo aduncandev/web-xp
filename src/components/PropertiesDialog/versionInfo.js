@@ -61,13 +61,12 @@ function readVersion(node) {
   if (MYSTERY.test(node.path)) return mysteryVersion(fileName);
   const windows = isWindowsBinary(node.path);
   const description =
-    (program && (program.description || program.displayName || program.name)) ||
-    fileName;
+    (program && (program.description || program.displayName)) || fileName;
   const company = windows ? MS : (program && program.publisher) || MS;
   const version = windows ? WINDOWS_BUILD : '1.0.0.0';
   const productName = windows
     ? WINDOWS_PRODUCT
-    : (program && (program.displayName || program.name)) || fileName;
+    : (program && program.displayName) || fileName;
 
   return {
     fileVersion: version,

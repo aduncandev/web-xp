@@ -2,7 +2,7 @@ import React, { useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import styled from 'styled-components';
 
-import { POWER_STATE } from 'WinXP/constants';
+import { POWER_ACTION, POWER_STATE } from 'WinXP/constants';
 import XPButton from 'components/XPButton';
 import { getArt } from '../../xpArt';
 
@@ -19,6 +19,7 @@ const restartOrb = getArt('power-restart', restartIcon);
 const switchUserOrb = getArt('power-switchuser', switcherIcon);
 const logOffOrb = getArt('power-logoff', lockIcon);
 
+/** The Turn Off Computer / Log Off Windows dialog; onClickButton gets a POWER_ACTION. */
 function Modal(props) {
   return createPortal(
     <StyledContainer>
@@ -57,21 +58,19 @@ const Menu = ({ mode, onClose, onClickButton }) => {
   }
 
   useEffect(() => {
-    function activate(buttonText) {
-      onClickButton(buttonText);
-    }
     function onKeyDown(e) {
       let handled = true;
       const key = e.key.length === 1 ? e.key.toLowerCase() : e.key;
       if (key === 'Escape') {
         onClose();
       } else if (mode === POWER_STATE.TURN_OFF) {
-        if (key === 'Enter' || key === 'u' || key === 't') activate('Turn Off');
-        else if (key === 'r') activate('Restart');
+        if (key === 'Enter' || key === 'u' || key === 't')
+          onClickButton(POWER_ACTION.TURN_OFF);
+        else if (key === 'r') onClickButton(POWER_ACTION.RESTART);
         else handled = false;
       } else if (mode === POWER_STATE.LOG_OFF) {
-        if (key === 'Enter' || key === 'l') activate('Log Off');
-        else if (key === 's') activate('Switch User');
+        if (key === 'Enter' || key === 'l') onClickButton(POWER_ACTION.LOG_OFF);
+        else if (key === 's') onClickButton(POWER_ACTION.SWITCH_USER);
         else handled = false;
       } else {
         handled = false;
@@ -94,12 +93,14 @@ const Menu = ({ mode, onClose, onClickButton }) => {
             img={turnOffOrb}
             text="Turn Off"
             underline={1}
+            action={POWER_ACTION.TURN_OFF}
             onClick={onClickButton}
           />
           <Button
             img={restartOrb}
             text="Restart"
             underline={0}
+            action={POWER_ACTION.RESTART}
             onClick={onClickButton}
           />
         </>
@@ -111,12 +112,14 @@ const Menu = ({ mode, onClose, onClickButton }) => {
           img={switchUserOrb}
           text="Switch User"
           underline={0}
+          action={POWER_ACTION.SWITCH_USER}
           onClick={onClickButton}
         />
         <Button
           img={logOffOrb}
           text="Log Off"
           underline={0}
+          action={POWER_ACTION.LOG_OFF}
           onClick={onClickButton}
         />
       </>
@@ -153,10 +156,10 @@ const ButtonText = ({ text, underline }) => (
   </span>
 );
 
-const Button = ({ style, img, text, underline, onClick }) => {
+const Button = ({ style, img, text, underline, action, onClick }) => {
   function _onClick() {
     if (onClick) {
-      onClick(text);
+      onClick(action);
     }
   }
   // Like real XP, both the icon and its label are clickable

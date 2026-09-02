@@ -7,12 +7,8 @@ import SetupWizard from './components/Setup';
 import SetupPrompt from './components/SetupPrompt';
 import BSOD from './components/BSOD';
 import RecoveryScreen from './components/RecoveryScreen';
-import './index.css';
 
-import xpStartupSoundSrc from 'assets/sounds/xp_startup.wav';
-import xpLogonSoundSrc from 'assets/sounds/xp_logon.wav';
-import xpShutdownSoundSrc from 'assets/sounds/xp_shutdown.wav';
-
+import { playSystemSound, registerVolumeAdapter } from './WinXP/sounds';
 import { VolumeProvider, useVolume } from './context/VolumeContext';
 import { VFSProvider, useVFS } from './context/VFSContext';
 import { DialogProvider } from './context/DialogContext';
@@ -23,6 +19,7 @@ import {
   setActiveUser,
   setFastBoot,
   setLoggedOnUsers,
+  subscribeUsers,
 } from './context/users';
 
 // The machine's power/session flow, matched to real XP:
@@ -79,11 +76,22 @@ function PoweredOff({ onPowerOn }) {
   return <PoweredOffScreen onMouseDown={onPowerOn} />;
 }
 
+// The machine's screens, in the order a boot passes through them
+const SCREEN = {
+  CD_BOOT: 'cdboot',
+  BOOT: 'boot',
+  SETUP: 'setup',
+  LOGON: 'logon',
+  DESKTOP: 'desktop',
+  POWERED_OFF: 'poweredOff',
+  BSOD: 'bsod',
+};
+
 function AppLogic() {
   // A machine with no accounts is a fresh install, and that starts at the
   // CD prompt — unless ?guest said to skip all of it.
   const [screen, setScreen] = useState(() =>
-    listUsers().length === 0 && !guestLinkRequested() ? 'cdboot' : 'boot',
+    listUsers().length === 0 && !guestLinkRequested() ? SCREEN.CD_BOOT : SCREEN.BOOT,
   );
   // Fast user switching: every logged-in user keeps a live, mounted desktop.
   const [sessions, setSessions] = useState([]);
@@ -109,39 +117,28 @@ function AppLogic() {
   const vfsRef = useRef(vfs);
   vfsRef.current = vfs;
 
-  const playSound = useCallback(
-    soundSrc => {
-      if (!soundSrc) return;
-      try {
-        const audio = new Audio(soundSrc);
-        if (typeof applyVolume === 'function') {
-          applyVolume(audio);
-        }
-        audio.play().catch(() => {});
-      } catch (error) {
-        // Failed to play sound
-      }
-    },
-    [applyVolume],
-  );
-  const playSoundRef = useRef(playSound);
-  playSoundRef.current = playSound;
+  // The sound module applies the master volume through this adapter. It lives
+  // above every session so the startup chime has it and a logoff cannot remove it.
+  useEffect(() => {
+    registerVolumeAdapter(applyVolume);
+    return () => registerVolumeAdapter(null);
+  }, [applyVolume]);
 
   useEffect(() => {
     const handleGlobalError = message => {
-      if (screen === 'bsod') return;
+      if (screen === SCREEN.BSOD) return;
       setCrashError(message);
       setSessions([]);
-      setScreen('bsod');
+      setScreen(SCREEN.BSOD);
     };
 
     const handlePromiseRejection = event => {
-      if (screen === 'bsod') return;
+      if (screen === SCREEN.BSOD) return;
       const reason =
         event.reason?.message || event.reason || 'Unknown Promise Error';
       setCrashError(reason);
       setSessions([]);
-      setScreen('bsod');
+      setScreen(SCREEN.BSOD);
     };
 
     /*
@@ -167,7 +164,7 @@ function AppLogic() {
   // Bring up the logon surface: "Please wait..." then the user list.
   // (Silent, like the real thing — XP's sounds belong to logon/logoff.)
   const enterLogon = useCallback(() => {
-    setScreen('logon');
+    setScreen(SCREEN.LOGON);
     setLogonPhase('status');
     setStatusMessages([{ text: 'Please wait...', ms: 1200 }]);
     setStatusNext('login');
@@ -182,8 +179,16 @@ function AppLogic() {
    * gesture browsers demand before audio may play, so going further
    * would trade the startup sound for about one more second.
    */
+  // The account list, kept current by the registry rather than re-read on
+  // every render
+  const [users, setUsers] = useState(listUsers);
+  useEffect(() => subscribeUsers(() => setUsers(listUsers())), []);
+
   useEffect(() => {
-    if (screen !== 'boot') return undefined;
+    if (screen !== SCREEN.BOOT) return undefined;
+    // Windows Error Recovery holds the boot: the logon surface must not
+    // mount, or start its own timers, behind that screen
+    if (vfs.recovery) return undefined;
 
     /*
      * ?guest creates the account and turns fast boot on, then falls
@@ -197,12 +202,12 @@ function AppLogic() {
     }
 
     if (listUsers().length === 0) {
-      const t = setTimeout(() => setScreen('setup'), 4500);
+      const t = setTimeout(() => setScreen(SCREEN.SETUP), 4500);
       return () => clearTimeout(t);
     }
 
     if (getFastBoot()) {
-      setScreen('logon');
+      setScreen(SCREEN.LOGON);
       setLogonPhase('login');
       setStatusMessages([]);
       return undefined;
@@ -210,7 +215,14 @@ function AppLogic() {
 
     const t = setTimeout(() => enterLogon(), 4500);
     return () => clearTimeout(t);
-  }, [screen, enterLogon]);
+  }, [screen, enterLogon, vfs.recovery]);
+
+  // An account logging on before the disk was ready gets its profile tree
+  // as soon as it is (idempotent for existing profiles)
+  useEffect(() => {
+    if (vfs.initialized && activeUser) vfs.createUserProfile(activeUser);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [vfs.initialized, activeUser]);
 
   // Control Panel refuses to delete or rename an account with a live
   // session, and fast user switching means that is a list, not just
@@ -224,19 +236,19 @@ function AppLogic() {
   useEffect(() => {
     let title = 'Windows XP';
     switch (screen) {
-      case 'cdboot':
+      case SCREEN.CD_BOOT:
         title = 'Windows XP';
         break;
-      case 'boot':
+      case SCREEN.BOOT:
         title = 'Starting Windows...';
         break;
-      case 'setup':
+      case SCREEN.SETUP:
         title = 'Windows XP Setup';
         break;
-      case 'logon':
+      case SCREEN.LOGON:
         title = logonPhase === 'welcome' ? 'Welcome' : 'Log On to Windows';
         break;
-      case 'desktop':
+      case SCREEN.DESKTOP:
         title = activeUser ? `${activeUser}'s Computer` : 'Windows XP';
         break;
       default:
@@ -247,7 +259,7 @@ function AppLogic() {
 
   // welcome interstitial -> desktop reveal
   useEffect(() => {
-    if (screen !== 'logon' || logonPhase !== 'welcome' || !pendingUser) {
+    if (screen !== SCREEN.LOGON || logonPhase !== 'welcome' || !pendingUser) {
       return undefined;
     }
     let revealTimer;
@@ -264,12 +276,10 @@ function AppLogic() {
         // The desktop mounts under the fading logon surface. A fresh logon
         // plays the famous Startup sound ("Start Windows"); resuming a
         // switched-out session plays the short Logon sound instead.
-        playSoundRef.current(
-          pendingResume ? xpLogonSoundSrc : xpStartupSoundSrc,
-        );
+        playSystemSound(pendingResume ? 'logon' : 'startup');
         setExiting(true);
         revealTimer = setTimeout(() => {
-          setScreen('desktop');
+          setScreen(SCREEN.DESKTOP);
           setExiting(false);
           setPendingUser(null);
         }, DESKTOP_REVEAL_MS);
@@ -293,10 +303,10 @@ function AppLogic() {
         setLogonPhase('login');
         break;
       case 'poweredOff':
-        setScreen('poweredOff');
+        setScreen(SCREEN.POWERED_OFF);
         break;
       case 'boot':
-        setScreen('boot');
+        setScreen(SCREEN.BOOT);
         break;
       default:
         break;
@@ -318,35 +328,48 @@ function AppLogic() {
     );
   }, []);
 
+  // A session that ends takes its count with it, or the Welcome screen
+  // would keep reporting programs for an account that has logged off.
+  const forgetProgramCount = useCallback(name => {
+    setProgramCounts(prev => {
+      if (!(name in prev)) return prev;
+      const next = { ...prev };
+      delete next[name];
+      return next;
+    });
+  }, []);
+
   const handleLogoff = useCallback(() => {
     // Log Off destroys the active user's session (windows close)
     setSessions(s => s.filter(name => name !== activeUser));
+    forgetProgramCount(activeUser);
     setActiveUser(null);
     setActiveUserState(null);
-    setScreen('logon');
+    setScreen(SCREEN.LOGON);
     setLogonPhase('status');
     setStatusMessages([
       { text: 'Logging off...', ms: 1100 },
       { text: 'Saving your settings...', ms: 1400 },
     ]);
     setStatusNext('login');
-  }, [activeUser]);
+  }, [activeUser, forgetProgramCount]);
 
   const handleSwitchUser = useCallback(() => {
     // Switch User keeps every session alive — straight back to the user list
-    setScreen('logon');
+    setScreen(SCREEN.LOGON);
     setLogonPhase('login');
   }, []);
 
   const endAllSessions = useCallback(() => {
     setSessions([]);
+    setProgramCounts({});
     setActiveUser(null);
     setActiveUserState(null);
   }, []);
 
   const handleShutdown = useCallback(() => {
     endAllSessions();
-    setScreen('logon');
+    setScreen(SCREEN.LOGON);
     setLogonPhase('status');
     setStatusMessages([
       { text: 'Saving your settings...', ms: 1400 },
@@ -357,7 +380,7 @@ function AppLogic() {
 
   const handleRestart = useCallback(() => {
     endAllSessions();
-    setScreen('logon');
+    setScreen(SCREEN.LOGON);
     setLogonPhase('status');
     setStatusMessages([
       { text: 'Saving your settings...', ms: 1400 },
@@ -367,37 +390,35 @@ function AppLogic() {
   }, [endAllSessions]);
 
   const handleInitiateShutdownFromLogin = useCallback(() => {
-    playSound(xpShutdownSoundSrc);
+    playSystemSound('shutdown');
     endAllSessions();
     setLogonPhase('status');
     setStatusMessages([{ text: 'Windows is shutting down...', ms: 2200 }]);
     setStatusNext('poweredOff');
-  }, [playSound, endAllSessions]);
+  }, [endAllSessions]);
 
   const handleSetupComplete = useCallback(() => {
     enterLogon();
   }, [enterLogon]);
 
   const handlePowerOn = useCallback(() => {
-    setScreen('boot');
+    setScreen(SCREEN.BOOT);
   }, []);
 
   const renderOverlay = () => {
     switch (screen) {
-      case 'boot':
+      case SCREEN.BOOT:
         return <BootScreen />;
-      case 'setup':
+      case SCREEN.SETUP:
         return <SetupWizard onComplete={handleSetupComplete} />;
-      case 'logon': {
+      case SCREEN.LOGON: {
         const pendingUserRecord = pendingUser
-          ? listUsers().find(u => u.name === pendingUser) || {
-              name: pendingUser,
-            }
+          ? users.find(u => u.name === pendingUser) || { name: pendingUser }
           : null;
         return (
           <LogonUI
             phase={logonPhase}
-            users={listUsers()}
+            users={users}
             loggedOnUsers={sessions}
             programCounts={programCounts}
             onLogin={handleLogin}
@@ -409,13 +430,13 @@ function AppLogic() {
           />
         );
       }
-      case 'cdboot':
-        return <SetupPrompt onContinue={() => setScreen('boot')} />;
-      case 'poweredOff':
+      case SCREEN.CD_BOOT:
+        return <SetupPrompt onContinue={() => setScreen(SCREEN.BOOT)} />;
+      case SCREEN.POWERED_OFF:
         return <PoweredOff onPowerOn={handlePowerOn} />;
-      case 'bsod':
+      case SCREEN.BSOD:
         return <BSOD error={crashError} />;
-      case 'desktop':
+      case SCREEN.DESKTOP:
       default:
         return null;
     }
@@ -423,12 +444,12 @@ function AppLogic() {
 
   // The desktop is visible under the logon surface while it fades away.
   const desktopVisible =
-    screen === 'desktop' || (screen === 'logon' && exiting);
+    screen === SCREEN.DESKTOP || (screen === SCREEN.LOGON && exiting);
 
   return (
-    <div className="App">
+    <div>
       <Black />
-      {screen !== 'bsod' &&
+      {screen !== SCREEN.BSOD &&
         sessions.map(name => (
           <div
             key={name}
@@ -444,7 +465,7 @@ function AppLogic() {
               onSwitchUser={handleSwitchUser}
               onShutdown={handleShutdown}
               onRestart={handleRestart}
-              onOpenAppsChange={count => handleOpenAppsChange(name, count)}
+              onOpenAppsChange={handleOpenAppsChange}
             />
           </div>
         ))}
@@ -456,13 +477,14 @@ function AppLogic() {
 
 function App() {
   return (
-    <VolumeProvider>
-      <VFSProvider>
+    <VFSProvider>
+      {/* inside the filesystem: each account's levels live in its hive */}
+      <VolumeProvider>
         <DialogProvider>
           <AppLogic />
         </DialogProvider>
-      </VFSProvider>
-    </VolumeProvider>
+      </VolumeProvider>
+    </VFSProvider>
   );
 }
 

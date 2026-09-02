@@ -8,6 +8,10 @@
  */
 export const TASKBAR_HEIGHT = 30;
 
+// The Luna frame around a window's content. A maximized window is pulled
+// off-screen by this much on every side so only its content shows.
+export const WINDOW_FRAME_PADDING = 3;
+
 export const FOCUSING = {
   WINDOW: 'WINDOW',
   ICON: 'ICON',
@@ -17,4 +21,13 @@ export const POWER_STATE = {
   START: 'START',
   LOG_OFF: 'LOG_OFF',
   TURN_OFF: 'TURN_OFF',
+};
+
+// The power verbs: one vocabulary for the dialog, the Start menu, cmd's
+// shutdown and Control Panel. The values travel over the shell bus.
+export const POWER_ACTION = {
+  LOG_OFF: 'logoff',
+  SWITCH_USER: 'switch-user',
+  TURN_OFF: 'shutdown',
+  RESTART: 'restart',
 };

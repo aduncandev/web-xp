@@ -4,6 +4,7 @@ import {
   FOCUS_APP,
   MINIMIZE_APP,
   TOGGLE_MAXIMIZE_APP,
+  SET_APP_GEOMETRY,
   FOCUS_ICON,
   SELECT_ICONS,
   FOCUS_DESKTOP,
@@ -18,7 +19,6 @@ import {
   TILE_WINDOWS_VERTICALLY,
 } from './constants/actions';
 import { FOCUSING, POWER_STATE, TASKBAR_HEIGHT } from './constants';
-import { defaultAppState } from './apps';
 
 // Desktop work area for window-arrangement actions; dispatchers may pass
 // their own { width, height } payload
@@ -60,10 +60,10 @@ const cascadeWindows = (state, payload) => {
       ...app,
       maximized: false,
       zIndex: p.zIndex,
-      defaultOffset: p.offset,
+      offset: p.offset,
     };
     if (app.resizable) {
-      next.defaultSize = {
+      next.size = {
         width: Math.max(app.minWidth || 0, size.width),
         height: Math.max(app.minHeight || 0, size.height),
       };
@@ -103,6 +103,9 @@ const tileWindows = (state, payload, vertical) => {
         size: vertical
           ? { width: Math.round(cellSize), height: Math.round(bandSize) }
           : { width: Math.round(bandSize), height: Math.round(cellSize) },
+        // Restacked in their existing order, so whatever was on top stays
+        // on top where tiles overlap (a window wider than its cell)
+        zIndex: state.nextZIndex + index,
       });
       index += 1;
     }
@@ -113,10 +116,11 @@ const tileWindows = (state, payload, vertical) => {
     const next = {
       ...app,
       maximized: false,
-      defaultOffset: p.offset,
+      zIndex: p.zIndex,
+      offset: p.offset,
     };
     if (app.resizable) {
-      next.defaultSize = {
+      next.size = {
         width: Math.max(app.minWidth || 0, p.size.width),
         height: Math.max(app.minHeight || 0, p.size.height),
       };
@@ -126,14 +130,29 @@ const tileWindows = (state, payload, vertical) => {
   return {
     ...state,
     apps,
+    nextZIndex: state.nextZIndex + n,
     focusing: FOCUSING.WINDOW,
   };
 };
 
+/**
+ * What holds focus once the windows changed: a visible window, else the
+ * selected icons, else the desktop.
+ */
+const focusAfterChange = (apps, focusedIconPaths) => {
+  if (apps.some(app => !app.minimized)) return FOCUSING.WINDOW;
+  return focusedIconPaths.length > 0 ? FOCUSING.ICON : FOCUSING.DESKTOP;
+};
+
+/** Same program, for the single-instance rule: by exe path where there is one. */
+const sameProgram = (a, b) =>
+  a.exePath || b.exePath
+    ? a.exePath === b.exePath
+    : a.component === b.component;
+
 export const initState = {
-  apps: defaultAppState,
-  nextAppID: defaultAppState.length,
-  nextZIndex: defaultAppState.length,
+  apps: [],
+  nextZIndex: 0,
   focusing: FOCUSING.WINDOW,
   focusedIconPaths: [], // VFS paths of focused desktop icons
   selecting: null,
@@ -153,22 +172,25 @@ export const reducer = (state, action = { type: '' }) => {
   switch (action.type) {
     case ADD_APP: {
       const existingApp = state.apps.find(
-        _app =>
-          _app.component === action.payload.component && !_app.multiInstance,
+        _app => sameProgram(_app, action.payload) && !_app.multiInstance,
       );
       if (action.payload.multiInstance || !existingApp) {
+        // The launch layout becomes the window's live geometry, which the
+        // frame reports back into as it is dragged and resized
+        const { defaultOffset, defaultSize, ...entry } = action.payload;
         return {
           ...state,
           apps: [
             ...state.apps,
             {
-              ...action.payload,
+              ...entry,
+              offset: defaultOffset,
+              size: defaultSize,
               id: window.__winxpWindowIdSeq++,
               zIndex: state.nextZIndex,
               minimized: false,
             },
           ],
-          nextAppID: state.nextAppID + 1,
           nextZIndex: state.nextZIndex + 1,
           focusing: FOCUSING.WINDOW,
         };
@@ -177,7 +199,7 @@ export const reducer = (state, action = { type: '' }) => {
         action.payload.injectProps &&
         Object.keys(action.payload.injectProps).length > 0;
       const appsWithFocus = state.apps.map(app =>
-        app.component === action.payload.component
+        sameProgram(app, action.payload)
           ? {
               ...app,
               zIndex: state.nextZIndex,
@@ -199,16 +221,10 @@ export const reducer = (state, action = { type: '' }) => {
     }
     case DEL_APP: {
       const remainingApps = state.apps.filter(app => app.id !== action.payload);
-      let nextFocusing = FOCUSING.DESKTOP;
-      if (remainingApps.length > 0) {
-        nextFocusing = FOCUSING.WINDOW;
-      } else if (state.focusedIconPaths.length > 0) {
-        nextFocusing = FOCUSING.ICON;
-      }
       return {
         ...state,
         apps: remainingApps,
-        focusing: nextFocusing,
+        focusing: focusAfterChange(remainingApps, state.focusedIconPaths),
       };
     }
     case FOCUS_APP: {
@@ -228,18 +244,18 @@ export const reducer = (state, action = { type: '' }) => {
       const apps = state.apps.map(app =>
         app.id === action.payload ? { ...app, minimized: true } : app,
       );
-      const openWindows = apps.filter(app => !app.minimized);
-      let nextFocusing = FOCUSING.DESKTOP;
-      if (openWindows.length > 0) {
-        nextFocusing = FOCUSING.WINDOW;
-      } else if (state.focusedIconPaths.length > 0) {
-        nextFocusing = FOCUSING.ICON;
-      }
       return {
         ...state,
         apps,
-        focusing: nextFocusing,
+        focusing: focusAfterChange(apps, state.focusedIconPaths),
       };
+    }
+    case SET_APP_GEOMETRY: {
+      const { id, offset, size } = action.payload;
+      const apps = state.apps.map(app =>
+        app.id === id ? { ...app, offset, size } : app,
+      );
+      return { ...state, apps };
     }
     case TOGGLE_MAXIMIZE_APP: {
       const apps = state.apps.map(app =>
@@ -286,13 +302,15 @@ export const reducer = (state, action = { type: '' }) => {
       let changed = false;
       const apps = state.apps.map(app => {
         if (app.id !== id) return app;
+        // The header also carries the window's behaviour flags (buttons,
+        // noMinimize...), so any field may change it, not just the title
+        // and icon. Apps that set their header on every render still get a
+        // no-op when nothing differs, which is what keeps them from looping.
         const newHeader = { ...app.header, ...patch };
-        if (
-          newHeader.title === app.header.title &&
-          newHeader.icon === app.header.icon
-        ) {
-          return app;
-        }
+        const same = Object.keys(newHeader).every(
+          key => newHeader[key] === app.header[key],
+        );
+        if (same) return app;
         changed = true;
         return { ...app, header: newHeader };
       });
@@ -309,8 +327,7 @@ export const reducer = (state, action = { type: '' }) => {
       return {
         ...state,
         apps,
-        focusing:
-          state.focusedIconPaths.length > 0 ? FOCUSING.ICON : FOCUSING.DESKTOP,
+        focusing: focusAfterChange(apps, state.focusedIconPaths),
       };
     }
     case CASCADE_WINDOWS:

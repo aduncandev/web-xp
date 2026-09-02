@@ -47,5 +47,7 @@ test('a file created on the desktop survives a reload', async ({ page }) => {
 
   // Still there, and still exactly one of it — the seeder must not have
   // re-run over the top or added a duplicate.
-  await expect(page.locator('.desktop-icons-layer').getByText(/New Text Document/)).toHaveCount(1);
+  await expect(
+    page.locator('.desktop-icons-layer').getByText(/New Text Document/),
+  ).toHaveCount(1);
 });

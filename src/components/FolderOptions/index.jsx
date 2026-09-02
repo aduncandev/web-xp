@@ -8,35 +8,10 @@ import { useVFS } from '../../context/VFSContext';
 import { useDialog } from '../../context/DialogContext';
 import { FILE_ASSOCIATIONS } from '../../context/vfsConstants';
 import { getProgramByPath } from '../../WinXP/apps';
+import { EXT_TYPE_LABELS } from '../../WinXP/shell/fileTypes';
 
 import folderIcon from 'assets/windowsIcons/318(16x16).png';
 import documentIcon from 'assets/windowsIcons/308(16x16).png';
-
-// Friendly type names for the shell's registered extensions, as XP's
-// File Types list shows them.
-const TYPE_NAMES = {
-  '.rtf': 'Rich Text Format',
-  '.doc': 'Microsoft Word Document',
-  '.txt': 'Text Document',
-  '.log': 'Text Document',
-  '.ini': 'Configuration Settings',
-  '.cfg': 'Configuration Settings',
-  '.bat': 'MS-DOS Batch File',
-  '.html': 'HTML Document',
-  '.htm': 'HTML Document',
-  '.url': 'Internet Shortcut',
-  '.bmp': 'Bitmap Image',
-  '.png': 'PNG Image',
-  '.jpg': 'JPEG Image',
-  '.jpeg': 'JPEG Image',
-  '.gif': 'GIF Image',
-  '.wav': 'Wave Sound',
-  '.mp3': 'MP3 Format Sound',
-  '.ogg': 'OGG Format Sound',
-  '.mp4': 'MP4 Video',
-  '.webm': 'WebM Video',
-  '.avi': 'Video Clip',
-};
 
 /**
  * XP Folder Options (Tools > Folder Options... / Control Panel applet).
@@ -144,10 +119,11 @@ export default function FolderOptions({ onClose }) {
         : null;
       return {
         ext,
-        typeName: TYPE_NAMES[ext] || `${ext.slice(1).toUpperCase()} File`,
+        // The same label Explorer's Type column shows
+        typeName: EXT_TYPE_LABELS[ext] || `${ext.slice(1).toUpperCase()} File`,
         icon: (assoc && assoc.icon) || documentIcon,
         opensWith: overrideProgram
-          ? overrideProgram.displayName || overrideProgram.name
+          ? overrideProgram.displayName
           : (assoc && assoc.appName) || null,
         // Whether this row is pointed somewhere other than the shell default
         custom: !!overrideProgram,

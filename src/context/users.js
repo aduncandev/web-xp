@@ -20,11 +20,12 @@ import skillzAvatar from 'assets/userIcons/skillz.bmp';
 
 const USERS_KEY = 'winxp_users';
 const ACTIVE_KEY = 'winxp_active_user';
-const SETTINGS_KEY = 'winxp_user_settings';
 const FASTBOOT_KEY = 'winxp_fastboot';
 // Five accounts of your own, plus room for Guest — XP kept Guest out of
 // the ordinary count too, and it should never cost somebody a slot.
-const MAX_USERS = 6;
+export const MAX_USERS = 6;
+/** How many accounts Setup lets someone name: everything but Guest's slot. */
+export const MAX_SETUP_ACCOUNTS = MAX_USERS - 1;
 
 /** XP account pictures, keyed by stable string (persisted per user). */
 export const AVATARS = {
@@ -101,30 +102,14 @@ function writeJson(key, value) {
 // --- Subscriptions ---
 
 const userListeners = new Set();
-const settingListeners = new Set();
 
 export function subscribeUsers(cb) {
   userListeners.add(cb);
   return () => userListeners.delete(cb);
 }
 
-export function subscribeUserSettings(cb) {
-  settingListeners.add(cb);
-  return () => settingListeners.delete(cb);
-}
-
 function emitUsers() {
   userListeners.forEach(cb => {
-    try {
-      cb();
-    } catch {
-      // listener errors must not break the registry
-    }
-  });
-}
-
-function emitSettings() {
-  settingListeners.forEach(cb => {
     try {
       cb();
     } catch {
@@ -210,13 +195,8 @@ export function renameUser(oldName, newName) {
     USERS_KEY,
     users.map(u => (u.name === user.name ? { ...u, name: trimmed } : u)),
   );
-  // Migrate per-user settings and the active pointer
-  const settings = readJson(SETTINGS_KEY, {});
-  if (settings[user.name]) {
-    settings[trimmed] = settings[user.name];
-    delete settings[user.name];
-    writeJson(SETTINGS_KEY, settings);
-  }
+  // The active pointer follows the name; per-user settings live in the
+  // profile hive, which Control Panel moves with vfs.renameUserProfile
   if (getCurrentUserName() === null) {
     try {
       if (localStorage.getItem(ACTIVE_KEY) === user.name) {
@@ -227,7 +207,6 @@ export function renameUser(oldName, newName) {
     }
   }
   emitUsers();
-  emitSettings();
   return { ok: true };
 }
 
@@ -296,11 +275,6 @@ export function deleteUser(name) {
     USERS_KEY,
     users.filter(u => u.name !== user.name),
   );
-  const settings = readJson(SETTINGS_KEY, {});
-  if (settings[user.name]) {
-    delete settings[user.name];
-    writeJson(SETTINGS_KEY, settings);
-  }
   try {
     if (localStorage.getItem(ACTIVE_KEY) === user.name) {
       localStorage.removeItem(ACTIVE_KEY);
@@ -310,24 +284,6 @@ export function deleteUser(name) {
   }
   emitUsers();
   return { ok: true };
-}
-
-// --- Per-user settings (wallpaper, theme, …) ---
-
-export function getUserSetting(name, key, def) {
-  if (!name) return def;
-  const settings = readJson(SETTINGS_KEY, {});
-  const bucket = settings[name];
-  if (!bucket || !(key in bucket)) return def;
-  return bucket[key];
-}
-
-export function setUserSetting(name, key, value) {
-  if (!name) return;
-  const settings = readJson(SETTINGS_KEY, {});
-  settings[name] = { ...(settings[name] || {}), [key]: value };
-  writeJson(SETTINGS_KEY, settings);
-  emitSettings();
 }
 
 /*
@@ -359,7 +315,7 @@ export function setFastBoot(enabled) {
   } catch {
     /* storage unavailable; the setting simply will not persist */
   }
-  userListeners.forEach(cb => cb());
+  emitUsers();
 }
 
 /*

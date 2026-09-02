@@ -97,7 +97,19 @@ export function buildMyComputerMenuItems({ isSystem }) {
   ];
 }
 
-/** Ordinary desktop item menu (files, folders, shortcuts; single or multi). */
+/**
+ * The item context menu, shared by Explorer and the desktop.
+ *   multiple   more than one item selected
+ *   isZip      the Compressed Folders verbs
+ *   isImage    the Edit / Print / Preview verbs
+ *   name       the file's name, for the Open With choices (files only)
+ *   allSystem  every selected item is locked: no Cut, no Delete
+ *   isSystem   the clicked item is locked: no Rename
+ *   isDrive    nothing to send it to, no renaming
+ *   pinLabel   'Pin to Start menu' / 'Unpin from Start menu', or null
+ *   canPaste   a folder with something on the clipboard
+ *   inArchive  an entry inside a zip: only Open and Extract
+ */
 export function buildIconMenuItems({
   multiple,
   isZip,
@@ -105,11 +117,23 @@ export function buildIconMenuItems({
   name,
   allSystem,
   isSystem,
+  isDrive = false,
+  pinLabel = null,
+  canPaste = false,
+  inArchive = false,
 }) {
+  if (inArchive) {
+    return [
+      { label: 'Open', action: 'open', bold: true },
+      { type: 'separator' },
+      { label: 'Extract...', action: 'extract-here' },
+    ];
+  }
   const items = [];
   if (!multiple) {
     items.push({ label: 'Open', action: 'open', bold: true });
     if (isImage) {
+      // the picture verbs, in the real menu's order
       items.push({ label: 'Edit', action: 'img-edit' });
       items.push({ label: 'Print', action: 'img-print' });
       items.push({ label: 'Preview', action: 'img-preview' });
@@ -134,31 +158,35 @@ export function buildIconMenuItems({
         ],
       });
     }
+    if (pinLabel) items.push({ label: pinLabel, action: 'toggle-pin' });
     items.push({ type: 'separator' });
   }
-  items.push({
-    label: 'Send To',
-    submenu: [
-      {
-        label: 'Compressed (zipped) Folder',
-        icon: zipSendIcon,
-        action: 'sendto-zip',
-      },
-      {
-        label: 'Desktop (create shortcut)',
-        icon: getArt('Desktop16', getArt('Desktop', desktopIconSvg)),
-        action: 'sendto-desktop',
-      },
-      {
-        label: 'My Documents',
-        icon: getArt('MyDocuments16', documentIcon16),
-        action: 'sendto-mydocs',
-      },
-    ],
-  });
-  items.push({ type: 'separator' });
+  if (!isDrive) {
+    items.push({
+      label: 'Send To',
+      submenu: [
+        {
+          label: 'Compressed (zipped) Folder',
+          icon: zipSendIcon,
+          action: 'sendto-zip',
+        },
+        {
+          label: 'Desktop (create shortcut)',
+          icon: getArt('Desktop16', getArt('Desktop', desktopIconSvg)),
+          action: 'sendto-desktop',
+        },
+        {
+          label: 'My Documents',
+          icon: getArt('MyDocuments16', documentIcon16),
+          action: 'sendto-mydocs',
+        },
+      ],
+    });
+    items.push({ type: 'separator' });
+  }
   items.push({ label: 'Cut', action: 'cut', disabled: allSystem });
   items.push({ label: 'Copy', action: 'copy' });
+  if (!multiple && canPaste) items.push({ label: 'Paste', action: 'paste' });
   items.push({ type: 'separator' });
   items.push({ label: 'Create Shortcut', action: 'create-shortcut' });
   items.push({ label: 'Delete', action: 'delete', disabled: allSystem });
@@ -166,7 +194,7 @@ export function buildIconMenuItems({
     items.push({
       label: 'Rename',
       action: 'rename',
-      disabled: isSystem,
+      disabled: isSystem || isDrive,
     });
   }
   items.push({ type: 'separator' });

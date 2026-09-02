@@ -23,6 +23,7 @@ import {
   INVALID_NAME_MESSAGE,
 } from '../../context/vfsUtils';
 import { displayName, hiddenExtension } from '../../WinXP/shell/fileTypes';
+import { useExplorerView } from '../../WinXP/shell/useExplorerView';
 import {
   desktopIcon,
   documentsIcon,
@@ -71,16 +72,9 @@ export default function FileDialog({
   // active user's profile, so they must not be captured at module scope.
   const { DESKTOP, MY_DOCUMENTS } = SPECIAL_FOLDERS;
 
-  // 'Hide extensions for known file types' — XP default is on
-  const hideExt = useMemo(() => {
-    try {
-      const view = vfs.getUserConfig('explorerView', null) || {};
-      return view.hideExt !== false;
-    } catch {
-      return true;
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [vfs.version, vfs.initialized]);
+  // Folder Options: hidden extensions, and which files show at all
+  const view = useExplorerView();
+  const { hideExt } = view;
 
   const [location, setLocation] = useState(() => {
     if (initialPath && vfs.exists(initialPath)) return folderLoc(initialPath);
@@ -160,8 +154,8 @@ export default function FileDialog({
           ...vfs.getNode(MY_DOCUMENTS),
           displayName: 'My Documents',
         },
-        vfs.getNode('C:/Documents and Settings/All Users/Documents') && {
-          ...vfs.getNode('C:/Documents and Settings/All Users/Documents'),
+        vfs.getNode(SPECIAL_FOLDERS.SHARED_DOCUMENTS) && {
+          ...vfs.getNode(SPECIAL_FOLDERS.SHARED_DOCUMENTS),
           displayName: 'Shared Documents',
         },
         vfs.getNode('C:/') && {
@@ -182,7 +176,7 @@ export default function FileDialog({
     }
     return vfs
       .listDir(location.path)
-      .filter(node => !node.hidden)
+      .filter(view.isVisible)
       .filter(node => node.type !== 'shortcut')
       .filter(node =>
         node.type === 'folder' || node.type === 'drive'
@@ -217,15 +211,10 @@ export default function FileDialog({
 
   const onNewFolder = useCallback(() => {
     if (location.kind !== 'folder') return;
-    let name = 'New Folder';
-    let path = joinPath(location.path, name);
-    let counter = 2;
-    while (vfs.exists(path)) {
-      name = `New Folder (${counter})`;
-      path = joinPath(location.path, name);
-      counter++;
-    }
-    vfs.createFolder(path);
+    const name = vfs.uniqueNameIn(location.path, n =>
+      n === 1 ? 'New Folder' : `New Folder (${n})`,
+    );
+    vfs.createFolder(joinPath(location.path, name));
   }, [location, vfs]);
 
   // --- Current location display ---
@@ -644,4 +633,3 @@ export default function FileDialog({
     </XPDialogFrame>
   );
 }
-

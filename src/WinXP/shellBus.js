@@ -1,6 +1,6 @@
 // A tiny bus between the shell and task-management UIs (Task Manager,
-// taskbar tools): the shell publishes its window list here and registers
-// handlers for close/focus/minimize/maximize requests.
+// taskbar tools, cmd): the shell publishes its window list here and
+// registers handlers for close/focus/minimize/maximize/arrange requests.
 
 let windows = [];
 const subscribers = new Set();
@@ -9,6 +9,7 @@ let handlers = {
   focus: null,
   minimize: null,
   toggleMaximize: null,
+  arrange: null,
   power: null,
 };
 const taskbarButtons = new Map();
@@ -19,7 +20,10 @@ function sameWindow(a, b) {
     a.id === b.id &&
     a.title === b.title &&
     a.icon === b.icon &&
+    a.exePath === b.exePath &&
     a.minimized === b.minimized &&
+    a.maximized === b.maximized &&
+    a.hidden === b.hidden &&
     a.focused === b.focused
   );
 }
@@ -47,7 +51,17 @@ export function registerWindowHandlers(next) {
   handlers = { ...handlers, ...next };
 }
 
-/** -> [{ id, title, icon, minimized, focused }] */
+/**
+ * Shell-side: drop handlers on the way out, but only the ones still
+ * installed, so the session switching in cannot lose what it just registered.
+ */
+export function unregisterWindowHandlers(mine) {
+  for (const [key, fn] of Object.entries(mine)) {
+    if (handlers[key] === fn) handlers = { ...handlers, [key]: null };
+  }
+}
+
+/** -> [{ id, title, icon, exePath, minimized, maximized, hidden, focused }] */
 export function getWindows() {
   return windows;
 }
@@ -64,12 +78,12 @@ export function requestClose(id, force = false) {
   if (handlers.close) handlers.close(id, force);
 }
 
-/** Power flow from a program (e.g. cmd `shutdown`): 'logoff'|'restart'|'shutdown'. */
+/** Power flow from a program (e.g. cmd `shutdown`): a POWER_ACTION value. */
 export function requestPower(action) {
   if (handlers.power) handlers.power(action);
 }
 
-/** Focus by id; taskbar menus may pass a whole { type, payload } action. */
+/** Focus (and restore) the window with this id. */
 export function requestFocus(id) {
   if (handlers.focus) handlers.focus(id);
 }
@@ -81,6 +95,19 @@ export function requestMinimize(id) {
 /** Maximize <-> restore. */
 export function requestToggleMaximize(id) {
   if (handlers.toggleMaximize) handlers.toggleMaximize(id);
+}
+
+/** The taskbar menu's window arrangements. */
+export const ARRANGE = {
+  CASCADE: 'cascade',
+  TILE_HORIZONTAL: 'tile-horizontal',
+  TILE_VERTICAL: 'tile-vertical',
+  SHOW_DESKTOP: 'show-desktop',
+};
+
+/** Arrange every window; `workArea` ({ width, height }) is the desktop above the taskbar. */
+export function requestArrange(kind, workArea) {
+  if (handlers.arrange) handlers.arrange(kind, workArea);
 }
 
 /** Window-side: register the app's async close interceptor (WM_CLOSE veto). */

@@ -5,6 +5,7 @@ import XPButton from 'components/XPButton';
 import XPSelect from 'components/XPSelect';
 import OpenWithDialog from 'components/OpenWithDialog';
 import { useVFS } from '../../context/VFSContext';
+import { useExplorerView } from '../../WinXP/shell/useExplorerView';
 import { useDialog } from '../../context/DialogContext';
 import { getFileAssociation } from '../../context/vfsConstants';
 import {
@@ -63,15 +64,7 @@ export default function PropertiesDialog({ path, onClose, onShellOpen }) {
   const attrsLocked = !node || node.system || node.type === 'drive';
 
   // 'Hide extensions for known file types' — XP default is on
-  const hideExt = useMemo(() => {
-    try {
-      const view = vfs.getUserConfig('explorerView', null) || {};
-      return view.hideExt !== false;
-    } catch {
-      return true;
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [vfs.version, vfs.initialized]);
+  const { hideExt } = useExplorerView();
 
   const shownName = node ? displayName(node, hideExt) : '';
   const [nameValue, setNameValue] = useState(shownName);
@@ -194,7 +187,7 @@ export default function PropertiesDialog({ path, onClose, onShellOpen }) {
   const assoc = isDrive || isFolder ? null : getFileAssociation(assocPath);
   const opensWith = assocOverride
     ? {
-        appName: assocOverride.displayName || assocOverride.name,
+        appName: assocOverride.displayName,
         icon: (assocOverride.header && assocOverride.header.icon) || null,
       }
     : assoc;

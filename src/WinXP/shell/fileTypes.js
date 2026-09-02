@@ -1,9 +1,13 @@
 // The shell's registry of file-type knowledge: what each file type is
-// called (the XP "Type" column) and how node names display — which
-// registered extensions get hidden and where the shell overrides the
-// on-disk name.
+// called (the XP "Type" column), which types are pictures, how node names
+// display, which registered extensions get hidden and where the shell
+// overrides the on-disk name, and which programs offer to open what.
 import { getExtension } from '../../context/vfsUtils';
-import { FILE_ASSOCIATIONS } from '../../context/vfsConstants';
+import {
+  EXE_PATHS,
+  FILE_ASSOCIATIONS,
+  SPECIAL_FOLDERS,
+} from '../../context/vfsConstants';
 import { getArt } from '../../xpArt';
 import ieOpenIcon from 'assets/windowsIcons/ie-paper.png';
 import paintOpenIcon from 'assets/windowsIcons/680(16x16).png';
@@ -13,12 +17,15 @@ import wmpOpenIcon from 'assets/windowsIcons/846(16x16).png';
 
 const shimgvwIcon = getArt('Slideshow', paintOpenIcon);
 
-/** Friendly type labels by extension (XP "Type" column). */
-const EXT_TYPE_LABELS = {
+/** Friendly type labels by extension: the Type column, Properties and Folder Options. */
+export const EXT_TYPE_LABELS = {
   '.txt': 'Text Document',
   '.log': 'Text Document',
   '.ini': 'Configuration Settings',
   '.cfg': 'Configuration Settings',
+  '.bat': 'MS-DOS Batch File',
+  '.rtf': 'Rich Text Format',
+  '.doc': 'Microsoft Word Document',
   '.html': 'HTML Document',
   '.htm': 'HTML Document',
   '.url': 'Internet Shortcut',
@@ -27,19 +34,46 @@ const EXT_TYPE_LABELS = {
   '.jpg': 'JPEG Image',
   '.jpeg': 'JPEG Image',
   '.gif': 'GIF Image',
+  '.tif': 'TIFF Image',
+  '.tiff': 'TIFF Image',
+  '.ico': 'Icon',
+  '.webp': 'WebP Image',
   '.wav': 'Wave Sound',
   '.mp3': 'MP3 Format Sound',
-  '.ogg': 'OGG Audio File',
-  '.mp4': 'Video Clip',
-  '.webm': 'Video Clip',
+  '.ogg': 'OGG Format Sound',
+  '.mp4': 'MP4 Video',
+  '.webm': 'WebM Video',
   '.avi': 'Video Clip',
+  '.m3u': 'Playlist',
   '.exe': 'Application',
   '.dll': 'Application Extension',
   '.sys': 'System file',
   '.ocx': 'ActiveX Control',
+  '.cpl': 'Control Panel extension',
   '.zip': 'Compressed (zipped) Folder',
   '.pdf': 'PDF Document',
 };
+
+/** Picture formats the shell knows: the picture verbs, the viewer, the Summary tab. */
+export const IMAGE_EXTENSIONS = [
+  '.bmp',
+  '.png',
+  '.jpg',
+  '.jpeg',
+  '.gif',
+  '.tif',
+  '.tiff',
+  '.ico',
+  '.webp',
+];
+
+/** The subset a browser can paint (wallpaper, the slideshow saver): no TIFF. */
+export const WALLPAPER_EXTENSIONS = IMAGE_EXTENSIONS.filter(
+  ext => ext !== '.tif' && ext !== '.tiff',
+);
+
+export const isImageFile = name =>
+  IMAGE_EXTENSIONS.includes(getExtension(String(name || '')));
 
 /** Registered ("known") extensions — XP hides these when HideFileExt is on. */
 const KNOWN_EXTENSIONS = new Set([
@@ -64,25 +98,17 @@ export function hiddenExtension(node, hideExt) {
 // The All Users media folders sit on disk as "My Music" and friends but the
 // shell labels them "Shared ...", the same trick their desktop.ini pulls.
 const SHARED_MEDIA_NAMES = [
-  [
-    /^C:\/Documents and Settings\/All Users\/Documents\/My Music$/i,
-    'Shared Music',
-  ],
-  [
-    /^C:\/Documents and Settings\/All Users\/Documents\/My Pictures$/i,
-    'Shared Pictures',
-  ],
-  [
-    /^C:\/Documents and Settings\/All Users\/Documents\/My Videos$/i,
-    'Shared Video',
-  ],
+  [SPECIAL_FOLDERS.SHARED_MUSIC, 'Shared Music'],
+  [SPECIAL_FOLDERS.SHARED_PICTURES, 'Shared Pictures'],
+  [SPECIAL_FOLDERS.SHARED_VIDEOS, 'Shared Video'],
 ];
 
 /** The shell's own label for a node, where it overrides the on-disk name. */
 export function shellDisplayName(node) {
   if (!node || node.type !== 'folder' || !node.path) return null;
-  for (const [pattern, label] of SHARED_MEDIA_NAMES) {
-    if (pattern.test(node.path)) return label;
+  const lower = node.path.toLowerCase();
+  for (const [path, label] of SHARED_MEDIA_NAMES) {
+    if (path.toLowerCase() === lower) return label;
   }
   return null;
 }
@@ -124,42 +150,40 @@ export function getTypeLabel(node) {
 // cycle: apps/index.jsx already imports Explorer).
 
 const VIEWER = {
-  exePath: 'C:/WINDOWS/system32/shimgvw.dll',
+  exePath: EXE_PATHS.SHIMGVW,
   label: 'Windows Picture and Fax Viewer',
   icon: shimgvwIcon,
 };
 const IE = {
-  exePath: 'C:/Program Files/Internet Explorer/iexplore.exe',
+  exePath: EXE_PATHS.IEXPLORE,
   label: 'Internet Explorer',
   icon: ieOpenIcon,
 };
 const PAINT = {
-  exePath: 'C:/WINDOWS/system32/mspaint.exe',
+  exePath: EXE_PATHS.MSPAINT,
   label: 'Paint',
   icon: paintOpenIcon,
 };
 const NOTEPAD = {
-  exePath: 'C:/WINDOWS/system32/notepad.exe',
+  exePath: EXE_PATHS.NOTEPAD,
   label: 'Notepad',
   icon: notepadOpenIcon,
 };
 const WORDPAD = {
-  exePath: 'C:/Program Files/Windows NT/Accessories/wordpad.exe',
+  exePath: EXE_PATHS.WORDPAD,
   label: 'WordPad',
   icon: wordpadOpenIcon,
 };
 const WMP = {
-  exePath: 'C:/Program Files/Windows Media Player/wmplayer.exe',
+  exePath: EXE_PATHS.WMPLAYER,
   label: 'Windows Media Player',
   icon: wmpOpenIcon,
 };
 
-export const IMAGE_EXTS = /\.(bmp|png|jpe?g|gif|tiff?|ico)$/i;
-
 /** Ordered "Open With >" entries for a file name, or [] when unknown. */
 export function openWithChoicesFor(name) {
   const n = String(name || '');
-  if (IMAGE_EXTS.test(n)) return [VIEWER, IE, PAINT];
+  if (isImageFile(n)) return [VIEWER, IE, PAINT];
   if (/\.(txt|log|ini|cfg|bat)$/i.test(n)) return [NOTEPAD, WORDPAD];
   if (/\.(rtf|doc)$/i.test(n)) return [WORDPAD, NOTEPAD];
   if (/\.(html?|url)$/i.test(n)) return [IE, NOTEPAD];

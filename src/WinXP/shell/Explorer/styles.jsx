@@ -1,7 +1,7 @@
 // Explorer's presentational layer: the window-wide styled-components
 // blob plus the small stateless visual pieces that hang off it.
 import React from 'react';
-import styled from 'styled-components';
+import styled, { css } from 'styled-components';
 
 import { getArt } from '../../../xpArt';
 
@@ -56,6 +56,105 @@ export function TaskChevron({ collapsed }) {
     </svg>
   );
 }
+
+/**
+ * The Luna task pane: the blue column of roll-up cards left of a listing.
+ * Explorer's window and Control Panel both include it, so the two panes
+ * cannot drift apart.
+ */
+export const taskPaneCss = css`
+  .com__content__left {
+    width: 200px;
+    background: linear-gradient(to bottom, #7ba2e7 0%, #6375d6 100%);
+    overflow-y: auto;
+    padding: 12px 10px;
+    flex-shrink: 0;
+  }
+
+  .com__content__left__card {
+    border-top-left-radius: 4px;
+    border-top-right-radius: 4px;
+    width: 100%;
+    overflow: hidden;
+    border: 1px solid rgba(255, 255, 255, 0.45);
+  }
+  .com__content__left__card:not(:last-child) {
+    margin-bottom: 12px;
+  }
+  .com__content__left__card__header {
+    display: flex;
+    align-items: center;
+    height: 25px;
+    padding-left: 10px;
+    padding-right: 4px;
+    cursor: pointer;
+    background: linear-gradient(to right, #ffffff 0%, #c6d3f7 100%);
+  }
+  .com__content__left__card__header:hover {
+    & .com__content__left__card__header__text {
+      color: #428eff;
+    }
+  }
+  .com__content__left__card__header__text {
+    font-weight: 700;
+    font-size: 11px;
+    color: #215dc6;
+    flex: 1;
+  }
+  .com__task-chevron {
+    flex-shrink: 0;
+    cursor: pointer;
+  }
+  .com__content__left__card__content {
+    padding: 8px 10px 10px;
+    background: #d6dff7;
+  }
+  .com__content__left__card__row {
+    display: flex;
+    align-items: flex-start;
+    margin-bottom: 5px;
+  }
+  .com__content__left__card__row:last-child {
+    margin-bottom: 0;
+  }
+
+  .com__content__left__card__img {
+    width: 16px;
+    height: 16px;
+    margin-right: 6px;
+    flex-shrink: 0;
+  }
+  .com__content__left__card__text {
+    font-size: 11px;
+    line-height: 14px;
+    color: #000;
+    word-break: break-word;
+    &.black {
+      color: #000;
+    }
+    &.bold {
+      font-weight: bold;
+    }
+    &.link {
+      color: #215dc6;
+    }
+    &.link:hover {
+      cursor: pointer;
+      color: #428eff;
+      text-decoration: underline;
+    }
+    &.link.inert:hover {
+      cursor: default;
+      color: #215dc6;
+      text-decoration: none;
+    }
+  }
+  .com__content__left__card__header__img {
+    width: 22px;
+    height: 22px;
+    margin-right: 6px;
+  }
+`;
 
 export const Div = styled.div`
   height: 100%;
@@ -270,92 +369,7 @@ export const Div = styled.div`
     height: 100%;
     overflow: auto;
   }
-  .com__content__left {
-    width: 200px;
-    background: linear-gradient(to bottom, #7ba2e7 0%, #6375d6 100%);
-    overflow-y: auto;
-    padding: 12px 10px;
-    flex-shrink: 0;
-  }
-
-  .com__content__left__card {
-    border-top-left-radius: 4px;
-    border-top-right-radius: 4px;
-    width: 100%;
-    overflow: hidden;
-    border: 1px solid rgba(255, 255, 255, 0.45);
-  }
-  .com__content__left__card:not(:last-child) {
-    margin-bottom: 12px;
-  }
-  .com__content__left__card__header {
-    display: flex;
-    align-items: center;
-    height: 25px;
-    padding-left: 10px;
-    padding-right: 4px;
-    cursor: pointer;
-    background: linear-gradient(to right, #ffffff 0%, #c6d3f7 100%);
-  }
-  .com__content__left__card__header:hover {
-    & .com__content__left__card__header__text {
-      color: #428eff;
-    }
-  }
-  .com__content__left__card__header__text {
-    font-weight: 700;
-    font-size: 11px;
-    color: #215dc6;
-    flex: 1;
-  }
-  .com__task-chevron {
-    flex-shrink: 0;
-    cursor: pointer;
-  }
-  .com__content__left__card__content {
-    padding: 8px 10px 10px;
-    background: #d6dff7;
-  }
-  .com__content__left__card__row {
-    display: flex;
-    align-items: flex-start;
-    margin-bottom: 5px;
-  }
-  .com__content__left__card__row:last-child {
-    margin-bottom: 0;
-  }
-
-  .com__content__left__card__img {
-    width: 16px;
-    height: 16px;
-    margin-right: 6px;
-    flex-shrink: 0;
-  }
-  .com__content__left__card__text {
-    font-size: 11px;
-    line-height: 14px;
-    color: #000;
-    word-break: break-word;
-    &.black {
-      color: #000;
-    }
-    &.bold {
-      font-weight: bold;
-    }
-    &.link {
-      color: #215dc6;
-    }
-    &.link:hover {
-      cursor: pointer;
-      color: #428eff;
-      text-decoration: underline;
-    }
-    &.link.inert:hover {
-      cursor: default;
-      color: #215dc6;
-      text-decoration: none;
-    }
-  }
+  ${taskPaneCss}
   .com__content__right {
     overflow-y: auto;
     background-color: #fff;

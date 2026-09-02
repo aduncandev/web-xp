@@ -9,7 +9,9 @@ import { TaskChevron } from './styles';
 // React's reconciler leave ghost copies behind across navigations.
 export const taskRow = (icon, label, onClick, rowKey) => (
   <div className="com__content__left__card__row" key={rowKey || label}>
-    <img className="com__content__left__card__img" src={icon} alt="" />
+    {icon && (
+      <img className="com__content__left__card__img" src={icon} alt="" />
+    )}
     <div
       className={`com__content__left__card__text link${
         onClick ? '' : ' inert'
@@ -22,9 +24,16 @@ export const taskRow = (icon, label, onClick, rowKey) => (
 );
 
 /** One roll-up card. Collapse state lives with the caller (per window). */
-export const TaskCard = ({ title, collapsed, onToggle, children }) => (
+export const TaskCard = ({ title, icon, collapsed, onToggle, children }) => (
   <div className="com__content__left__card">
     <div className="com__content__left__card__header" onClick={onToggle}>
+      {icon && (
+        <img
+          className="com__content__left__card__header__img"
+          src={icon}
+          alt=""
+        />
+      )}
       <div className="com__content__left__card__header__text">{title}</div>
       <TaskChevron collapsed={collapsed} />
     </div>

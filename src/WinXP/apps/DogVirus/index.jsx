@@ -26,6 +26,7 @@ import { useEffect, useMemo, useRef } from 'react';
 import styled from 'styled-components';
 
 import { playSound, playSystemSound } from '../../sounds';
+import { TASKBAR_HEIGHT } from '../../constants';
 import { useWallpaperHijack } from '../../wallpaperHijack';
 import { EXE_PATHS } from '../../../context/vfsConstants';
 import { useVolume } from '../../../context/VolumeContext';
@@ -41,7 +42,6 @@ import baciMp3 from 'assets/dogvirus/baci_perugina2.mp3';
 import dogCheckOgg from 'assets/dogvirus/dogCheck.ogg';
 import victoryWav from 'assets/dogvirus/victory.wav';
 
-const TASKBAR_H = 30;
 const MAX_WINDOWS = 100; // patient zero + children, total
 const AUDIO_GAIN = 0.8;
 const VICTORY_GAIN = 0.9;
@@ -255,7 +255,7 @@ export default function DogVirus({
       const w = Math.round(rand(150, 320));
       const h = Math.round(rand(140, 290));
       const vw = window.innerWidth;
-      const vh = window.innerHeight - TASKBAR_H;
+      const vh = window.innerHeight - TASKBAR_HEIGHT;
       const x = Math.round(rand(0, Math.max(0, vw - w)));
       const y = Math.round(rand(0, Math.max(0, vh - h)));
       if (onShellOpenRef.current)

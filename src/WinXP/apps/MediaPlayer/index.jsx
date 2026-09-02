@@ -29,7 +29,7 @@ const getMediaType = (url, type) => {
 
 const MEDIA_EXTENSIONS = /\.(mp3|wav|ogg|mp4|webm|avi)$/i;
 
-const SHARED_MUSIC = 'C:/Documents and Settings/All Users/Documents/My Music';
+const SHARED_MUSIC = SPECIAL_FOLDERS.SHARED_MUSIC;
 
 /*
  * Resolved per scan. SPECIAL_FOLDERS.MY_MUSIC is a getter over the current

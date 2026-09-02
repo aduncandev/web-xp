@@ -5,6 +5,8 @@ import { useVFS } from '../../../context/VFSContext';
 import { SPECIAL_FOLDERS, computerIcon } from '../../../context/vfsConstants';
 import { getParentPath } from '../../../context/vfsUtils';
 import { getArt } from '../../../xpArt';
+import { MY_COMPUTER, RECYCLE_BIN } from '../location';
+import { useExplorerView } from '../useExplorerView';
 
 import desktopIconSvg from 'assets/windowsIcons/desktop.svg';
 import networkIconPng from 'assets/windowsIcons/693(16x16).png';
@@ -18,20 +20,15 @@ const recycleIcon = getArt('recycle-empty', recycleIconSvg);
 const treePlus = getArt('tree-plus', null);
 const treeMinus = getArt('tree-minus', null);
 
-const MY_COMPUTER = 'My Computer';
 const MC_ID = '::my-computer';
 
 /**
  * XP Explorer "Folders" pane — an expandable tree of the folder hierarchy.
  * Props: { currentPath, onNavigate(pathOrMyComputer), onClose }
  */
-export default function FolderTree({
-  currentPath,
-  onNavigate,
-  onShellOpen,
-  onClose,
-}) {
+export default function FolderTree({ currentPath, onNavigate, onClose }) {
   const vfs = useVFS();
+  const view = useExplorerView();
   const [expanded, setExpanded] = useState(
     () => new Set([SPECIAL_FOLDERS.DESKTOP, MC_ID]),
   );
@@ -59,27 +56,11 @@ export default function FolderTree({
     });
   }, []);
 
+  // Hidden-folder visibility follows Folder Options (per-user hive)
   const subFolders = useCallback(
-    path => {
-      // Hidden-folder visibility follows Folder Options (per-user hive)
-      let view = {};
-      try {
-        view = vfs.getUserConfig('explorerView', null) || {};
-      } catch {
-        view = {};
-      }
-      const showHidden = !!view.showHidden;
-      const hideProtectedOS = view.hideProtectedOS !== false;
-      return vfs
-        .listDir(path)
-        .filter(
-          n =>
-            n.type === 'folder' &&
-            (!n.hidden || (showHidden && !(n.system && hideProtectedOS))),
-        );
-    },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [vfs.version],
+    path =>
+      vfs.listDir(path).filter(n => n.type === 'folder' && view.isVisible(n)),
+    [vfs, view],
   );
 
   const renderFolder = (node, depth) => {
@@ -184,11 +165,11 @@ export default function FolderTree({
                 depth={1}
                 hasChildren={false}
                 isOpen={false}
-                isActive={currentPath === 'Recycle Bin'}
+                isActive={currentPath === RECYCLE_BIN}
                 icon={recycleIcon}
                 label="Recycle Bin"
                 onToggle={() => {}}
-                onSelect={() => onNavigate('Recycle Bin')}
+                onSelect={() => onNavigate(RECYCLE_BIN)}
               />
               {desktopFolders
                 .filter(f => f.path !== SPECIAL_FOLDERS.MY_DOCUMENTS)

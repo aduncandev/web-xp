@@ -5,6 +5,7 @@ import Webamp from 'webamp';
 import { useVFS } from '../../../context/VFSContext';
 import { useVolume } from '../../../context/VolumeContext';
 import { SPECIAL_FOLDERS } from '../../../context/vfsConstants';
+import { TASKBAR_HEIGHT } from '../../constants';
 
 // Webamp is rendered contained (renderInto) so its skinned windows live
 // INSIDE this app's window-manager entry: they stack by the app's z-index,
@@ -18,7 +19,7 @@ const Host = styled.div`
   left: 0;
   top: -25px; /* cancel the window chrome's content inset */
   width: 100vw;
-  height: calc(100vh - 30px); /* keep Winamp off the taskbar */
+  height: calc(100vh - ${TASKBAR_HEIGHT}px); /* keep Winamp off the taskbar */
   pointer-events: none;
   #webamp {
     pointer-events: auto;

@@ -7,6 +7,7 @@ import XPSelect from 'components/XPSelect';
 import FileDialog from 'components/FileDialog';
 import { SPECIAL_FOLDERS } from '../../context/vfsConstants';
 import { getBaseName } from '../../context/vfsUtils';
+import { WALLPAPER_EXTENSIONS } from '../../WinXP/shell/fileTypes';
 
 import { SAVERS } from './savers';
 import { VGA_PALETTE } from './savers2d';
@@ -138,8 +139,10 @@ export default function SaverSettings({ name, settings, onSave, onClose }) {
   const BITMAP_FILTERS = [
     { label: 'Bitmaps (*.bmp)', extensions: ['.bmp'] },
     {
-      label: 'All Picture Files (*.bmp;*.jpg;*.jpeg;*.png;*.gif)',
-      extensions: ['.bmp', '.jpg', '.jpeg', '.png', '.gif'],
+      label: `All Picture Files (${WALLPAPER_EXTENSIONS.map(e => `*${e}`).join(
+        ';',
+      )})`,
+      extensions: WALLPAPER_EXTENSIONS,
     },
     { label: 'All Files', extensions: null },
   ];

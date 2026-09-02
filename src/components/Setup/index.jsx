@@ -1,9 +1,15 @@
 import React, { useState, useRef, useEffect } from 'react';
 import styled, { keyframes } from 'styled-components';
 
-import { createUser, setActiveUser, listUsers } from '../../context/users';
+import {
+  createUser,
+  setActiveUser,
+  listUsers,
+  MAX_SETUP_ACCOUNTS,
+} from '../../context/users';
 import { useVFS } from '../../context/VFSContext';
 import { useVolume } from '../../context/VolumeContext';
+import { playSound } from '../../WinXP/sounds';
 import { getArt } from '../../xpArt';
 
 import msLogo from 'assets/xp/oobe-mslogo.jpg';
@@ -42,7 +48,7 @@ import { validateFileName } from '../../context/vfsUtils';
 // in, spr_spamton_cherub materializes over the cursor, follows it, heals
 // it, and leaves. Once only.
 
-const MAX_ACCOUNTS = 5;
+const MAX_ACCOUNTS = MAX_SETUP_ACCOUNTS;
 const USER_LABELS = [
   'Your name:',
   '2nd User:',
@@ -76,16 +82,10 @@ export default function SetupWizard({ onComplete }) {
 
   const helpArt = getArt('oobe-help', null);
 
-  const playSnd = (src, v, rate) => {
-    const a = new Audio(src);
-    a.volume = Math.min(1, volRef.current * v);
-    if (rate) {
-      // GameMaker pitches the sample itself, so undo the browser default
-      a.preservesPitch = false;
-      a.playbackRate = rate;
-    }
-    a.play().catch(() => {});
-  };
+  // `v` is the sample's own level under the master volume, which the
+  // sound module applies on top
+  const playSnd = (src, v, rate) =>
+    playSound(src, { gain: v, playbackRate: rate || null });
   const click = () => playSnd(navClickSrc, 0.6);
 
   // ---- the real OOBE music, looping under the whole wizard ----
@@ -452,17 +452,13 @@ export default function SetupWizard({ onComplete }) {
       setStep(STEP_USERS);
       return;
     }
-    entered.forEach(name => {
-      const res = createUser(name);
-      if (!res.ok && res.error !== 'exists') {
-        // 'invalid' was pre-checked; 'limit' cannot happen with 5 inputs
-      }
-    });
-    // Seed profile trees now; the first account gets the sample music
+    // 'invalid' was checked above and 'limit' cannot happen: Setup offers
+    // exactly as many slots as the registry has spare.
+    entered.forEach(name => createUser(name));
+    // Seed the profile trees now, for every account (Setup is only ever
+    // reached with none, so that is the ones just entered)
     if (vfs.initialized) {
-      listUsers().forEach((u, i) => {
-        vfs.createUserProfile(u.name);
-      });
+      listUsers().forEach(u => vfs.createUserProfile(u.name));
     }
     setActiveUser(null);
     if (onComplete) onComplete();

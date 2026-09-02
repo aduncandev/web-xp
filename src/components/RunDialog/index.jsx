@@ -13,8 +13,7 @@ import { getProgramByCommand } from '../../WinXP/apps';
 import runIcon from 'assets/windowsIcons/743(32x32).png';
 
 // Run history lives per-user in the profile hive (ntuser.dat) under
-// 'runHistory'; the legacy shared localStorage key is imported once.
-const LEGACY_HISTORY_KEY = 'winxp_run_history';
+// 'runHistory'.
 const HISTORY_MAX = 10;
 
 /**
@@ -34,15 +33,6 @@ export default function RunDialog({ onClose, onRun }) {
     try {
       const list = vfs.getUserConfigFor(userRef.current, 'runHistory', null);
       if (Array.isArray(list)) return list;
-      // One-time import of the legacy shared history
-      const raw = localStorage.getItem(LEGACY_HISTORY_KEY);
-      if (raw) {
-        const legacy = JSON.parse(raw);
-        const arr = Array.isArray(legacy) ? legacy : [];
-        vfs.setUserConfigFor(userRef.current, 'runHistory', arr);
-        localStorage.removeItem(LEGACY_HISTORY_KEY);
-        return arr;
-      }
     } catch {
       // hive unavailable
     }

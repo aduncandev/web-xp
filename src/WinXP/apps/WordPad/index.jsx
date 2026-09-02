@@ -2,7 +2,6 @@ import React, {
   useState,
   useEffect,
   useCallback,
-  useMemo,
   useRef,
 } from 'react';
 import styled from 'styled-components';
@@ -12,6 +11,7 @@ import FileDialog from '../../../components/FileDialog';
 import XPSelect from '../../../components/XPSelect';
 import useEditContextMenu from '../../../components/EditContextMenu';
 import { useVFS } from '../../../context/VFSContext';
+import { useExplorerView } from '../../shell/useExplorerView';
 import { useDialog } from '../../../context/DialogContext';
 import { SPECIAL_FOLDERS } from '../../../context/vfsConstants';
 import { getBaseName } from '../../../context/vfsUtils';
@@ -159,15 +159,7 @@ export default function WordPad({
   const { openEditContextMenu, editContextMenu } = useEditContextMenu();
 
   // 'Hide extensions for known file types' — XP default is on
-  const hideExt = useMemo(() => {
-    try {
-      const view = vfs.getUserConfig('explorerView', null) || {};
-      return view.hideExt !== false;
-    } catch {
-      return true;
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [vfs.version, vfs.initialized]);
+  const { hideExt } = useExplorerView();
 
   // Shell display name of the open document ('notes', not 'notes.rtf')
   const fileTitle = currentPath

@@ -58,7 +58,10 @@ export async function bootToDesktop(page) {
 /** Open the Start menu and click one of its entries by visible text. */
 export async function startMenu(page, label) {
   await startButton(page).click();
-  await page.getByText(label, { exact: true }).first().click();
+  await page
+    .getByText(label, { exact: true })
+    .first()
+    .click();
 }
 
 export { expect };

@@ -5,6 +5,7 @@ import { getArt } from '../xpArt';
 // Luna scrollbar chrome (bitmaps cropped from real XP screenshots), shared
 // by the desktop container and portaled dialogs — portals render outside
 // the WinXP container, so its scoped scrollbar styles don't reach them.
+// Missing bitmaps degrade to 'none'.
 const sbUrl = name => {
   const url = getArt(name, null);
   return url ? `url(${url})` : 'none';
@@ -58,9 +59,17 @@ export const lunaScrollbars = css`
   & ::-webkit-scrollbar-button:horizontal:end:decrement {
     display: none;
   }
+  /* Hover lightens the whole piece, pressing tints it blue, as Luna did */
   & ::-webkit-scrollbar-thumb:hover,
   & ::-webkit-scrollbar-button:hover {
-    filter: brightness(1.05);
+    box-shadow: inset 0 0 0 17px rgba(255, 255, 255, 0.3);
+  }
+  & ::-webkit-scrollbar-thumb:active,
+  & ::-webkit-scrollbar-button:active {
+    box-shadow: inset 0 0 0 17px rgba(40, 73, 135, 0.2);
+  }
+  & ::-webkit-scrollbar-corner {
+    background: #ece9d8;
   }
 `;
 

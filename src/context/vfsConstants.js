@@ -39,16 +39,17 @@ const unknownIcon = documentIcon;
 
 export const DOCS_AND_SETTINGS = 'C:/Documents and Settings';
 
-/**
- * The active user's profile root. Before anyone is logged in it falls back
- * to the first registered account (or the legacy 'Skillz' name) so path
- * reads never crash.
- */
-export function getProfileRoot() {
+/** Whose profile ambient path reads resolve against: the logged-in user, else the first account. */
+function currentProfileName() {
   const current = getCurrentUserName();
-  if (current) return `${DOCS_AND_SETTINGS}/${current}`;
+  if (current) return current;
   const first = listUsers()[0];
-  return `${DOCS_AND_SETTINGS}/${first ? first.name : 'Skillz'}`;
+  return first ? first.name : 'Skillz';
+}
+
+/** The active user's profile root. */
+export function getProfileRoot() {
+  return getProfileRootFor(currentProfileName());
 }
 
 /** Profile root for a specific account (seeding, Control Panel). */
@@ -56,41 +57,74 @@ export function getProfileRootFor(userName) {
   return `${DOCS_AND_SETTINGS}/${userName}`;
 }
 
+/**
+ * Every shell folder of one account's profile, by name. Seeding, the shop and
+ * account management work on a named account; SPECIAL_FOLDERS below is the
+ * same shape for the current user.
+ */
+export function profileFoldersFor(userName) {
+  const root = getProfileRootFor(userName);
+  const myDocuments = `${root}/My Documents`;
+  const startMenu = `${root}/Start Menu`;
+  return {
+    ROOT: root,
+    DESKTOP: `${root}/Desktop`,
+    MY_DOCUMENTS: myDocuments,
+    MY_MUSIC: `${myDocuments}/My Music`,
+    MY_PICTURES: `${myDocuments}/My Pictures`,
+    MY_VIDEOS: `${myDocuments}/My Videos`,
+    START_MENU: startMenu,
+    PROGRAMS: `${startMenu}/Programs`,
+    FAVORITES: `${root}/Favorites`,
+    TEMP: `${root}/Local Settings/Temp`,
+  };
+}
+
+const ALL_USERS = `${DOCS_AND_SETTINGS}/All Users`;
+const SHARED_DOCUMENTS = `${ALL_USERS}/Documents`;
+
 // User-scoped entries are getters so every read resolves against the
 // CURRENT user; machine-wide entries stay static strings. Do not capture
 // these at module scope — always read at call time.
 export const SPECIAL_FOLDERS = {
   get DESKTOP() {
-    return `${getProfileRoot()}/Desktop`;
+    return profileFoldersFor(currentProfileName()).DESKTOP;
   },
   get MY_DOCUMENTS() {
-    return `${getProfileRoot()}/My Documents`;
+    return profileFoldersFor(currentProfileName()).MY_DOCUMENTS;
   },
   get MY_MUSIC() {
-    return `${getProfileRoot()}/My Documents/My Music`;
+    return profileFoldersFor(currentProfileName()).MY_MUSIC;
   },
   get MY_PICTURES() {
-    return `${getProfileRoot()}/My Documents/My Pictures`;
+    return profileFoldersFor(currentProfileName()).MY_PICTURES;
   },
   get MY_VIDEOS() {
-    return `${getProfileRoot()}/My Documents/My Videos`;
+    return profileFoldersFor(currentProfileName()).MY_VIDEOS;
   },
   get START_MENU() {
-    return `${getProfileRoot()}/Start Menu`;
+    return profileFoldersFor(currentProfileName()).START_MENU;
   },
   get PROGRAMS() {
-    return `${getProfileRoot()}/Start Menu/Programs`;
+    return profileFoldersFor(currentProfileName()).PROGRAMS;
   },
   get FAVORITES() {
-    return `${getProfileRoot()}/Favorites`;
+    return profileFoldersFor(currentProfileName()).FAVORITES;
   },
   get TEMP() {
-    return `${getProfileRoot()}/Local Settings/Temp`;
+    return profileFoldersFor(currentProfileName()).TEMP;
   },
   PROGRAM_FILES: 'C:/Program Files',
   WINDOWS: 'C:/WINDOWS',
   SYSTEM32: 'C:/WINDOWS/system32',
   RECYCLER: 'C:/RECYCLER',
+  // The All Users profile: Shared Documents and the shared media folders,
+  // which the shell labels "Shared Music" and friends.
+  ALL_USERS,
+  SHARED_DOCUMENTS,
+  SHARED_MUSIC: `${SHARED_DOCUMENTS}/My Music`,
+  SHARED_PICTURES: `${SHARED_DOCUMENTS}/My Pictures`,
+  SHARED_VIDEOS: `${SHARED_DOCUMENTS}/My Videos`,
 };
 
 /**
@@ -102,6 +136,21 @@ export const SPECIAL_FOLDERS = {
 export const EXE_PATHS = {
   NOTEPAD: 'C:/WINDOWS/system32/notepad.exe',
   MSPAINT: 'C:/WINDOWS/system32/mspaint.exe',
+  CALC: 'C:/WINDOWS/system32/calc.exe',
+  SOL: 'C:/WINDOWS/system32/sol.exe',
+  NTBACKUP: 'C:/WINDOWS/system32/ntbackup.exe',
+  SNDVOL32: 'C:/WINDOWS/system32/sndvol32.exe',
+  TASKMGR: 'C:/WINDOWS/system32/taskmgr.exe',
+  // control.exe is the Control Panel namespace: launching it browses the
+  // Control Panel in Explorer rather than opening a program window.
+  CONTROL: 'C:/WINDOWS/system32/control.exe',
+  // Control Panel applets are .cpl files the shell runs like programs.
+  DESK_CPL: 'C:/WINDOWS/system32/desk.cpl',
+  SYSDM_CPL: 'C:/WINDOWS/system32/sysdm.cpl',
+  WORDPAD: 'C:/Program Files/Windows NT/Accessories/wordpad.exe',
+  // Outlook Express has no program behind it, but its exe is seeded and
+  // the Start menu and Quick Launch know it by path.
+  MSIMN: 'C:/Program Files/Outlook Express/msimn.exe',
   // Windows Picture and Fax Viewer — really a shimgvw.dll entry point that
   // the shell launches through rundll32; a plain exe node here.
   SHIMGVW: 'C:/WINDOWS/system32/shimgvw.dll',
@@ -196,7 +245,7 @@ const jpgAssoc = picture('JPG');
 const gifAssoc = picture('GIF');
 const tiffAssoc = picture('TIFF');
 const wordPadAssoc = {
-  exePath: 'C:/Program Files/Windows NT/Accessories/wordpad.exe',
+  exePath: EXE_PATHS.WORDPAD,
   appName: 'WordPad',
   icon: wordPadIcon,
   iconLarge: wordPadIcon,
@@ -221,6 +270,9 @@ export const FILE_ASSOCIATIONS = {
   '.tif': tiffAssoc,
   '.tiff': tiffAssoc,
   '.ico': bmpAssoc,
+  // Not an XP format, but a picture people drop in from the host OS; the
+  // viewer renders it, so the shell may as well open it there.
+  '.webp': bmpAssoc,
   '.wav': mediaAssoc,
   '.mp3': mediaAssoc,
   '.ogg': mediaAssoc,
@@ -243,67 +295,92 @@ export { documentIcon, documentIconLarge };
 export { computerIcon, computerIconLarge };
 export { diskIcon, diskIcon48, cdIcon, cdIcon48 };
 
-// --- Shell folders with their own icons ---
-// Only the registered per-profile (and All Users) paths are special; a folder
-// the user happens to name "My Music" elsewhere stays a plain folder, exactly
-// as the real shell treats it.
+// --- Shell folders ---
+// The folders the shell treats as its own: their icons, and whether the
+// shell refuses to move, rename or delete them. A node is matched by its
+// specialFolder tag first, then by path, so a renamed special folder keeps
+// its identity the way desktop.ini kept it. Only the registered per-profile
+// (and All Users) paths are special; a folder the user happens to name
+// "My Music" elsewhere stays a plain folder, exactly as the real shell
+// treats it.
 const shellFolder = (icon, iconLarge) => ({ icon, iconLarge });
-const SHELL_FOLDER_ICONS = [
-  [
-    /^C:\/Documents and Settings\/[^/]+\/Desktop$/i,
-    () =>
-      shellFolder(
-        getArt('Desktop16', getArt('Desktop', folderIcon)),
-        getArt('Desktop', folderIconLarge),
-      ),
-  ],
-  [
-    /^C:\/Documents and Settings\/[^/]+\/My Documents$/i,
-    () =>
-      shellFolder(
-        getArt('MyDocuments16', getArt('MyDocuments', folderIcon)),
-        getArt('MyDocuments', folderIconLarge),
-      ),
-  ],
-  [
-    /^C:\/Documents and Settings\/[^/]+\/(My )?Documents\/My Music$/i,
-    () =>
-      shellFolder(
-        getArt('MyMusic16', getArt('MyMusic', folderIcon)),
-        getArt('MyMusic', folderIconLarge),
-      ),
-  ],
-  [
-    /^C:\/Documents and Settings\/[^/]+\/(My )?Documents\/My Pictures$/i,
-    () =>
-      shellFolder(
-        getArt('MyPictures16', getArt('MyPictures', folderIcon)),
-        getArt('MyPictures', folderIconLarge),
-      ),
-  ],
-  [
-    /^C:\/Documents and Settings\/[^/]+\/(My )?Documents\/My Videos$/i,
-    () =>
-      shellFolder(
-        getArt('MyVideos16', getArt('MyVideos', folderIcon)),
-        getArt('MyVideos', folderIconLarge),
-      ),
-  ],
-  [
-    /^C:\/Documents and Settings\/All Users\/Documents$/i,
-    () =>
-      shellFolder(
-        getArt('SharedFolder16', getArt('SharedFolder', folderIcon)),
-        getArt('SharedFolder', folderIconLarge),
-      ),
-  ],
+const profileFolder = tail =>
+  new RegExp(`^c:/documents and settings/[^/]+/${tail}$`);
+const artFolder = (name, small) => () =>
+  shellFolder(
+    getArt(small, getArt(name, folderIcon)),
+    getArt(name, folderIconLarge),
+  );
+
+export const SHELL_FOLDERS = [
+  {
+    kind: 'desktop',
+    pattern: profileFolder('desktop'),
+    protected: true,
+    icon: artFolder('Desktop', 'Desktop16'),
+  },
+  {
+    kind: 'my-documents',
+    pattern: profileFolder('my documents'),
+    protected: true,
+    icon: artFolder('MyDocuments', 'MyDocuments16'),
+  },
+  // Protected but drawn as a plain folder, like the real one
+  {
+    kind: 'start-menu',
+    pattern: profileFolder('start menu'),
+    protected: true,
+    icon: null,
+  },
+  // The media folders, in both the profile and All Users. Not strictly
+  // protected in real XP, but they carry registered icons and task panes
+  // here, so losing them breaks more than it's worth.
+  {
+    kind: 'my-music',
+    pattern: profileFolder('(my )?documents/my music'),
+    protected: true,
+    icon: artFolder('MyMusic', 'MyMusic16'),
+  },
+  {
+    kind: 'my-pictures',
+    pattern: profileFolder('(my )?documents/my pictures'),
+    protected: true,
+    icon: artFolder('MyPictures', 'MyPictures16'),
+  },
+  {
+    kind: 'my-videos',
+    pattern: profileFolder('(my )?documents/my videos'),
+    protected: true,
+    icon: artFolder('MyVideos', 'MyVideos16'),
+  },
+  {
+    kind: 'shared-documents',
+    pattern: /^c:\/documents and settings\/all users\/documents$/,
+    protected: false,
+    icon: artFolder('SharedFolder', 'SharedFolder16'),
+  },
 ];
 
-function shellFolderIcons(path) {
-  for (const [pattern, make] of SHELL_FOLDER_ICONS) {
-    if (pattern.test(path)) return make();
+/** The shell folder a node is, or null. */
+export function shellFolderFor(node) {
+  if (!node) return null;
+  if (node.specialFolder) {
+    const tagged = SHELL_FOLDERS.find(f => f.kind === node.specialFolder);
+    if (tagged) return tagged;
   }
-  return null;
+  const p = String(node.path || '').toLowerCase();
+  return SHELL_FOLDERS.find(f => f.pattern.test(p)) || null;
+}
+
+/** Whether the shell refuses to move, rename or delete this folder. */
+export const isProtectedShellFolder = node => {
+  const folder = shellFolderFor(node);
+  return !!(folder && folder.protected);
+};
+
+function shellFolderIcons(node) {
+  const folder = shellFolderFor(node);
+  return folder && folder.icon ? folder.icon() : null;
 }
 
 /** Get { icon, iconLarge } for a FileNode based on type and extension. */
@@ -317,7 +394,7 @@ export function getIconsForNode(node) {
   }
   switch (node.type) {
     case 'folder': {
-      const special = shellFolderIcons(node.path);
+      const special = shellFolderIcons(node);
       if (special) return special;
       return { icon: folderIcon, iconLarge: folderIconLarge };
     }

@@ -12,6 +12,9 @@ import {
   displayPath,
 } from '../../../context/vfsUtils';
 import { getCurrentUserName } from '../../../context/users';
+// The program registry; cmd only consults it once its own PATH search fails
+import { getProgramByCommand } from '../index';
+import { FILE_ASSOCIATIONS } from '../../../context/vfsConstants';
 import {
   STATIC_PROCESSES,
   mapWindowExe,
@@ -894,7 +897,13 @@ function cmdSet(sh, rest) {
   return matches;
 }
 
-/** Resolve a bare program name / exe path → node path, or null. */
+/**
+ * Resolve a bare program name / exe path to a node path, or null. The
+ * PATH search comes first, like cmd's; a bare name it cannot find falls
+ * back to the registry's command names (App Paths, roughly), but only when
+ * that program's exe is really on disk, so an uninstalled title still says
+ * the file cannot be found.
+ */
 function resolveProgram(sh, token) {
   const tries = [];
   const clean = token.replace(/"/g, '');
@@ -908,8 +917,15 @@ function resolveProgram(sh, token) {
   }
   for (const p of tries) {
     const node = sh.vfs.findNodeCI(p);
-    if (node && node.type === 'file' && getExtension(node.path) === '.exe') {
+    if (node && node.type === 'file' && /\.(exe|cpl)$/i.test(node.path)) {
       return node.path;
+    }
+  }
+  if (!/[\\/]/.test(clean)) {
+    const byCommand = getProgramByCommand(clean);
+    if (byCommand) {
+      const node = sh.vfs.findNodeCI(byCommand.exePath);
+      if (node && node.type === 'file') return node.path;
     }
   }
   return null;
@@ -1452,27 +1468,52 @@ function cmdWhere(sh, args) {
   return [...new Set(found)];
 }
 
-const ASSOC_TABLE = [
-  ['.txt', 'txtfile'],
-  ['.bmp', 'Paint.Picture'],
-  ['.exe', 'exefile'],
-  ['.jpg', 'jpegfile'],
-  ['.wav', 'WMP11.AssocFile.WAV'],
-  ['.mp3', 'WMP11.AssocFile.MP3'],
-  ['.zip', 'CompressedFolder'],
-  ['.rtf', 'rtffile'],
-];
-const FTYPE_TABLE = [
-  ['txtfile', '%SystemRoot%\\system32\\NOTEPAD.EXE %1'],
-  ['exefile', '"%1" %*'],
-  ['Paint.Picture', '%SystemRoot%\\system32\\mspaint.exe "%1"'],
-  ['rtffile', '%SystemRoot%\\system32\\write.exe "%1"'],
-];
+// The ProgIDs XP registered for the shell's extensions; the rest read as
+// '<ext>file', which is what the registry did for a type nobody named
+const PROGIDS = {
+  '.txt': 'txtfile',
+  '.log': 'txtfile',
+  '.ini': 'inifile',
+  '.cfg': 'cfgfile',
+  '.bat': 'batfile',
+  '.rtf': 'rtffile',
+  '.doc': 'WordPad.Document.1',
+  '.html': 'htmlfile',
+  '.htm': 'htmlfile',
+  '.url': 'InternetShortcut',
+  '.bmp': 'Paint.Picture',
+  '.png': 'pngfile',
+  '.jpg': 'jpegfile',
+  '.jpeg': 'jpegfile',
+  '.gif': 'giffile',
+  '.tif': 'TIFImage.Document',
+  '.tiff': 'TIFImage.Document',
+  '.ico': 'icofile',
+  '.zip': 'CompressedFolder',
+  '.m3u': 'WMP11.AssocFile.m3u',
+};
+const progIdFor = ext =>
+  PROGIDS[ext] ||
+  (/^\.(wav|mp3|ogg|mp4|webm|avi)$/.test(ext)
+    ? `WMP11.AssocFile.${ext.slice(1).toUpperCase()}`
+    : `${ext.slice(1)}file`);
+
+/** The registry's view of the shell's associations: [ext, progId, exe]. */
+function associationRows() {
+  return Object.entries(FILE_ASSOCIATIONS).map(([ext, a]) => [
+    ext,
+    progIdFor(ext),
+    a.exePath,
+  ]);
+}
+
+const toWinPath = p => String(p).replace(/\//g, '\\');
 
 function cmdAssoc(args) {
   const q = (args[0] || '').toLowerCase();
-  if (!q) return ASSOC_TABLE.map(([e, t]) => `${e}=${t}`);
-  const row = ASSOC_TABLE.find(([e]) => e.toLowerCase() === q);
+  const rows = [['.exe', 'exefile', null], ...associationRows()].sort();
+  if (!q) return rows.map(([e, t]) => `${e}=${t}`);
+  const row = rows.find(([e]) => e === q);
   return row
     ? [`${row[0]}=${row[1]}`]
     : [`File association not found for extension ${args[0]}`];
@@ -1480,8 +1521,13 @@ function cmdAssoc(args) {
 
 function cmdFtype(args) {
   const q = (args[0] || '').toLowerCase();
-  if (!q) return FTYPE_TABLE.map(([t, c]) => `${t}=${c}`);
-  const row = FTYPE_TABLE.find(([t]) => t.toLowerCase() === q);
+  const commands = new Map([['exefile', '"%1" %*']]);
+  for (const [, progId, exe] of associationRows()) {
+    if (!commands.has(progId)) commands.set(progId, `"${toWinPath(exe)}" "%1"`);
+  }
+  const rows = [...commands.entries()].sort();
+  if (!q) return rows.map(([t, c]) => `${t}=${c}`);
+  const row = rows.find(([t]) => t.toLowerCase() === q);
   return row
     ? [`${row[0]}=${row[1]}`]
     : [

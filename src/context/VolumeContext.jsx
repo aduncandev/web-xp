@@ -7,16 +7,17 @@ import React, {
   useCallback,
   useMemo,
 } from 'react';
+import { useVFS } from './VFSContext';
+import { getCurrentUserName, subscribeUsers } from './users';
 
 const VolumeContext = createContext();
 
 export const useVolume = () => useContext(VolumeContext);
 
 // Mixer model (sndvol32): the master "Volume Control" column and "Wave"
-// both gate every software sound, like the real thing — effective gain is
+// both gate every software sound, like the real thing: effective gain is
 // master * wave, muted when either is muted. The remaining channels
 // (SW Synth, Line In, CD Audio) persist their sliders but drive nothing.
-const MIXER_KEY = 'siteMixer';
 const DEFAULT_MIXER = {
   wave: { volume: 80, muted: false, balance: 50 },
   synth: { volume: 80, muted: false, balance: 50 },
@@ -25,48 +26,104 @@ const DEFAULT_MIXER = {
   masterBalance: 50,
 };
 
+// Each account keeps its own levels in its hive under this key. The machine
+// copy in localStorage is what plays before anyone has logged on (the
+// startup chime) and what a new account starts from.
+const HIVE_KEY = 'sound';
+const MACHINE_KEYS = {
+  volume: 'siteVolume',
+  muted: 'siteMuted',
+  mixer: 'siteMixer',
+};
+
+const readMachine = (key, def) => {
+  try {
+    const raw = localStorage.getItem(key);
+    return raw !== null ? JSON.parse(raw) : def;
+  } catch {
+    return def;
+  }
+};
+const writeMachine = (key, value) => {
+  try {
+    localStorage.setItem(key, JSON.stringify(value));
+  } catch {
+    // storage unavailable
+  }
+};
+
+const mergeMixer = saved => ({
+  ...DEFAULT_MIXER,
+  ...(saved || {}),
+  wave: { ...DEFAULT_MIXER.wave, ...((saved && saved.wave) || {}) },
+  synth: { ...DEFAULT_MIXER.synth, ...((saved && saved.synth) || {}) },
+  linein: { ...DEFAULT_MIXER.linein, ...((saved && saved.linein) || {}) },
+  cd: { ...DEFAULT_MIXER.cd, ...((saved && saved.cd) || {}) },
+});
+
+/** The account on screen, kept current by the user registry. */
+function useActiveUserName() {
+  const [name, setName] = useState(() => getCurrentUserName());
+  useEffect(() => subscribeUsers(() => setName(getCurrentUserName())), []);
+  return name;
+}
+
 export const VolumeProvider = ({ children }) => {
-  const [volume, setVolume] = useState(() => {
-    const savedVolume = localStorage.getItem('siteVolume');
-    return savedVolume !== null ? JSON.parse(savedVolume) : 50;
-  });
+  const vfs = useVFS();
+  const user = useActiveUserName();
+  const [volume, setVolume] = useState(() =>
+    readMachine(MACHINE_KEYS.volume, 50),
+  );
+  const [isMuted, setIsMuted] = useState(() =>
+    readMachine(MACHINE_KEYS.muted, false),
+  );
+  const [mixer, setMixer] = useState(() =>
+    mergeMixer(readMachine(MACHINE_KEYS.mixer, null)),
+  );
 
-  const [isMuted, setIsMuted] = useState(() => {
-    const savedMute = localStorage.getItem('siteMuted');
-    return savedMute !== null ? JSON.parse(savedMute) : false;
-  });
+  // Whose levels the sliders currently show. Set only once that account's
+  // hive has been read, so a switch never writes the previous user's levels
+  // into the next user's hive.
+  const loadedFor = useRef(null);
+  const hiveReady = vfs.initialized && !!user;
 
-  const [mixer, setMixer] = useState(() => {
-    try {
-      const saved = localStorage.getItem(MIXER_KEY);
-      if (saved) {
-        const parsed = JSON.parse(saved);
-        return {
-          ...DEFAULT_MIXER,
-          ...parsed,
-          wave: { ...DEFAULT_MIXER.wave, ...(parsed.wave || {}) },
-          synth: { ...DEFAULT_MIXER.synth, ...(parsed.synth || {}) },
-          linein: { ...DEFAULT_MIXER.linein, ...(parsed.linein || {}) },
-          cd: { ...DEFAULT_MIXER.cd, ...(parsed.cd || {}) },
-        };
-      }
-    } catch {
-      // fall through to defaults
+  useEffect(() => {
+    if (!hiveReady) {
+      loadedFor.current = null;
+      return;
     }
-    return DEFAULT_MIXER;
-  });
+    if (loadedFor.current === user) return;
+    let saved = null;
+    try {
+      saved = vfs.getUserConfigFor(user, HIVE_KEY, null);
+    } catch {
+      saved = null;
+    }
+    if (saved && typeof saved === 'object') {
+      if (typeof saved.volume === 'number') setVolume(saved.volume);
+      if (typeof saved.muted === 'boolean') setIsMuted(saved.muted);
+      setMixer(mergeMixer(saved.mixer));
+    }
+    // A first logon keeps the machine's levels and adopts them below
+    loadedFor.current = user;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [hiveReady, user]);
 
   useEffect(() => {
-    localStorage.setItem('siteVolume', JSON.stringify(volume));
-  }, [volume]);
-
-  useEffect(() => {
-    localStorage.setItem('siteMuted', JSON.stringify(isMuted));
-  }, [isMuted]);
-
-  useEffect(() => {
-    localStorage.setItem(MIXER_KEY, JSON.stringify(mixer));
-  }, [mixer]);
+    writeMachine(MACHINE_KEYS.volume, volume);
+    writeMachine(MACHINE_KEYS.muted, isMuted);
+    writeMachine(MACHINE_KEYS.mixer, mixer);
+    if (!hiveReady || loadedFor.current !== user) return;
+    try {
+      const saved = vfs.getUserConfigFor(user, HIVE_KEY, null);
+      const next = { volume, muted: isMuted, mixer };
+      if (JSON.stringify(saved) !== JSON.stringify(next))
+        vfs.setUserConfigFor(user, HIVE_KEY, next);
+    } catch {
+      // hive unavailable, the machine copy still has it
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [volume, isMuted, mixer, hiveReady, user]);
 
   const setMixerChannel = useCallback((channel, patch) => {
     setMixer(m => ({ ...m, [channel]: { ...m[channel], ...patch } }));
@@ -115,22 +172,23 @@ export const VolumeProvider = ({ children }) => {
     }
   }, [effectiveVolume]);
 
+  const value = useMemo(
+    () => ({
+      volume,
+      setVolume,
+      isMuted,
+      setIsMuted,
+      toggleMute: () => setIsMuted(m => !m),
+      applyVolume,
+      mixer,
+      setMixerChannel,
+      setMasterBalance: b => setMixer(m => ({ ...m, masterBalance: b })),
+      effectiveVolume,
+    }),
+    [volume, isMuted, applyVolume, mixer, setMixerChannel, effectiveVolume],
+  );
+
   return (
-    <VolumeContext.Provider
-      value={{
-        volume,
-        setVolume,
-        isMuted,
-        setIsMuted,
-        toggleMute: () => setIsMuted(m => !m),
-        applyVolume,
-        mixer,
-        setMixerChannel,
-        setMasterBalance: b => setMixer(m => ({ ...m, masterBalance: b })),
-        effectiveVolume,
-      }}
-    >
-      {children}
-    </VolumeContext.Provider>
+    <VolumeContext.Provider value={value}>{children}</VolumeContext.Provider>
   );
 };

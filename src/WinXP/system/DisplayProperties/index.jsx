@@ -17,6 +17,7 @@ import XPSelect from '../../../components/XPSelect';
 import FileDialog from '../../../components/FileDialog';
 import { SPECIAL_FOLDERS } from '../../../context/vfsConstants';
 import { getBaseName, getExtension } from '../../../context/vfsUtils';
+import { WALLPAPER_EXTENSIONS } from '../../shell/fileTypes';
 
 import blissWallpaper from 'assets/windowsIcons/wallpaper.jpeg';
 import imageFileIcon from 'assets/windowsIcons/680(16x16).png';
@@ -24,7 +25,8 @@ import { getArt } from '../../../xpArt';
 import sliderThumb from 'assets/xp/SliderThumb.png';
 
 const TABS = ['Themes', 'Desktop', 'Screen Saver', 'Appearance', 'Settings'];
-const IMAGE_EXTS = ['.bmp', '.png', '.jpg', '.jpeg', '.gif'];
+// The picture formats a browser can paint as a background
+const IMAGE_EXTS = WALLPAPER_EXTENSIONS;
 const DEFAULT_WALLPAPER = {
   kind: 'asset',
   value: 'bliss',
@@ -67,7 +69,7 @@ export default function DisplayProperties({ onClose, onSetHeader }) {
   const [applied, setApplied] = useState(() =>
     safe(
       () =>
-        usersApi.getUserSetting(currentUser, 'wallpaper', DEFAULT_WALLPAPER),
+        vfs.getUserConfigFor(currentUser, 'wallpaper', DEFAULT_WALLPAPER),
       DEFAULT_WALLPAPER,
     ),
   );
@@ -197,7 +199,7 @@ export default function DisplayProperties({ onClose, onSetHeader }) {
   const apply = () => {
     applySaver();
     if (!dirty) return;
-    safe(() => usersApi.setUserSetting(currentUser, 'wallpaper', sel), null);
+    safe(() => vfs.setUserConfigFor(currentUser, 'wallpaper', sel), null);
     setApplied(sel);
   };
 
@@ -551,7 +553,9 @@ export default function DisplayProperties({ onClose, onSetHeader }) {
           initialPath={SPECIAL_FOLDERS.MY_PICTURES}
           filters={[
             {
-              label: 'Background Files (*.bmp;*.gif;*.jpg;*.jpeg;*.png)',
+              label: `Background Files (${IMAGE_EXTS.map(e => `*${e}`).join(
+                ';',
+              )})`,
               extensions: IMAGE_EXTS,
             },
             { label: 'All Files', extensions: null },

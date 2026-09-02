@@ -11,16 +11,13 @@ import styled from 'styled-components';
 import XPDialogFrame from 'components/XPDialogFrame';
 import XPButton from 'components/XPButton';
 import useEditContextMenu from 'components/EditContextMenu';
-import { useVolume } from './VolumeContext';
+import { playSystemSound } from 'WinXP/sounds';
 
 import errorIconDrawn from 'assets/windowsIcons/897(32x32).png';
 import questionIcon from 'assets/windowsIcons/747(32x32).png';
 import warningIconDrawn from 'assets/windowsIcons/msg-warning.svg';
 import infoIconDrawn from 'assets/windowsIcons/msg-info.svg';
 import { getArt } from '../xpArt';
-import criticalStopSrc from 'assets/sounds/Windows XP Critical Stop.wav';
-import exclamationSrc from 'assets/sounds/Windows XP Exclamation.wav';
-import dingSrc from 'assets/sounds/Windows XP Ding.wav';
 
 // Real user32.dll icons win when dropped into src/assets/xp/
 const errorIcon = getArt('msg-error', errorIconDrawn);
@@ -33,11 +30,12 @@ const ICON_SRC = {
   question: questionIcon,
   info: infoIcon,
 };
-const SOUND_SRC = {
-  error: criticalStopSrc,
-  warning: exclamationSrc,
-  question: dingSrc,
-  info: dingSrc,
+// Each message box icon has its stock sound in the XP scheme
+const SOUND_FOR_ICON = {
+  error: 'error',
+  warning: 'exclamation',
+  question: 'ding',
+  info: 'ding',
 };
 
 const DialogContext = createContext(null);
@@ -115,24 +113,23 @@ export function DialogProvider({ children }) {
   );
 }
 
+/*
+ * A key press is keydown, keypress, keyup. Enter in a Save As name field opens
+ * the "already exists" box on keydown and Chromium activates the freshly
+ * focused default button on the keypress, so a new box ignores Enter briefly.
+ */
+const OPENING_KEYSTROKE_MS = 300;
+
 function MessageBox({ dialog, zIndex, onResult }) {
-  const { applyVolume } = useVolume();
   const [inputValue, setInputValue] = useState(dialog.defaultValue || '');
   const inputRef = useRef(null);
   const defaultBtnRef = useRef(null);
+  const openedAt = useRef(performance.now());
   const { openEditContextMenu, editContextMenu } = useEditContextMenu();
 
   useEffect(() => {
-    const soundSrc = SOUND_SRC[dialog.icon];
-    if (soundSrc) {
-      try {
-        const audio = new Audio(soundSrc);
-        applyVolume(audio);
-        audio.play().catch(() => {});
-      } catch (err) {
-        // autoplay may be blocked
-      }
-    }
+    const sound = SOUND_FOR_ICON[dialog.icon];
+    if (sound) playSystemSound(sound);
     if (dialog.type === 'prompt' && inputRef.current) {
       inputRef.current.focus();
       inputRef.current.select();
@@ -141,6 +138,15 @@ function MessageBox({ dialog, zIndex, onResult }) {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  const swallowOpeningKeystroke = e => {
+    if (
+      e.key === 'Enter' &&
+      performance.now() - openedAt.current < OPENING_KEYSTROKE_MS
+    ) {
+      e.preventDefault();
+    }
+  };
 
   const accept = () => {
     if (dialog.type === 'confirm') onResult(true);
@@ -176,7 +182,7 @@ function MessageBox({ dialog, zIndex, onResult }) {
       zIndex={zIndex}
       onKeyDown={handleKeyDown}
     >
-      <BoxBody>
+      <BoxBody onKeyPress={swallowOpeningKeystroke}>
         <div className="msg-main">
           {iconSrc && <img src={iconSrc} alt="" className="msg-icon" />}
           <div className="msg-text">

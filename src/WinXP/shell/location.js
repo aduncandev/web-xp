@@ -23,12 +23,18 @@
  *   archive  { archive, inner } when inside a .zip
  *   view     the Control Panel page ('home' when at its root)
  *
- * Adding a namespace means adding a branch here, and nowhere else.
+ * This is where a namespace is recognised. Explorer still decides what a
+ * namespace lists, which columns it shows and which menus it offers, so a
+ * new one is a branch here plus those decisions there.
  */
 import { zipPathParts } from '../../context/zipShell';
 import { SPECIAL_FOLDERS } from '../../context/vfsConstants';
 import { displayPath, getParentPath } from '../../context/vfsUtils';
 import { getArt } from '../../xpArt';
+import {
+  controlPanelViewTitle,
+  isControlPanelView,
+} from './ControlPanel/categories';
 
 import computerIcon from 'assets/windowsIcons/676(16x16).png';
 import folderIcon from 'assets/windowsIcons/318(16x16).png';
@@ -36,22 +42,30 @@ import controlIcon from 'assets/windowsIcons/300(16x16).png';
 import recycleEmptyDrawn from 'assets/windowsIcons/recycle-empty.svg';
 import zipIcon from 'assets/windowsIcons/zipfldr(16x16).png';
 
+// The namespaces, as Explorer paths
 export const MY_COMPUTER = 'My Computer';
 export const RECYCLE_BIN = 'Recycle Bin';
 export const CONTROL_PANEL = 'Control Panel';
 
-const recycleIcon = () => getArt('recycle-empty', recycleEmptyDrawn);
+// Shortcuts to shell objects carry a token rather than a path. The desktop's
+// bin shortcut has always been seeded with this one, so it is persisted in
+// every store and stays; My Computer's token equals its path.
+export const RECYCLE_BIN_TARGET = 'RecycleBin';
+export const MY_COMPUTER_TARGET = MY_COMPUTER;
 
-/** True when `path` is a shell namespace rather than a file-system path. */
-export function isNamespacePath(path) {
-  const p = String(path || '');
-  return (
-    p === MY_COMPUTER ||
-    p === RECYCLE_BIN ||
-    p === CONTROL_PANEL ||
-    p.startsWith(`${CONTROL_PANEL}/`)
-  );
-}
+/** A shortcut to the Recycle Bin shell object (the desktop's bin icon). */
+export const isRecycleBinShortcut = node =>
+  !!node && node.type === 'shortcut' && node.target === RECYCLE_BIN_TARGET;
+
+/** A shortcut to the My Computer shell object. */
+export const isMyComputerShortcut = node =>
+  !!node && node.type === 'shortcut' && node.target === MY_COMPUTER_TARGET;
+
+/** True for either shell-object token, which shellOpen browses rather than resolves. */
+export const isShellObjectTarget = target =>
+  target === MY_COMPUTER_TARGET || target === RECYCLE_BIN_TARGET;
+
+const recycleIcon = () => getArt('recycle-empty', recycleEmptyDrawn);
 
 export function resolveLocation(vfs, path) {
   const p = String(path || '');
@@ -88,25 +102,30 @@ export function resolveLocation(vfs, path) {
   if (p === CONTROL_PANEL || p.startsWith(`${CONTROL_PANEL}/`)) {
     const view =
       p === CONTROL_PANEL ? 'home' : p.slice(CONTROL_PANEL.length + 1);
-    return {
-      kind: 'control',
-      exists: true,
-      path: p,
-      address: CONTROL_PANEL,
-      title: CONTROL_PANEL,
-      icon: controlIcon,
-      parent: view === 'home' ? MY_COMPUTER : CONTROL_PANEL,
-      node: null,
-      archive: null,
-      view,
-    };
+    // Only pages Control Panel has; anything else is as missing as a
+    // folder that is not there
+    if (isControlPanelView(view))
+      return {
+        kind: 'control',
+        exists: true,
+        path: p,
+        address: CONTROL_PANEL,
+        title: CONTROL_PANEL,
+        // Where the window is within Control Panel, for history menus
+        pageTitle: controlPanelViewTitle(view),
+        icon: controlIcon,
+        parent: view === 'home' ? MY_COMPUTER : CONTROL_PANEL,
+        node: null,
+        archive: null,
+        view,
+      };
   }
 
   // A .zip and the paths inside it — but only when the archive really is a
   // file; a folder someone named "x.zip" stays an ordinary folder.
   const parts = zipPathParts(p);
   if (parts) {
-    const zipNode = vfs.findNodeCI ? vfs.findNodeCI(parts.archive) : null;
+    const zipNode = vfs.getNode(parts.archive);
     if (zipNode && zipNode.type === 'file') {
       const canonical = parts.inner
         ? `${zipNode.path}/${parts.inner}`
@@ -130,7 +149,7 @@ export function resolveLocation(vfs, path) {
     }
   }
 
-  const node = vfs.getNode ? vfs.getNode(p) : null;
+  const node = vfs.getNode(p);
   if (node && (node.type === 'folder' || node.type === 'drive')) {
     const parent = getParentPath(node.path);
     return {

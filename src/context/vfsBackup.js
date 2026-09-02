@@ -14,20 +14,37 @@
  * per-user ntuser.dat settings hives.
  */
 import { extractEntry, readZip, writeZip } from './zip';
+import { SPECIAL_FOLDERS } from './vfsConstants';
+import { isShellObjectTarget } from '../WinXP/shell/location';
 
-/** A file the user made or filled in — worth carrying across a rebuild. */
+// Deleted files wait in the bin's store; restored into a fresh install they
+// would be orphans the bin cannot list, so they stay out of the archive
+const inRecycler = n =>
+  String(n.path)
+    .toLowerCase()
+    .startsWith(`${SPECIAL_FOLDERS.RECYCLER.toLowerCase()}/`);
+
+/** A file the user made or filled in, worth carrying across a rebuild. */
 export function isUserFile(n) {
   return (
     n.type === 'file' &&
     !n.system &&
+    !inRecycler(n) &&
     (n.content != null || n.hasBinaryContent || !!n.blobId)
   );
 }
 
 /** A folder the user made; kept so empty ones survive the trip. */
 export function isUserFolder(n) {
-  return n.type === 'folder' && !n.system;
+  return n.type === 'folder' && !n.system && !inRecycler(n);
 }
+
+/** A shortcut the user made; carried as a .lnk-alike beside the files. */
+export function isUserShortcut(n) {
+  return n.type === 'shortcut' && !n.system && !inRecycler(n);
+}
+
+const LNK = '.lnk';
 
 const README = `WINDOWS BACKUP
 ==============
@@ -82,14 +99,48 @@ export async function buildBackupZip(nodes, readBytes) {
   const files = [
     { name: 'README.txt', bytes: new TextEncoder().encode(README) },
   ];
+  const all = [...nodes];
+  // A folder is worth an entry of its own when it is empty (the user made
+  // it) or holds something of the user's. Seeded program folders hold only
+  // their exe, which the site build brings back, so they stay out.
+  const parentsOf = new Set();
+  const holdsUserData = new Set();
+  for (const n of all) {
+    const parent = n.path.slice(0, n.path.lastIndexOf('/'));
+    parentsOf.add(parent.toLowerCase());
+    if (isUserFile(n) || isUserShortcut(n)) {
+      let p = parent;
+      while (p.includes('/')) {
+        holdsUserData.add(p.toLowerCase());
+        p = p.slice(0, p.lastIndexOf('/'));
+      }
+    }
+  }
+  const folderWorthKeeping = n => {
+    const key = n.path.toLowerCase();
+    return !parentsOf.has(key) || holdsUserData.has(key);
+  };
   let count = 0;
-  for (const node of nodes) {
+  for (const node of all) {
     if (isUserFolder(node)) {
+      if (folderWorthKeeping(node))
+        files.push({
+          name: `${entryNameFor(node.path)}/`,
+          directory: true,
+          modified: node.modifiedAt,
+        });
+    } else if (isUserShortcut(node)) {
+      const link = {
+        target: node.target,
+        targetArgs: node.targetArgs || null,
+        iconKey: node.iconKey || null,
+      };
       files.push({
-        name: `${entryNameFor(node.path)}/`,
-        directory: true,
+        name: `${entryNameFor(node.path)}${LNK}`,
+        bytes: new TextEncoder().encode(JSON.stringify(link)),
         modified: node.modifiedAt,
       });
+      count += 1;
     } else if (isUserFile(node)) {
       // eslint-disable-next-line no-await-in-loop
       const bytes = await readBytes(node);
@@ -124,9 +175,26 @@ export async function storedNodeBytes(node, loadNodeBlob) {
 }
 
 /**
+ * A .lnk entry's shortcut, or null when the bytes are not one of ours. The
+ * target must exist (or be a shell object), or the restore would plant
+ * 'Problem with Shortcut' links.
+ */
+function shortcutFromEntry(vfs, data) {
+  try {
+    const link = JSON.parse(new TextDecoder().decode(data));
+    if (!link || typeof link.target !== 'string') return null;
+    if (!isShellObjectTarget(link.target) && !vfs.findNodeCI(link.target))
+      return null;
+    return link;
+  } catch {
+    return null;
+  }
+}
+
+/**
  * Restore a backup archive into the live filesystem. Existing user files
- * are overwritten; system nodes are never touched. Returns counts for the
- * completion summary.
+ * are overwritten; system and read-only nodes are never touched. Returns
+ * counts for the completion summary.
  */
 export async function restoreBackupZip(vfs, zipBytes, { onProgress } = {}) {
   const { entries } = readZip(zipBytes);
@@ -162,7 +230,10 @@ export async function restoreBackupZip(vfs, zipBytes, { onProgress } = {}) {
     }
     const path = pathForEntry(entry.name);
     const existing = vfs.findNodeCI(path);
-    if (existing && (existing.system || existing.type !== 'file')) {
+    if (
+      existing &&
+      (existing.system || existing.readOnly || existing.type !== 'file')
+    ) {
       skipped++;
       continue;
     }
@@ -174,7 +245,19 @@ export async function restoreBackupZip(vfs, zipBytes, { onProgress } = {}) {
     // eslint-disable-next-line no-await-in-loop
     const data = await extractEntry(zipBytes, entry, '');
     let ok;
-    if (TEXT_FILE.test(path)) {
+    if (path.toLowerCase().endsWith(LNK)) {
+      const link = shortcutFromEntry(vfs, data);
+      const linkPath = path.slice(0, -LNK.length);
+      const there = vfs.findNodeCI(linkPath);
+      if (link && (!there || there.type === 'shortcut')) {
+        ok = !!vfs.createShortcut(linkPath, link.target, {
+          targetArgs: link.targetArgs,
+          iconKey: link.iconKey,
+        });
+      } else {
+        ok = false;
+      }
+    } else if (TEXT_FILE.test(path)) {
       const text = new TextDecoder().decode(data);
       ok = existing
         ? vfs.writeFile(existing.path, text)

@@ -18,6 +18,7 @@ import { UserAccountsIcon, DateTimeIcon } from './icons';
 import { DESK_CPL, CATEGORIES, CLASSIC_APPLETS } from './categories';
 import { safe, fileToAccountPicture } from './helpers';
 import { Root } from './styles';
+import { TaskCard, taskRow } from '../Explorer/TaskPane';
 
 // "Browse for more pictures..." offers what the (virtual) computer holds —
 // the picker is the real XP Open dialog over the VFS, for immersion; only
@@ -312,6 +313,9 @@ export default function ControlPanel({
   const [, setUaLogonTick] = useState(0);
   const [usersTick, setUsersTick] = useState(0);
   const [folderOptionsOpen, setFolderOptionsOpen] = useState(false);
+  const [collapsedCards, setCollapsedCards] = useState({});
+  const toggleCard = key =>
+    setCollapsedCards(c => ({ ...c, [key]: !c[key] }));
 
   useEffect(() => {
     if (typeof usersApi.subscribeUsers !== 'function') return undefined;
@@ -614,64 +618,40 @@ export default function ControlPanel({
   };
 
   const doChangePicture = (user, key) => {
-    if (typeof usersApi.setUserAvatar === 'function') {
-      usersApi.setUserAvatar(user.name, key);
-    } else if (typeof usersApi.updateUserAvatar === 'function') {
-      usersApi.updateUserAvatar(user.name, key);
-    } else if (typeof usersApi.setUserSetting === 'function') {
-      usersApi.setUserSetting(user.name, 'avatarKey', key);
-    }
+    usersApi.setUserAvatar(user.name, key);
     setSelectedUser({ ...user, avatarKey: key });
     setUsersTick(t => t + 1);
   };
 
   // --- Renderers ---
 
+  // The same roll-up cards Explorer draws, so the two panes match
   const renderTaskPane = () => (
-    <div className="cp__pane">
-      <div className="cp__card">
-        <div className="cp__card-header">
-          <img
-            src={getArt('ControlPanel', controlIcon)}
-            alt=""
-            width={22}
-            height={22}
-          />
-          <span>Control Panel</span>
-        </div>
-        <div className="cp__card-body">
-          {view === 'classic' ? (
-            <div className="cp__link" onClick={() => navigate('home')}>
-              Switch to Category View
-            </div>
-          ) : (
-            <div className="cp__link" onClick={() => navigate('classic')}>
-              Switch to Classic View
-            </div>
-          )}
-        </div>
-      </div>
-      <div className="cp__card">
-        <div className="cp__card-header">
-          <span>See Also</span>
-        </div>
-        <div className="cp__card-body">
-          <div
-            className="cp__link"
-            onClick={() =>
-              onShellOpen &&
-              onShellOpen(`${SPECIAL_FOLDERS.FAVORITES}/Windows Update.url`)
-            }
-          >
-            <img src={updateIcon} alt="" width={16} height={16} />
-            Windows Update
-          </div>
-          <div className="cp__link cp__link--inert">
-            <img src={helpIcon} alt="" width={16} height={16} />
-            Help and Support
-          </div>
-        </div>
-      </div>
+    <div className="com__content__left">
+      <TaskCard
+        title="Control Panel"
+        icon={getArt('ControlPanel', controlIcon)}
+        collapsed={!!collapsedCards.panel}
+        onToggle={() => toggleCard('panel')}
+      >
+        {view === 'classic'
+          ? taskRow(null, 'Switch to Category View', () => navigate('home'))
+          : taskRow(null, 'Switch to Classic View', () => navigate('classic'))}
+      </TaskCard>
+      <TaskCard
+        title="See Also"
+        collapsed={!!collapsedCards.seeAlso}
+        onToggle={() => toggleCard('seeAlso')}
+      >
+        {taskRow(
+          updateIcon,
+          'Windows Update',
+          () =>
+            onShellOpen &&
+            onShellOpen(`${SPECIAL_FOLDERS.FAVORITES}/Windows Update.url`),
+        )}
+        {taskRow(helpIcon, 'Help and Support')}
+      </TaskCard>
     </div>
   );
 

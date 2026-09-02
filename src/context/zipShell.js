@@ -8,7 +8,7 @@
  */
 import { BadPasswordError, extractEntry, readZip, writeZip } from './zip';
 import { getParentPath } from './vfsUtils';
-import { resolveNodeIcons } from './vfsDefaults';
+import { resolveNodeIcons } from './vfsIcons';
 
 /**
  * An entry name that stays inside the folder it is extracted to. Nothing

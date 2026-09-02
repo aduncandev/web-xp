@@ -119,6 +119,10 @@ System sounds play for boot, login, logoff, shutdown, errors, and tray balloons.
 
 ## Getting Started
 
+Changing the code? [MAINTAINING.md](MAINTAINING.md) maps the tree, explains
+how the pieces fit, and has step-by-step recipes for adding programs, file
+types, settings, shell folders and tests.
+
 ### Prerequisites
 
 - A recent Node.js LTS

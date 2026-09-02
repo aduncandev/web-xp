@@ -1,4 +1,5 @@
 import styled from 'styled-components';
+import { taskPaneCss } from '../Explorer/styles';
 
 export const Root = styled.div`
   /* A flex sibling, not an overlay: the Folders tree renders beside this
@@ -21,53 +22,7 @@ export const Root = styled.div`
     background: #fff;
   }
 
-  /* Luna task pane, matching Explorer's */
-  .cp__pane {
-    width: 200px;
-    flex-shrink: 0;
-    overflow-y: auto;
-    padding: 12px 10px;
-    background: linear-gradient(to bottom, #7ba2e7 0%, #6375d6 100%);
-  }
-  .cp__card {
-    margin-bottom: 12px;
-    border: 1px solid rgba(255, 255, 255, 0.5);
-    border-radius: 4px 4px 0 0;
-    overflow: hidden;
-  }
-  .cp__card-header {
-    height: 25px;
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    padding: 0 10px;
-    background: linear-gradient(to right, #ffffff 0%, #c6d3f7 100%);
-    color: #215dc6;
-    font-weight: 700;
-  }
-  .cp__card-body {
-    background: #d6dff7;
-    padding: 8px 10px;
-  }
-  .cp__link {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    color: #215dc6;
-    padding: 3px 0;
-    cursor: pointer;
-    &:hover {
-      color: #428eff;
-      text-decoration: underline;
-    }
-  }
-  .cp__link--inert {
-    cursor: default;
-    &:hover {
-      color: #215dc6;
-      text-decoration: none;
-    }
-  }
+  ${taskPaneCss}
 
   .cp__main {
     flex: 1;

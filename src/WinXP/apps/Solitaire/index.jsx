@@ -31,8 +31,7 @@ const WASTE_FAN = 14;
 const colX = i => MARGIN + i * (CARD_W + GAP);
 
 // Options live per-user in the profile hive (ntuser.dat) under
-// 'solitaireOptions'; the legacy shared localStorage key is imported once.
-const LEGACY_OPTS_KEY = 'winxp_solitaire_opts';
+// 'solitaireOptions'.
 const DEFAULT_OPTS = {
   drawThree: true,
   scoring: 'standard',
@@ -127,14 +126,6 @@ export default function Solitaire({ onClose, isFocus }) {
       );
       if (stored && typeof stored === 'object')
         return { ...DEFAULT_OPTS, ...stored };
-      // One-time import of the legacy shared options
-      const raw = localStorage.getItem(LEGACY_OPTS_KEY);
-      if (raw) {
-        const legacy = { ...DEFAULT_OPTS, ...JSON.parse(raw) };
-        vfs.setUserConfigFor(userRef.current, 'solitaireOptions', legacy);
-        localStorage.removeItem(LEGACY_OPTS_KEY);
-        return legacy;
-      }
     } catch {
       // corrupted / unavailable
     }

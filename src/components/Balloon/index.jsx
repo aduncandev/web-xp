@@ -2,37 +2,17 @@ import React, { useState, useEffect, useRef } from 'react';
 import styled, { keyframes } from 'styled-components';
 
 import risk from 'assets/windowsIcons/229(16x16).png';
-import balloonSoundSrc from 'assets/sounds/xp_balloon.wav';
-
-import { useVolume } from '../../context/VolumeContext';
+import { playSystemSound } from 'WinXP/sounds';
 
 function Balloon({ startAfter = 3000, duration = 15000 }) {
   const [show, setShow] = useState(true);
   const [start, setStart] = useState(false);
+  // The chime, kept so an unmount mid-play can stop it
   const audioRef = useRef(null);
 
-  const { applyVolume } = useVolume();
-
-  // Store applyVolume in a ref to prevent the effect from re-running
-  const applyVolumeRef = useRef(applyVolume);
   useEffect(() => {
-    applyVolumeRef.current = applyVolume;
-  }, [applyVolume]);
-
-  useEffect(() => {
-    if (!audioRef.current) {
-      try {
-        audioRef.current = new Audio(balloonSoundSrc);
-      } catch (error) {
-        // Failed to load balloon sound
-      }
-    }
-
     const openTimer = setTimeout(() => {
-      if (audioRef.current) {
-        applyVolumeRef.current(audioRef.current);
-        audioRef.current.play().catch(() => {});
-      }
+      audioRef.current = playSystemSound('balloon');
       setStart(true);
     }, startAfter);
 

@@ -12,9 +12,10 @@ import {
   FolderOptionsIcon,
   SystemIcon,
 } from './icons';
+import { EXE_PATHS } from '../../../context/vfsConstants';
 
-export const DESK_CPL = 'C:/WINDOWS/system32/desk.cpl';
-export const SYSDM_CPL = 'C:/WINDOWS/system32/sysdm.cpl';
+export const DESK_CPL = EXE_PATHS.DESK_CPL;
+export const SYSDM_CPL = EXE_PATHS.SYSDM_CPL;
 
 export const CATEGORIES = [
   {
@@ -127,3 +128,36 @@ export const CLASSIC_APPLETS = [
   { label: 'System', Icon: SystemIcon, open: SYSDM_CPL },
   { label: 'User Accounts', Icon: UserAccountsIcon, view: 'ua-home' },
 ];
+
+// Every page Control Panel can show, as the view ids Explorer carries in its
+// path ('Control Panel/<view>'). The category pages are 'cat:<key>'.
+const FIXED_VIEWS = {
+  home: 'Control Panel',
+  classic: 'Control Panel',
+  datetime: 'Date and Time',
+  'ua-home': 'User Accounts',
+  'ua-create': 'User Accounts',
+  'ua-change': 'User Accounts',
+  'ua-password': 'User Accounts',
+  'ua-logon': 'User Accounts',
+};
+
+/** Whether `view` names a page Control Panel can show. */
+export function isControlPanelView(view) {
+  if (FIXED_VIEWS[view]) return true;
+  return (
+    typeof view === 'string' &&
+    view.startsWith('cat:') &&
+    CATEGORIES.some(c => c.key === view.slice(4))
+  );
+}
+
+/** The page's own title, for history menus; null for an unknown view. */
+export function controlPanelViewTitle(view) {
+  if (FIXED_VIEWS[view]) return FIXED_VIEWS[view];
+  const cat =
+    typeof view === 'string' && view.startsWith('cat:')
+      ? CATEGORIES.find(c => c.key === view.slice(4))
+      : null;
+  return cat ? cat.label : null;
+}

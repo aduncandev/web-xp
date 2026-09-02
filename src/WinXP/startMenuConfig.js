@@ -149,6 +149,35 @@ export function removeFromMfu(vfs, userName, exePath) {
   });
 }
 
+/**
+ * Forget a program everywhere the Start menu and taskbar refer to it, when
+ * it is uninstalled: pins, launch counts and Quick Launch slots (which fall
+ * back to their stock button). Returns true if anything changed.
+ */
+export function scrubProgramRefs(vfs, userName, exePath) {
+  const lower = String(exePath).toLowerCase();
+  const matches = v => typeof v === 'string' && v.toLowerCase() === lower;
+  const cfg = getStartMenuConfig(vfs, userName);
+  const patch = {};
+  if (cfg.pinned.some(matches))
+    patch.pinned = cfg.pinned.filter(v => !matches(v));
+  if (Object.keys(cfg.usage).some(matches))
+    patch.usage = Object.fromEntries(
+      Object.entries(cfg.usage).filter(([k]) => !matches(k)),
+    );
+  if (cfg.mfuRemoved.some(matches))
+    patch.mfuRemoved = cfg.mfuRemoved.filter(v => !matches(v));
+  if (cfg.taskbar.quickLaunch.some(matches))
+    patch.taskbar = {
+      quickLaunch: cfg.taskbar.quickLaunch.map((v, i) =>
+        matches(v) ? START_MENU_DEFAULTS.taskbar.quickLaunch[i] : v,
+      ),
+    };
+  if (Object.keys(patch).length === 0) return false;
+  setStartMenuConfig(vfs, userName, patch);
+  return true;
+}
+
 /** "Clear List" in Customize Start Menu (General) — empties everything,
  *  seed programs included, like the real thing. */
 export function clearMfu(vfs, userName) {

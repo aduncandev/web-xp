@@ -170,8 +170,11 @@ export default function TaskManager({ onClose, onSetHeader, isFocus }) {
 
   const sim = simRef.current;
 
+  // Applications lists what the taskbar lists: not itself, and not the
+  // windows the shell keeps off the taskbar
   const appWindows = useMemo(
-    () => windows.filter(w => !/task manager/i.test(w.title || '')),
+    () =>
+      windows.filter(w => !w.hidden && !/task manager/i.test(w.title || '')),
     [windows],
   );
 

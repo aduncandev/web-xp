@@ -19,8 +19,6 @@ screenshots.
 
 | File name              | What it replaces                          | Where to find the original                          |
 | ---------------------- | ----------------------------------------- | --------------------------------------------------- |
-| `oobe-next.png`        | OOBE green Next arrow button (~44px)      | `C:\WINDOWS\system32\oobe\` html/images resources   |
-| `oobe-back.png`        | OOBE green Back arrow button — the file currently here is the WRONG (orange) variant; the UI mirrors `oobe-next.png` instead until the real green one is dropped in | same |
 | `oobe-help.png`        | OOBE glossy blue "?" orb (round, silver ring) | XPIcons `HelpandSupport.png` (replaced an earlier square variant) |
 | `LoginGo.png`          | Welcome-screen green OK arrow button (high-res) | XPIcons `Go.png` |
 | `msg-error.png`        | Dialog red X icon (32px)                  | `user32.dll` (IDI_ERROR)                            |

@@ -1,4 +1,10 @@
-import { test, expect, bootToDesktop, startMenu, startButton } from './fixtures';
+import {
+  test,
+  expect,
+  bootToDesktop,
+  startMenu,
+  startButton,
+} from './fixtures';
 
 /*
  * The "did that break the desktop" tripwire. Four tests, one machine boot
@@ -20,7 +26,9 @@ test('@smoke cold boot reaches a live desktop', async ({ page }) => {
   expect(page.__errors, 'no uncaught errors during boot').toEqual([]);
 });
 
-test('@smoke launch, minimize, restore and close a program', async ({ page }) => {
+test('@smoke launch, minimize, restore and close a program', async ({
+  page,
+}) => {
   await bootToDesktop(page);
   await startMenu(page, 'Notepad');
 
@@ -31,7 +39,9 @@ test('@smoke launch, minimize, restore and close a program', async ({ page }) =>
   await page.locator('.header__button--minimize').click();
   await expect(title).toBeHidden();
 
-  const taskbarButton = page.locator('.footer__window, [class*="footer"] img[alt*="Notepad"]').first();
+  const taskbarButton = page
+    .locator('.footer__window, [class*="footer"] img[alt*="Notepad"]')
+    .first();
   await taskbarButton.click();
   await expect(title).toBeVisible();
 
@@ -45,10 +55,14 @@ test('@smoke focus moves between two windows', async ({ page }) => {
   await bootToDesktop(page);
 
   await startMenu(page, 'Notepad');
-  await expect(page.locator('.app__header__title', { hasText: 'Notepad' })).toBeVisible();
+  await expect(
+    page.locator('.app__header__title', { hasText: 'Notepad' }),
+  ).toBeVisible();
 
   await startMenu(page, 'Minesweeper');
-  await expect(page.locator('.app__header__title', { hasText: 'Minesweeper' })).toBeVisible();
+  await expect(
+    page.locator('.app__header__title', { hasText: 'Minesweeper' }),
+  ).toBeVisible();
 
   /*
    * The newest window must sit above the older one. Read the stacking
@@ -60,7 +74,8 @@ test('@smoke focus moves between two windows', async ({ page }) => {
       const titles = [...document.querySelectorAll('.app__header__title')];
       const el = titles.find(t => t.textContent.includes(label));
       if (!el) return null;
-      const frame = el.closest('[style*="z-index"]') || el.closest('div[style]');
+      const frame =
+        el.closest('[style*="z-index"]') || el.closest('div[style]');
       return frame ? Number(getComputedStyle(frame).zIndex) || 0 : 0;
     }, name);
   };
@@ -87,7 +102,9 @@ test('the pinned Internet row launches Internet Explorer', async ({ page }) => {
   ).toBeVisible();
 });
 
-test('All Programs is built from the filesystem, not the static fallback', async ({ page }) => {
+test('All Programs is built from the filesystem, not the static fallback', async ({
+  page,
+}) => {
   await bootToDesktop(page);
   await startButton(page).click();
   await page.getByText('All Programs', { exact: true }).click();

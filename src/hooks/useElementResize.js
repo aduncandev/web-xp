@@ -1,9 +1,162 @@
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 
+// Which edges a grip moves. A grip on the left or top edge changes the
+// offset as well as the size, so the opposite edge stays put.
+const GRIPS = {
+  top: { dx: 0, dy: -1 },
+  topRight: { dx: 1, dy: -1 },
+  right: { dx: 1, dy: 0 },
+  bottomRight: { dx: 1, dy: 1 },
+  bottom: { dx: 0, dy: 1 },
+  bottomLeft: { dx: -1, dy: 1 },
+  left: { dx: -1, dy: 0 },
+  topLeft: { dx: -1, dy: -1 },
+};
+
+const CURSORS = {
+  top: 'n-resize',
+  topRight: 'ne-resize',
+  right: 'e-resize',
+  bottomRight: 'se-resize',
+  bottom: 's-resize',
+  bottomLeft: 'sw-resize',
+  left: 'w-resize',
+  topLeft: 'nw-resize',
+};
+
+// Enough of the caption to grab when the viewport shrinks under a window
+const REACHABLE = { x: 60, y: 30 };
+
+/** A full-screen sheet that keeps a gesture's pointer events (and cursor) away from whatever is under it. */
+function makeCover() {
+  const cover = document.createElement('div');
+  Object.assign(cover.style, {
+    position: 'fixed',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+  });
+  return cover;
+}
+
+const clampPoint = (e, b) => ({
+  x: b ? Math.min(Math.max(e.pageX, b.left), b.right) : e.pageX,
+  y: b ? Math.min(Math.max(e.pageY, b.top), b.bottom) : e.pageY,
+});
+
+/** Where a gesture puts the window for the pointer at `e`. */
+function geometryFor(g, e, minWidth, minHeight) {
+  const p = clampPoint(e, g.bounds);
+  const deltaX = p.x - g.origin.x;
+  const deltaY = p.y - g.origin.y;
+  const { offset, size } = g.start;
+  if (g.move) {
+    return {
+      offset: { x: offset.x + deltaX, y: offset.y + deltaY },
+      size,
+    };
+  }
+  let { x, y } = offset;
+  let { width, height } = size;
+  if (g.dx < 0) {
+    width = Math.max(size.width - deltaX, minWidth);
+    x = offset.x + size.width - width;
+  } else if (g.dx > 0) {
+    width = Math.max(size.width + deltaX, minWidth);
+  }
+  if (g.dy < 0) {
+    height = Math.max(size.height - deltaY, minHeight);
+    y = offset.y + size.height - height;
+  } else if (g.dy > 0) {
+    height = Math.max(size.height + deltaY, minHeight);
+  }
+  return { offset: { x, y }, size: { width, height } };
+}
+
+/**
+ * Which grip of the frame the pointer is over, kept in a ref since only the
+ * mousedown handler reads it. Sets the matching cursor on the frame, and
+ * holds it (over a cover) while a resize is under way.
+ */
+function useGrip(ref, threshold, resizable) {
+  const grip = useRef('');
+  useEffect(() => {
+    const target = ref.current;
+    if (!target || !resizable) return undefined;
+    const cover = makeCover();
+    let locked = false;
+    const set = p => {
+      grip.current = p;
+      target.style.cursor = CURSORS[p] || 'auto';
+      cover.style.cursor = CURSORS[p] || 'auto';
+    };
+    const onHover = e => {
+      if (locked) return;
+      if (e.target !== target) {
+        set('');
+        return;
+      }
+      const { offsetX, offsetY } = e;
+      const { width, height } = target.getBoundingClientRect();
+      const v =
+        offsetY < threshold
+          ? 'top'
+          : height - offsetY < threshold
+          ? 'bottom'
+          : '';
+      const h =
+        offsetX < threshold
+          ? 'left'
+          : width - offsetX < threshold
+          ? 'right'
+          : '';
+      set(v && h ? `${v}${h[0].toUpperCase()}${h.slice(1)}` : v || h);
+    };
+    const onLeave = () => {
+      if (!locked) set('');
+    };
+    const onUp = () => {
+      locked = false;
+      cover.remove();
+      window.removeEventListener('mouseup', onUp);
+    };
+    const onDown = e => {
+      if (e.target !== target) return;
+      onHover(e);
+      locked = true;
+      document.body.appendChild(cover);
+      window.addEventListener('mouseup', onUp);
+    };
+    target.addEventListener('mousemove', onHover);
+    target.addEventListener('mouseleave', onLeave);
+    target.addEventListener('mousedown', onDown);
+    return () => {
+      cover.remove();
+      target.removeEventListener('mousemove', onHover);
+      target.removeEventListener('mouseleave', onLeave);
+      target.removeEventListener('mousedown', onDown);
+      window.removeEventListener('mouseup', onUp);
+    };
+  }, [ref, threshold, resizable]);
+  return grip;
+}
+
+/**
+ * Move a window by its caption (`dragRef`) and resize it by the edges of
+ * its frame (`ref`). The store owns the geometry: `offset` and `size` come
+ * in as props, the hook shows the pointer's transient geometry while a
+ * gesture is under way, and `onCommit({ offset, size })` reports where it
+ * ended. The pointer is kept inside `boundary` while dragging, and during a
+ * resize also short of the point where the window would be narrower than
+ * `constraintSize`.
+ */
 function useElementResize(ref, options) {
   const {
-    defaultOffset,
-    defaultSize,
+    dragRef,
+    offset,
+    size,
+    onCommit,
     boundary,
     resizable = true,
     resizeThreshold = 10,
@@ -11,496 +164,109 @@ function useElementResize(ref, options) {
     minWidth = 0,
     minHeight = 0,
   } = options;
-  const [offset, setOffset] = useState(defaultOffset);
-  const [size, setSize] = useState(defaultSize);
-  // Window-arrangement actions (Cascade/Tile) hand down fresh default
-  // identities; adopt them as the window's new geometry
-  const adoptedOffset = useRef(defaultOffset);
-  const adoptedSize = useRef(defaultSize);
-  if (defaultOffset !== adoptedOffset.current) {
-    adoptedOffset.current = defaultOffset;
-    setOffset(defaultOffset);
-  }
-  if (defaultSize !== adoptedSize.current) {
-    adoptedSize.current = defaultSize;
-    setSize(defaultSize);
-  }
-  const cursorPos = useCursor(ref, resizeThreshold, resizable);
+  // What the frame shows mid-gesture; null when the store's geometry stands
+  const [transient, setTransient] = useState(null);
+  const current = transient || { offset, size };
+
+  // The store caught up with the last commit: show its geometry again. A
+  // commit that changed nothing leaves the (equal) transient in place.
   useEffect(() => {
-    const target = ref.current;
-    if (!target) return;
-    const dragTarget = options.dragRef && options.dragRef.current;
-    const cover = document.createElement('div');
-    cover.style.position = 'fixed';
-    cover.style.top = 0;
-    cover.style.left = 0;
-    cover.style.right = 0;
-    cover.style.bottom = 0;
-    const previousOffset = { ...offset };
-    const previousSize = { ...size };
-    let _boundary;
-    let originMouseX;
-    let originMouseY;
-    let shouldCover = false;
+    setTransient(null);
+  }, [offset, size]);
 
-    function onDragging(e) {
-      if (shouldCover && !document.body.contains(cover)) {
-        document.body.appendChild(cover);
-      }
-      const { pageX, pageY } = getComputedPagePosition(e, _boundary);
-
-      let deltaX = pageX - originMouseX;
-      let deltaY = pageY - originMouseY;
-
-      // Only constrain dragging if we are resizing from top-left (which changes position)
-      if (cursorPos === 'topLeft') {
-        if (minWidth) deltaX = Math.min(deltaX, previousSize.width - minWidth);
-        if (minHeight)
-          deltaY = Math.min(deltaY, previousSize.height - minHeight);
-      }
-
-      const x = deltaX + previousOffset.x;
-      const y = deltaY + previousOffset.y;
-      setOffset({ x, y });
-    }
-    function onDragEnd(e) {
-      cover.remove();
-      shouldCover = false;
-      const { pageX, pageY } = getComputedPagePosition(e, _boundary);
-
-      let deltaX = pageX - originMouseX;
-      let deltaY = pageY - originMouseY;
-
-      if (cursorPos === 'topLeft') {
-        if (minWidth) deltaX = Math.min(deltaX, previousSize.width - minWidth);
-        if (minHeight)
-          deltaY = Math.min(deltaY, previousSize.height - minHeight);
-      }
-
-      previousOffset.x += deltaX;
-      previousOffset.y += deltaY;
-      window.removeEventListener('mousemove', onDragging);
-      window.removeEventListener('mouseup', onDragEnd);
-    }
-    function onDragStart(e) {
-      window.addEventListener('mousemove', onDragging);
-      window.addEventListener('mouseup', onDragEnd);
-    }
-    function onDraggingTop(e) {
-      const { pageY } = getComputedPagePosition(e, _boundary);
-      let deltaY = pageY - originMouseY;
-      if (minHeight) deltaY = Math.min(deltaY, previousSize.height - minHeight);
-
-      const { x } = previousOffset;
-      const y = deltaY + previousOffset.y;
-      setOffset({ x, y });
-    }
-    function onDragEndTop(e) {
-      const { pageY } = getComputedPagePosition(e, _boundary);
-      let deltaY = pageY - originMouseY;
-      if (minHeight) deltaY = Math.min(deltaY, previousSize.height - minHeight);
-
-      previousOffset.y += deltaY;
-      window.removeEventListener('mousemove', onDraggingTop);
-      window.removeEventListener('mouseup', onDragEndTop);
-    }
-    function onDragStartTop(e) {
-      window.addEventListener('mousemove', onDraggingTop);
-      window.addEventListener('mouseup', onDragEndTop);
-    }
-    function onDraggingLeft(e) {
-      const { pageX } = getComputedPagePosition(e, _boundary);
-      let deltaX = pageX - originMouseX;
-      if (minWidth) deltaX = Math.min(deltaX, previousSize.width - minWidth);
-
-      const x = deltaX + previousOffset.x;
-      const { y } = previousOffset;
-      setOffset({ x, y });
-    }
-    function onDragEndLeft(e) {
-      const { pageX } = getComputedPagePosition(e, _boundary);
-      let deltaX = pageX - originMouseX;
-      if (minWidth) deltaX = Math.min(deltaX, previousSize.width - minWidth);
-
-      previousOffset.x += deltaX;
-      window.removeEventListener('mousemove', onDraggingLeft);
-      window.removeEventListener('mouseup', onDragEndLeft);
-    }
-    function onDragStartLeft(e) {
-      window.addEventListener('mousemove', onDraggingLeft);
-      window.addEventListener('mouseup', onDragEndLeft);
-    }
-    function onResizingRight(e) {
-      const { pageX } = getComputedPagePosition(e, _boundary);
-      let width = pageX - originMouseX + previousSize.width;
-      if (minWidth) width = Math.max(width, minWidth);
-      const { height } = previousSize;
-      setSize({ width, height });
-    }
-    function onResizeEndRight(e) {
-      const { pageX } = getComputedPagePosition(e, _boundary);
-      let width = pageX - originMouseX + previousSize.width;
-      if (minWidth) width = Math.max(width, minWidth);
-      previousSize.width = width;
-      window.removeEventListener('mousemove', onResizingRight);
-      window.removeEventListener('mouseup', onResizeEndRight);
-    }
-    function onResizeStartRight(e) {
-      window.addEventListener('mousemove', onResizingRight);
-      window.addEventListener('mouseup', onResizeEndRight);
-    }
-    function onResizingBottom(e) {
-      const { pageY } = getComputedPagePosition(e, _boundary);
-      const { width } = previousSize;
-      let height = pageY - originMouseY + previousSize.height;
-      if (minHeight) height = Math.max(height, minHeight);
-      setSize({ width, height });
-    }
-    function onResizeEndBottom(e) {
-      const { pageY } = getComputedPagePosition(e, _boundary);
-      let height = pageY - originMouseY + previousSize.height;
-      if (minHeight) height = Math.max(height, minHeight);
-      previousSize.height = height;
-      window.removeEventListener('mousemove', onResizingBottom);
-      window.removeEventListener('mouseup', onResizeEndBottom);
-    }
-    function onResizeStartBottom(e) {
-      window.addEventListener('mousemove', onResizingBottom);
-      window.addEventListener('mouseup', onResizeEndBottom);
-    }
-    function onResizingLeft(e) {
-      const { pageX } = getComputedPagePosition(e, _boundary);
-      let width = -pageX + originMouseX + previousSize.width;
-      if (minWidth) width = Math.max(width, minWidth);
-      const { height } = previousSize;
-      setSize({ width, height });
-    }
-    function onResizeEndLeft(e) {
-      const { pageX } = getComputedPagePosition(e, _boundary);
-      let width = -pageX + originMouseX + previousSize.width;
-      if (minWidth) width = Math.max(width, minWidth);
-      previousSize.width = width;
-      window.removeEventListener('mousemove', onResizingLeft);
-      window.removeEventListener('mouseup', onResizeEndLeft);
-    }
-    function onResizeStartLeft(e) {
-      window.addEventListener('mousemove', onResizingLeft);
-      window.addEventListener('mouseup', onResizeEndLeft);
-    }
-    function onResizingTop(e) {
-      const { pageY } = getComputedPagePosition(e, _boundary);
-      let height = -pageY + originMouseY + previousSize.height;
-      if (minHeight) height = Math.max(height, minHeight);
-      const { width } = previousSize;
-      setSize({ width, height });
-    }
-    function onResizeEndTop(e) {
-      const { pageY } = getComputedPagePosition(e, _boundary);
-      let height = -pageY + originMouseY + previousSize.height;
-      if (minHeight) height = Math.max(height, minHeight);
-      previousSize.height = height;
-      window.removeEventListener('mousemove', onResizingTop);
-      window.removeEventListener('mouseup', onResizeEndTop);
-    }
-    function onResizeStartTop(e) {
-      window.addEventListener('mousemove', onResizingTop);
-      window.addEventListener('mouseup', onResizeEndTop);
-    }
-    function onResizingTopLeft(e) {
-      const { pageX, pageY } = getComputedPagePosition(e, _boundary);
-      let width = -pageX + originMouseX + previousSize.width;
-      let height = -pageY + originMouseY + previousSize.height;
-      if (minWidth) width = Math.max(width, minWidth);
-      if (minHeight) height = Math.max(height, minHeight);
-      setSize({ width, height });
-    }
-    function onResizeEndTopLeft(e) {
-      const { pageX, pageY } = getComputedPagePosition(e, _boundary);
-      let width = -pageX + originMouseX + previousSize.width;
-      let height = -pageY + originMouseY + previousSize.height;
-      if (minWidth) width = Math.max(width, minWidth);
-      if (minHeight) height = Math.max(height, minHeight);
-      previousSize.width = width;
-      previousSize.height = height;
-      window.removeEventListener('mousemove', onResizingTopLeft);
-      window.removeEventListener('mouseup', onResizeEndTopLeft);
-    }
-    function onResizeStartTopLeft(e) {
-      window.addEventListener('mousemove', onResizingTopLeft);
-      window.addEventListener('mouseup', onResizeEndTopLeft);
-    }
-    function onResizingTopRight(e) {
-      const { pageX, pageY } = getComputedPagePosition(e, _boundary);
-      let width = pageX - originMouseX + previousSize.width;
-      let height = -pageY + originMouseY + previousSize.height;
-      if (minWidth) width = Math.max(width, minWidth);
-      if (minHeight) height = Math.max(height, minHeight);
-      setSize({ width, height });
-    }
-    function onResizeEndTopRight(e) {
-      const { pageX, pageY } = getComputedPagePosition(e, _boundary);
-      let width = pageX - originMouseX + previousSize.width;
-      let height = -pageY + originMouseY + previousSize.height;
-      if (minWidth) width = Math.max(width, minWidth);
-      if (minHeight) height = Math.max(height, minHeight);
-      previousSize.width = width;
-      previousSize.height = height;
-      window.removeEventListener('mousemove', onResizingTopRight);
-      window.removeEventListener('mouseup', onResizeEndTopRight);
-    }
-    function onResizeStartTopRight(e) {
-      window.addEventListener('mousemove', onResizingTopRight);
-      window.addEventListener('mouseup', onResizeEndTopRight);
-    }
-    function onResizingBottomLeft(e) {
-      const { pageX, pageY } = getComputedPagePosition(e, _boundary);
-      let width = -pageX + originMouseX + previousSize.width;
-      let height = pageY - originMouseY + previousSize.height;
-      if (minWidth) width = Math.max(width, minWidth);
-      if (minHeight) height = Math.max(height, minHeight);
-      setSize({ width, height });
-    }
-    function onResizeEndBottomLeft(e) {
-      const { pageX, pageY } = getComputedPagePosition(e, _boundary);
-      let width = -pageX + originMouseX + previousSize.width;
-      let height = pageY - originMouseY + previousSize.height;
-      if (minWidth) width = Math.max(width, minWidth);
-      if (minHeight) height = Math.max(height, minHeight);
-      previousSize.width = width;
-      previousSize.height = height;
-      window.removeEventListener('mousemove', onResizingBottomLeft);
-      window.removeEventListener('mouseup', onResizeEndBottomLeft);
-    }
-    function onResizeStartBottomLeft(e) {
-      window.addEventListener('mousemove', onResizingBottomLeft);
-      window.addEventListener('mouseup', onResizeEndBottomLeft);
-    }
-    function onResizingBottomRight(e) {
-      const { pageX, pageY } = getComputedPagePosition(e, _boundary);
-      let width = pageX - originMouseX + previousSize.width;
-      let height = pageY - originMouseY + previousSize.height;
-      if (minWidth) width = Math.max(width, minWidth);
-      if (minHeight) height = Math.max(height, minHeight);
-      setSize({ width, height });
-    }
-    function onResizeEndBottomRight(e) {
-      const { pageX, pageY } = getComputedPagePosition(e, _boundary);
-      let width = pageX - originMouseX + previousSize.width;
-      let height = pageY - originMouseY + previousSize.height;
-      if (minWidth) width = Math.max(width, minWidth);
-      if (minHeight) height = Math.max(height, minHeight);
-      previousSize.width = width;
-      previousSize.height = height;
-      window.removeEventListener('mousemove', onResizingBottomRight);
-      window.removeEventListener('mouseup', onResizeEndBottomRight);
-    }
-    function onResizeStartBottomRight(e) {
-      window.addEventListener('mousemove', onResizingBottomRight);
-      window.addEventListener('mouseup', onResizeEndBottomRight);
-    }
-    function onMouseDown(e) {
-      originMouseX = e.pageX;
-      originMouseY = e.pageY;
-      _boundary = { ...boundary };
-      if (dragTarget && e.target === dragTarget) {
-        shouldCover = true;
-        return onDragStart(e);
-      }
-      if (e.target !== target || !resizable) return;
-      switch (cursorPos) {
-        case 'topLeft':
-          _boundary.right = originMouseX + previousSize.width - constraintSize;
-          _boundary.bottom =
-            originMouseY + previousSize.height - constraintSize;
-          onResizeStartTopLeft(e);
-          onDragStart(e);
-          break;
-        case 'left':
-          _boundary.right = originMouseX + previousSize.width - constraintSize;
-          onResizeStartLeft(e);
-          onDragStartLeft(e);
-          break;
-        case 'bottomLeft':
-          _boundary.right = originMouseX + previousSize.width - constraintSize;
-          _boundary.top = originMouseY - previousSize.height + constraintSize;
-          onResizeStartBottomLeft(e);
-          onDragStartLeft(e);
-          break;
-        case 'top':
-          _boundary.bottom =
-            originMouseY + previousSize.height - constraintSize;
-          onResizeStartTop(e);
-          onDragStartTop(e);
-          break;
-        case 'topRight':
-          _boundary.bottom =
-            originMouseY + previousSize.height - constraintSize;
-          _boundary.left = originMouseX - previousSize.width + constraintSize;
-          onDragStartTop(e);
-          onResizeStartTopRight(e);
-          break;
-        case 'right':
-          _boundary.left = originMouseX - previousSize.width + constraintSize;
-          onResizeStartRight(e);
-          break;
-        case 'bottomRight':
-          _boundary.top = originMouseY - previousSize.height + constraintSize;
-          _boundary.left = originMouseX - previousSize.width + constraintSize;
-          onResizeStartBottomRight(e);
-          break;
-        case 'bottom':
-          _boundary.top = originMouseY - previousSize.height + constraintSize;
-          onResizeStartBottom(e);
-          break;
-        default:
-      }
-    }
-    target.addEventListener('mousedown', onMouseDown);
-    return () => {
-      target.removeEventListener('mousedown', onMouseDown);
-      window.removeEventListener('mousemove', onDraggingLeft);
-      window.removeEventListener('mousemove', onDraggingTop);
-      window.removeEventListener('mousemove', onDragging);
-      window.removeEventListener('mouseup', onDragEndTop);
-      window.removeEventListener('mouseup', onDragEndLeft);
-      window.removeEventListener('mouseup', onDragEnd);
-      window.removeEventListener('mousemove', onResizingTop);
-      window.removeEventListener('mousemove', onResizingRight);
-      window.removeEventListener('mousemove', onResizingBottom);
-      window.removeEventListener('mousemove', onResizingLeft);
-      window.removeEventListener('mousemove', onResizingBottomLeft);
-      window.removeEventListener('mousemove', onResizingTopLeft);
-      window.removeEventListener('mousemove', onResizingTopRight);
-      window.removeEventListener('mousemove', onResizingBottomRight);
-      window.removeEventListener('mouseup', onResizeEndTop);
-      window.removeEventListener('mouseup', onResizeEndRight);
-      window.removeEventListener('mouseup', onResizeEndBottom);
-      window.removeEventListener('mouseup', onResizeEndLeft);
-      window.removeEventListener('mouseup', onResizeEndBottomLeft);
-      window.removeEventListener('mouseup', onResizeEndTopLeft);
-      window.removeEventListener('mouseup', onResizeEndTopRight);
-      window.removeEventListener('mouseup', onResizeEndBottomRight);
-      cover.remove();
-    };
-    // eslint-disable-next-line
-  }, [
-    boundary.top,
-    boundary.right,
-    boundary.bottom,
-    boundary.left,
-    cursorPos,
-    defaultOffset,
-    defaultSize,
-  ]);
-  return { offset, size };
-}
-
-function useCursor(ref, threshold, resizable) {
-  const [position, setPosition] = useState('');
+  // The gesture handlers run outside React's render, so they read the
+  // current geometry, boundary and commit callback from refs
+  const live = useRef(current);
   useEffect(() => {
-    const target = ref.current;
-    if (!target || !resizable) return;
-    const cover = document.createElement('div');
-    cover.style.position = 'fixed';
-    cover.style.top = 0;
-    cover.style.left = 0;
-    cover.style.right = 0;
-    cover.style.bottom = 0;
-    let lock = false;
-    function _setPosition(p) {
-      setPosition(p);
-      target.style.cursor = getCursorStyle(p);
-      cover.style.cursor = getCursorStyle(p);
-    }
-    function onMouseDown(e) {
-      if (e.target !== target) return;
-      onHover(e);
-      lock = true;
-      document.body.appendChild(cover);
-      window.addEventListener('mouseup', onMouseUp);
-    }
-    function onMouseUp(e) {
-      lock = false;
-      cover.remove();
-      window.removeEventListener('mouseup', onMouseUp);
-    }
-    function onHoverEnd(e) {
-      if (lock) return;
-      _setPosition('');
-    }
-    function onHover(e) {
-      if (lock) return;
-      if (e.target !== target) return _setPosition('');
-      const { offsetX, offsetY } = e;
-      const { width, height } = target.getBoundingClientRect();
-      if (offsetX < threshold) {
-        if (offsetY < threshold) {
-          _setPosition('topLeft');
-        } else if (height - offsetY < threshold) {
-          _setPosition('bottomLeft');
-        } else {
-          _setPosition('left');
-        }
-      } else if (offsetY < threshold) {
-        if (width - offsetX < threshold) {
-          _setPosition('topRight');
-        } else {
-          _setPosition('top');
-        }
-      } else if (width - offsetX < threshold) {
-        if (height - offsetY < threshold) _setPosition('bottomRight');
-        else _setPosition('right');
-      } else if (height - offsetY < threshold) {
-        _setPosition('bottom');
-      } else {
-        _setPosition('');
-      }
-    }
-    target.addEventListener('mouseleave', onHoverEnd);
-    target.addEventListener('mousemove', onHover);
-    target.addEventListener('mousedown', onMouseDown);
-    return () => {
-      cover.remove();
-      target.removeEventListener('mouseleave', onHoverEnd);
-      target.removeEventListener('mousemove', onHover);
-      target.removeEventListener('mousedown', onMouseDown);
-      window.removeEventListener('mouseup', onMouseUp);
-    };
-    // eslint-disable-next-line
+    live.current = current;
+  });
+  const boundsRef = useRef(boundary);
+  const commitRef = useRef(onCommit);
+  useEffect(() => {
+    boundsRef.current = boundary;
+    commitRef.current = onCommit;
+  });
+
+  const commit = useCallback(geometry => {
+    live.current = geometry;
+    setTransient(geometry);
+    if (commitRef.current) commitRef.current(geometry);
   }, []);
-  return position;
+
+  // A window near the edge is pulled back in when the viewport shrinks
+  const edgeRight = boundary ? boundary.right : null;
+  const edgeBottom = boundary ? boundary.bottom : null;
+  useEffect(() => {
+    if (edgeRight == null || edgeBottom == null) return;
+    const { offset: o, size: s } = live.current;
+    const x = Math.min(o.x, edgeRight - REACHABLE.x);
+    const y = Math.min(o.y, edgeBottom - REACHABLE.y);
+    if (x !== o.x || y !== o.y) commit({ offset: { x, y }, size: s });
+  }, [edgeRight, edgeBottom, commit]);
+
+  const grip = useGrip(ref, resizeThreshold, resizable);
+
+  useEffect(() => {
+    const target = ref.current;
+    if (!target) return undefined;
+    const dragTarget = dragRef && dragRef.current;
+    const cover = makeCover();
+    let gesture = null;
+
+    const onMove = e => {
+      if (!gesture) return;
+      // Only a caption drag hides the page: content under the pointer
+      // (iframes) would otherwise swallow the moves
+      if (gesture.move && !cover.isConnected) document.body.appendChild(cover);
+      const next = geometryFor(gesture, e, minWidth, minHeight);
+      live.current = next;
+      setTransient(next);
+    };
+    const onUp = e => {
+      if (gesture) commit(geometryFor(gesture, e, minWidth, minHeight));
+      gesture = null;
+      cover.remove();
+      window.removeEventListener('mousemove', onMove);
+      window.removeEventListener('mouseup', onUp);
+    };
+    const onDown = e => {
+      const origin = { x: e.pageX, y: e.pageY };
+      const start = live.current;
+      const bounds = { ...boundsRef.current };
+      if (dragTarget && e.target === dragTarget) {
+        gesture = { move: true, origin, start, bounds };
+      } else {
+        const g = resizable && e.target === target ? GRIPS[grip.current] : null;
+        if (!g) return;
+        const { width, height } = start.size;
+        if (g.dx < 0) bounds.right = origin.x + width - constraintSize;
+        if (g.dx > 0) bounds.left = origin.x - width + constraintSize;
+        if (g.dy < 0) bounds.bottom = origin.y + height - constraintSize;
+        if (g.dy > 0) bounds.top = origin.y - height + constraintSize;
+        gesture = { ...g, origin, start, bounds };
+      }
+      window.addEventListener('mousemove', onMove);
+      window.addEventListener('mouseup', onUp);
+    };
+    target.addEventListener('mousedown', onDown);
+    return () => {
+      target.removeEventListener('mousedown', onDown);
+      window.removeEventListener('mousemove', onMove);
+      window.removeEventListener('mouseup', onUp);
+      cover.remove();
+    };
+  }, [
+    ref,
+    dragRef,
+    grip,
+    commit,
+    resizable,
+    constraintSize,
+    minWidth,
+    minHeight,
+  ]);
+
+  return current;
 }
 
-function getComputedPagePosition(e, boundary) {
-  let { pageX, pageY } = e;
-  if (!boundary) return { pageX, pageY };
-  const { top, right, bottom, left } = boundary;
-  if (pageX <= left) pageX = left;
-  else if (pageX >= right) pageX = right;
-  if (pageY <= top) pageY = top;
-  else if (pageY >= bottom) pageY = bottom;
-  return { pageX, pageY };
-}
-function getCursorStyle(pos) {
-  switch (pos) {
-    case 'top':
-      return 'n-resize';
-    case 'topRight':
-      return 'ne-resize';
-    case 'right':
-      return 'e-resize';
-    case 'bottomRight':
-      return 'se-resize';
-    case 'bottom':
-      return 's-resize';
-    case 'bottomLeft':
-      return 'sw-resize';
-    case 'left':
-      return 'w-resize';
-    case 'topLeft':
-      return 'nw-resize';
-    default:
-      return 'auto';
-  }
-}
 export default useElementResize;

@@ -53,21 +53,19 @@ export default function OpenWithDialog({
               icon: zipHandlerIcon,
             },
           ]),
-      ...Object.entries(PROGRAMS)
+      ...Object.values(PROGRAMS)
         .filter(
-          ([exePath, p]) =>
-            p.name &&
+          p =>
             !p.unlisted &&
             // uninstalled shop titles have no exe on disk
-            !!vfs.findNodeCI(exePath) &&
-            exePath !== EXE_PATHS.EXPLORER &&
-            // Control Panel is a shell namespace; its registration exists
-            // only so 'control' resolves in Run — it cannot open files
-            !/\/control\.exe$/i.test(exePath),
+            vfs.exists(p.exePath) &&
+            p.exePath !== EXE_PATHS.EXPLORER &&
+            // Explorer namespaces (Control Panel) cannot open files
+            !p.namespace,
         )
-        .map(([exePath, p]) => ({
-          exePath,
-          name: p.displayName || p.name,
+        .map(p => ({
+          exePath: p.exePath,
+          name: p.displayName,
           icon: (p.header && p.header.icon) || null,
         }))
         .sort((a, b) => a.name.localeCompare(b.name)),

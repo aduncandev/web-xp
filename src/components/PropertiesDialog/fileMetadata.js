@@ -1,6 +1,7 @@
 import { getExtension } from '../../context/vfsUtils';
 import { readMediaTags } from '../../context/mediaTags';
 import { applyTagEdits, tagEditsFor } from '../../context/tagOverrides';
+import { WALLPAPER_EXTENSIONS } from '../../WinXP/shell/fileTypes';
 
 // Tag → Summary row, in the order XP lists them under each group
 const DESCRIPTION_ROWS = [
@@ -38,7 +39,8 @@ const section = (label, rows, tags) => {
  */
 
 const AUDIO_EXT = ['.wav', '.mp3', '.ogg', '.m4a', '.flac'];
-const IMAGE_EXT = ['.png', '.jpg', '.jpeg', '.gif', '.bmp', '.webp', '.ico'];
+// The pictures whose dimensions the browser can read for the Summary tab
+const IMAGE_EXT = WALLPAPER_EXTENSIONS;
 const VIDEO_EXT = ['.mp4', '.webm', '.avi', '.mov', '.mkv'];
 
 const WAVE_FORMATS = {

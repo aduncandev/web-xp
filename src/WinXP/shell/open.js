@@ -18,14 +18,19 @@ import {
   isExecutablePath,
 } from '../../context/vfsConstants';
 import { getExtension } from '../../context/vfsUtils';
-import { RECYCLE_BIN, CONTROL_PANEL } from './location';
+import {
+  RECYCLE_BIN,
+  MY_COMPUTER_TARGET,
+  RECYCLE_BIN_TARGET,
+  isShellObjectTarget,
+} from './location';
 import { recordProgramLaunch } from '../startMenuConfig';
 
 /**
  * Build the shell's open function from the runtime's machinery:
  * { vfs, dlg, userName, launchProgram, openErrorBox, getProgramByPath,
  *   setOpenWith, reopen } — `reopen` re-enters the CURRENT shellOpen (for
- * shortcut chains), so the runtime passes its own ref through.
+ *   shortcut chains), so the runtime passes its own ref through.
  */
 export function createShellOpen({
   vfs,
@@ -77,18 +82,18 @@ export function createShellOpen({
       if (ie) launchProgram(ie, { initialUrl: target, ...injectProps });
       return;
     }
-    // Shell namespace sentinels (not filesystem paths)
-    if (target === 'My Computer') {
+    // Shell object tokens (not filesystem paths)
+    if (target === MY_COMPUTER_TARGET) {
       browseIn(null);
       return;
     }
-    if (target === 'RecycleBin') {
+    if (target === RECYCLE_BIN_TARGET) {
       // A namespace of Explorer, as it really was — not a program
       browseIn(RECYCLE_BIN);
       return;
     }
 
-    const node = vfs.findNodeCI(target);
+    const node = vfs.getNode(target);
     if (!node) {
       cannotFind(
         toWinPath(target),
@@ -102,11 +107,11 @@ export function createShellOpen({
     if (node.type === 'shortcut') {
       if (depth > 4) return;
       const t = node.target;
-      if (t === 'My Computer' || t === 'RecycleBin') {
+      if (isShellObjectTarget(t)) {
         reopen(t, { depth: depth + 1 });
         return;
       }
-      const targetNode = t ? vfs.findNodeCI(t) : null;
+      const targetNode = t ? vfs.getNode(t) : null;
       if (!targetNode) {
         dlg
           .confirm(
@@ -133,7 +138,7 @@ export function createShellOpen({
 
     if (node.type === 'special') {
       if (node.specialFolder === 'recycle-bin') {
-        reopen('RecycleBin', { depth: depth + 1 });
+        reopen(RECYCLE_BIN_TARGET, { depth: depth + 1 });
       } else {
         browseIn(null);
       }
@@ -142,7 +147,7 @@ export function createShellOpen({
 
     if (node.type === 'folder' || node.type === 'drive') {
       if (node.path === SPECIAL_FOLDERS.RECYCLER) {
-        reopen('RecycleBin', { depth: depth + 1 });
+        reopen(RECYCLE_BIN_TARGET, { depth: depth + 1 });
         return;
       }
       browseIn(node.path);
@@ -177,32 +182,32 @@ export function createShellOpen({
 
     // Executables resolve through the program registry
     if (isExecutablePath(node.path)) {
-      // control.exe is the Control Panel namespace, not a windowed program
-      if (/\/control\.exe$/i.test(node.path)) {
-        browseIn(CONTROL_PANEL);
+      const program = getProgramByPath(node.path);
+      // Some registered "programs" are Explorer namespaces (control.exe is
+      // the Control Panel): browse them instead of opening a window
+      if (program && program.namespace) {
+        browseIn(program.namespace);
         return;
       }
       // Until the first egg is found, launching any program has a small
       // chance of summoning the egg instead. Once collected, the '???'
-      // shortcut lives openly on the desktop and the ambush stops.
-      if (
-        node.path !== EXE_PATHS.MISSINGNO &&
-        node.path !== EXE_PATHS.DOGWINDOW &&
-        shouldAmbushWithEgg()
-      ) {
+      // shortcut lives openly on the desktop and the ambush stops. The
+      // secrets themselves are never ambushed.
+      const secret = program && program.excludeFromMfu && program.unlisted;
+      if (!secret && shouldAmbushWithEgg()) {
         const eggProgram = getProgramByPath(EXE_PATHS.MISSINGNO);
         if (eggProgram) {
           launchProgram(eggProgram, injectProps);
           return;
         }
       }
-      const program = getProgramByPath(node.path);
       if (program) {
-        if (
-          node.path !== EXE_PATHS.MISSINGNO &&
-          node.path !== EXE_PATHS.DOGWINDOW
-        )
-          recordProgramLaunch(vfs, userName, node.path);
+        // The most-used list counts launches, except of the programs it
+        // never shows
+        // Counted under the registered path, so a mirror copy and the
+        // original are one program to the Start menu
+        if (!program.excludeFromMfu)
+          recordProgramLaunch(vfs, userName, program.exePath || node.path);
         launchProgram(program, injectProps, {
           size: opts.size,
           offset: opts.offset,
@@ -231,7 +236,7 @@ export function createShellOpen({
     }
 
     // Per-user "Always use this program" overrides beat the static map
-    const ext = getExtension(node.path).toLowerCase();
+    const ext = getExtension(node.path);
     if (ext) {
       const overrideExe = overrideFor(ext);
       const overrideProgram = overrideExe
@@ -250,7 +255,7 @@ export function createShellOpen({
     // Documents open with their associated program
     const assoc = getFileAssociation(node.path);
     if (assoc) {
-      const exeNode = vfs.findNodeCI(assoc.exePath);
+      const exeNode = vfs.getNode(assoc.exePath);
       const program = exeNode ? getProgramByPath(exeNode.path) : null;
       if (!program) {
         cannotFind(toWinPath(assoc.exePath), node.name);

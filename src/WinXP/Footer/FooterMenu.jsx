@@ -21,7 +21,7 @@ import search from 'assets/windowsIcons/299(32x32).png';
 import run from 'assets/windowsIcons/743(32x32).png';
 import lock from 'assets/windowsIcons/546(32x32).png';
 import user from 'assets/userIcons/skillz.bmp';
-import { getCurrentUserName, getUser, getAvatar } from '../../context/users';
+import { getUser, getAvatar } from '../../context/users';
 import shut from 'assets/windowsIcons/310(32x32).png';
 import allProgramsIcon from 'assets/windowsIcons/all-programs.ico';
 import storeBag from 'assets/store/bag.gif';
@@ -29,7 +29,7 @@ import empty from 'assets/empty.png';
 
 import { useVFS } from '../../context/VFSContext';
 import { EXE_PATHS } from '../../context/vfsConstants';
-import { PROGRAMS } from '../apps';
+import { PROGRAMS, MFU_EXCLUDED, getProgramByPath } from '../apps';
 import {
   getStartMenuConfig,
   togglePinned,
@@ -41,39 +41,13 @@ import { programIcon16, programIcon32 } from '../apps/programMeta';
 /** What My Recent Documents shows before anything has been opened. */
 const MyRecentDocuments = [{ type: 'item', icon: empty, text: '(Empty)' }];
 
-const OUTLOOK_EXE = 'C:/Program Files/Outlook Express/msimn.exe';
-
-// Menu label -> program exe, for resolving right-clicked entries in the
-// All Programs cascade (which only carries display text).
-const TEXT_TO_EXE = (() => {
-  const m = {};
-  for (const [exe, p] of Object.entries(PROGRAMS)) {
-    const label = p.displayName || p.name;
-    if (label && !(label in m)) m[label] = exe;
-  }
-  return m;
-})();
-
 // Pre-seeded most-frequently-used list lives in the shared config module
-// (Clear List needs it too); shown until real usage fills in.
-
-// Programs the MFU list never surfaces (shell surfaces and the permanent
-// IE/shop slots, mirroring XP's launch-count kill list).
-const MFU_EXCLUDED = [
-  EXE_PATHS.IEXPLORE,
-  OUTLOOK_EXE,
-  EXE_PATHS.STORE,
-  EXE_PATHS.MISSINGNO,
-  EXE_PATHS.EXPLORER,
-  EXE_PATHS.DOGVIRUS,
-  EXE_PATHS.DOGWINDOW,
-  'C:/WINDOWS/system32/control.exe',
-  'C:/WINDOWS/system32/taskmgr.exe',
-];
+// (Clear List needs it too); shown until real usage fills in. Which
+// programs the list never shows is a flag on their registry entries.
 
 /** Build a left-column row descriptor for a registered program. */
 function programEntry(exePath, small) {
-  const program = PROGRAMS[exePath];
+  const program = getProgramByPath(exePath);
   if (!program) return null;
   const icon =
     (small ? programIcon16(exePath) : programIcon32(exePath)) ||
@@ -81,7 +55,7 @@ function programEntry(exePath, small) {
   return {
     exePath,
     icon,
-    text: program.displayName || program.name,
+    text: program.displayName,
     // Every launch goes through the shell's 'open:<path>' passthrough. A
     // program used to need a third identity — a display-name "action"
     // string — that the shell then translated straight back into the exe
@@ -92,12 +66,12 @@ function programEntry(exePath, small) {
 
 function FooterMenu({
   className,
+  userName,
   onClick,
   allProgramsData,
   recentDocumentsData,
 }) {
   const vfs = useVFS();
-  const userName = getCurrentUserName();
   const cfg = getStartMenuConfig(vfs, userName);
   const { settings } = cfg;
   const small = settings.iconSize === 'small';
@@ -110,12 +84,12 @@ function FooterMenu({
   // --- Pinned area (Internet, E-mail, then user pins) ---
   // A pinned key is either a registered program's exe path or any VFS
   // path (anything from All Programs can be pinned, functional or not).
-  const exeExists = p => !!vfs.findNodeCI(p);
+  const exeExists = p => vfs.exists(p);
   const resolveEntry = key => {
     const asProgram = programEntry(key, small);
     // a registered program with no exe on disk was uninstalled
     if (asProgram) return exeExists(key) ? asProgram : null;
-    const node = vfs.findNodeCI(key);
+    const node = vfs.getNode(key);
     if (!node) return null;
     return {
       exePath: key,
@@ -135,7 +109,7 @@ function FooterMenu({
     .filter(
       ([p, count]) =>
         count > 0 &&
-        PROGRAMS[p] &&
+        getProgramByPath(p) &&
         !excluded.has(p) &&
         exeExists(p) &&
         p.toLowerCase().endsWith('.exe'),
@@ -153,9 +127,10 @@ function FooterMenu({
   function onMouseOver(e) {
     const item = e.target.closest('.menu__item');
     if (!item) return;
-    const textEl = item.querySelector('.menu__item__text');
-    if (!textEl) return;
-    const text = textEl.textContent;
+    // Rows identify themselves; a pinned shortcut that happens to be named
+    // 'All Programs' is not the All Programs row
+    const text = item.dataset.menuId;
+    if (!text) return;
     if (text === hovering) return;
     setHovering(text);
     clearTimeout(openTimer.current);
@@ -182,29 +157,24 @@ function FooterMenu({
   }
 
   // Right-click in the All Programs cascade: EVERY concrete item is
-  // pinnable, functional or not. Dynamic entries carry 'open:<vfs path>'
-  // actions — shortcuts to registered programs pin as the program; anything
-  // else pins as its VFS path and opens like a normal click would.
+  // pinnable, functional or not. Entries carry 'open:<vfs path>' actions -
+  // shortcuts to registered programs pin as the program; anything else
+  // pins as its VFS path and opens like a normal click would.
   function onAllProgramsContextMenu(e, item) {
-    const key = item.action || item.text;
-    let entry = null;
-    if (typeof key === 'string' && key.startsWith('open:')) {
-      const node = vfs.findNodeCI(key.slice(5));
-      if (!node) return;
-      const target = node.type === 'shortcut' ? node.target : node.path;
-      entry =
-        target && PROGRAMS[target]
-          ? programEntry(target, small)
-          : {
-              exePath: node.path,
-              icon: node.icon,
-              text: node.name,
-              action: `open:${node.path}`,
-            };
-    } else {
-      const exe = TEXT_TO_EXE[key];
-      if (exe && PROGRAMS[exe]) entry = programEntry(exe, small);
-    }
+    const key = item.action;
+    if (typeof key !== 'string' || !key.startsWith('open:')) return;
+    const node = vfs.getNode(key.slice(5));
+    if (!node) return;
+    const target = node.type === 'shortcut' ? node.target : node.path;
+    const program = target ? getProgramByPath(target) : null;
+    const entry = program
+      ? programEntry(program.exePath, small)
+      : {
+          exePath: node.path,
+          icon: node.icon,
+          text: node.name,
+          action: `open:${node.path}`,
+        };
     if (!entry) return;
     e.preventDefault();
     e.stopPropagation();
@@ -238,10 +208,10 @@ function FooterMenu({
       <header>
         <img
           className="header__img"
-          src={getAvatar(getUser(getCurrentUserName())?.avatarKey) || user}
+          src={getAvatar(getUser(userName)?.avatarKey) || user}
           alt="avatar"
         />
-        <span className="header__text">{getCurrentUserName()}</span>
+        <span className="header__text">{userName}</span>
       </header>
       <section className="menu" onMouseOver={onMouseOver}>
         <hr className="orange-hr" />
@@ -277,6 +247,7 @@ function FooterMenu({
           {pinnedEntries.map(entry => (
             <Item
               key={entry.exePath}
+              id={`pin:${entry.exePath}`}
               onClick={onClick}
               text={entry.text}
               action={entry.action}
@@ -289,6 +260,7 @@ function FooterMenu({
           {mfuEntries.map(entry => (
             <Item
               key={entry.exePath}
+              id={`mfu:${entry.exePath}`}
               onClick={onClick}
               text={entry.text}
               action={entry.action}
@@ -299,6 +271,7 @@ function FooterMenu({
           <div style={{ flex: 1 }} />
           <div className="menu__separator" />
           <Item
+            id="All Programs"
             className="menu__item--allprograms"
             bold
             style={
@@ -447,12 +420,12 @@ function FooterMenu({
 }
 function Item({
   style,
+  id,
   text,
   action,
   icon,
   bold,
   className,
-  onHover = () => {},
   onClick = () => {},
   onContextMenu,
   children,
@@ -461,17 +434,15 @@ function Item({
   function _onClick() {
     onClick(action || text);
   }
-  function onMouseEnter() {
-    onHover(text);
-  }
   return (
     <div
       className={`menu__item${bold ? ' menu__item--bold' : ''}${
         className ? ` ${className}` : ''
       }`}
+      // what the hover handler keys on; plain labels serve for the fixed rows
+      data-menu-id={id || (typeof text === 'string' ? text : undefined)}
       style={style}
       onClick={_onClick}
-      onMouseEnter={onMouseEnter}
       onContextMenu={onContextMenu}
     >
       <img className="menu__item__img" src={icon} alt="" />

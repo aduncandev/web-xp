@@ -8,10 +8,7 @@ import { useVFS } from '../../../context/VFSContext';
 import { getCurrentUserName } from '../../../context/users';
 
 // Eggs live per-user in the profile hive (ntuser.dat) under 'eggData' /
-// 'lastEggTime'; these localStorage keys are only for one-time migration.
-const LEGACY_EGG_DATA_KEY = 'eggData';
-const LEGACY_EGG_COUNT_KEY = 'eggCount';
-const LEGACY_EGG_TIME_KEY = 'lastEggTime';
+// 'lastEggTime'.
 
 const FontStyles = createGlobalStyle`
   @font-face {
@@ -162,28 +159,6 @@ function Egg() {
     try {
       const stored = vfs.getUserConfigFor(userRef.current, 'eggData', null);
       if (Array.isArray(stored)) return stored;
-
-      // One-time migration of the legacy shared localStorage collection
-      const saved = localStorage.getItem(LEGACY_EGG_DATA_KEY);
-      if (saved) {
-        const parsed = JSON.parse(saved);
-        const list = Array.isArray(parsed) ? parsed : [];
-        vfs.setUserConfigFor(userRef.current, 'eggData', list);
-        localStorage.removeItem(LEGACY_EGG_DATA_KEY);
-        return list;
-      }
-      const oldKey = localStorage.getItem(LEGACY_EGG_COUNT_KEY);
-      if (oldKey) {
-        const count = parseInt(oldKey, 10);
-        const list = Array.from({ length: count }).map((_, i) => ({
-          x: Math.random() * window.screen.width,
-          y: Math.random() * window.screen.height,
-          id: Date.now() + i,
-        }));
-        vfs.setUserConfigFor(userRef.current, 'eggData', list);
-        localStorage.removeItem(LEGACY_EGG_COUNT_KEY);
-        return list;
-      }
     } catch {
       // hive unavailable — start empty
     }
@@ -253,11 +228,7 @@ function Egg() {
     if (dialogueStep === 0) {
       let lastTime = 0;
       try {
-        lastTime = vfs.getUserConfigFor(
-          userRef.current,
-          'lastEggTime',
-          parseInt(localStorage.getItem(LEGACY_EGG_TIME_KEY) || '0', 10),
-        );
+        lastTime = vfs.getUserConfigFor(userRef.current, 'lastEggTime', 0);
       } catch {
         lastTime = 0;
       }
@@ -294,7 +265,6 @@ function Egg() {
     try {
       vfs.setUserConfigFor(userRef.current, 'eggData', newEggs);
       vfs.setUserConfigFor(userRef.current, 'lastEggTime', Date.now());
-      localStorage.removeItem(LEGACY_EGG_TIME_KEY);
     } catch {
       // hive unavailable — collection is session-only
     }

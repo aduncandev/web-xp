@@ -1,8 +1,9 @@
-import React, { useState, useEffect, useMemo, useRef } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 
 import { WindowDropDowns } from 'components';
 import FileDialog from '../../../components/FileDialog';
 import { useVFS } from '../../../context/VFSContext';
+import { useExplorerView } from '../../shell/useExplorerView';
 import { useDialog } from '../../../context/DialogContext';
 import { SPECIAL_FOLDERS } from '../../../context/vfsConstants';
 import { getBaseName, getExtension } from '../../../context/vfsUtils';
@@ -130,15 +131,7 @@ export default function Paint({
   };
 
   // 'Hide extensions for known file types' — XP default is on
-  const hideExt = useMemo(() => {
-    try {
-      const view = vfs.getUserConfig('explorerView', null) || {};
-      return view.hideExt !== false;
-    } catch {
-      return true;
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [vfs.version, vfs.initialized]);
+  const { hideExt } = useExplorerView();
 
   const fileTitle = currentPath
     ? displayName(vfs.getNode(currentPath), hideExt) || getBaseName(currentPath)
@@ -1312,7 +1305,7 @@ export default function Paint({
       if (!path) return;
     }
     try {
-      usersApi.setUserSetting(usersApi.getCurrentUserName(), 'wallpaper', {
+      vfs.setUserConfigFor(usersApi.getCurrentUserName(), 'wallpaper', {
         kind: 'vfs',
         value: path,
         position,

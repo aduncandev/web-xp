@@ -1,30 +1,75 @@
-/*
- * The Recycle Bin's verbs — restore, delete permanently, empty — with the
- * confirmations and the sound the real shell played.
- *
- * The bin used to be a whole view component; now Explorer renders its
- * listing through the normal content pipeline (so Tiles/Icons/Details and
- * the Folders pane all just work) and only these actions are bin-specific.
- */
+// The Recycle Bin's verbs, with their confirmations and sound. Explorer and the
+// desktop share them.
 import { useCallback } from 'react';
 
-import { useVolume } from '../../../context/VolumeContext';
 import { displayPath } from '../../../context/vfsUtils';
 import { displayName } from '../fileTypes';
-import recycleSoundSrc from 'assets/sounds/Windows XP Recycle.wav';
+import { playSystemSound } from '../../sounds';
+import { readRecycleSettings } from '../../../components/RecycleBinProperties';
 
 export function useRecycleBinActions(vfs, dlg, hideExt) {
-  const { applyVolume } = useVolume();
-
-  const playRecycleSound = useCallback(() => {
-    try {
-      const audio = new Audio(recycleSoundSrc);
-      applyVolume(audio);
-      audio.play().catch(() => {});
-    } catch {
-      // sound is best-effort
-    }
-  }, [applyVolume]);
+  /**
+   * Send items to the bin (or past it, per Recycle Bin Properties). Protected
+   * and read-only items are refused with the shell's error. Resolves true when
+   * something was deleted.
+   */
+  const deleteToBin = useCallback(
+    async paths => {
+      const nodes = paths.map(p => vfs.getNode(p)).filter(Boolean);
+      const blockedSystem = nodes.filter(n => vfs.isProtectedPath(n.path));
+      const blockedReadOnly = nodes.filter(
+        n => !blockedSystem.includes(n) && n.readOnly,
+      );
+      if (blockedSystem.length > 0) {
+        dlg.alert(
+          `Cannot delete ${displayName(
+            blockedSystem[0],
+            hideExt,
+          )}: It is a Windows system folder and is required for Windows to run properly.`,
+          'Error Deleting File or Folder',
+          { icon: 'error' },
+        );
+      } else if (blockedReadOnly.length > 0) {
+        dlg.alert(
+          `Cannot delete ${displayName(
+            blockedReadOnly[0],
+            hideExt,
+          )}: The file is read-only. Remove the read-only attribute in the file's Properties, and then try again.`,
+          'Error Deleting File or Folder',
+          { icon: 'error' },
+        );
+      }
+      const deletable = nodes.filter(
+        n => !blockedSystem.includes(n) && !blockedReadOnly.includes(n),
+      );
+      if (deletable.length === 0) return false;
+      // Recycle Bin Properties decides whether we confirm, and whether the
+      // file lands in the bin at all
+      const bin = readRecycleSettings(vfs);
+      const remove = n =>
+        bin.nukeOnDelete
+          ? vfs.deleteNodePermanently(n.path)
+          : vfs.deleteNode(n.path);
+      if (bin.confirmDelete) {
+        const message =
+          deletable.length === 1
+            ? `Are you sure you want to send '${displayName(
+                deletable[0],
+                hideExt,
+              )}' to the Recycle Bin?`
+            : `Are you sure you want to send these ${deletable.length} items to the Recycle Bin?`;
+        const title =
+          deletable.length === 1
+            ? 'Confirm File Delete'
+            : 'Confirm Multiple File Delete';
+        const yes = await dlg.confirm(message, title, { icon: 'none' });
+        if (!yes) return false;
+      }
+      deletable.forEach(remove);
+      return true;
+    },
+    [vfs, dlg, hideExt],
+  );
 
   const emptyBin = useCallback(
     async items => {
@@ -43,10 +88,10 @@ export function useRecycleBinActions(vfs, dlg, hideExt) {
       const yes = await dlg.confirm(message, title, { icon: 'none' });
       if (yes) {
         vfs.emptyRecycleBin();
-        playRecycleSound();
+        playSystemSound('recycle');
       }
     },
-    [vfs, dlg, playRecycleSound, hideExt],
+    [vfs, dlg, hideExt],
   );
 
   const restore = useCallback(
@@ -95,5 +140,5 @@ export function useRecycleBinActions(vfs, dlg, hideExt) {
     [vfs, dlg, hideExt],
   );
 
-  return { emptyBin, restore, deletePermanently };
+  return { deleteToBin, emptyBin, restore, deletePermanently };
 }

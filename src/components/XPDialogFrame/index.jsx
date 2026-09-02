@@ -2,8 +2,8 @@ import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { createPortal } from 'react-dom';
 import styled from 'styled-components';
 
-import { useVolume } from 'context/VolumeContext';
-import dingSrc from 'assets/sounds/Windows XP Ding.wav';
+import { playSystemSound } from 'WinXP/sounds';
+import { TASKBAR_HEIGHT } from 'WinXP/constants';
 import { lunaScrollbars } from '../lunaScrollbars';
 
 /**
@@ -28,7 +28,6 @@ export default function XPDialogFrame({
   zIndex = 99990,
   children,
 }) {
-  const { applyVolume } = useVolume();
   const frameRef = useRef(null);
   const dragOffsetRef = useRef({ dx: 0, dy: 0 });
   const [pos, setPos] = useState(null);
@@ -54,8 +53,8 @@ export default function XPDialogFrame({
       const w = frameRef.current ? frameRef.current.offsetWidth : 200;
       let x = e.clientX - dx;
       let y = e.clientY - dy;
-      // Title bar must stay reachable
-      y = Math.max(0, Math.min(y, window.innerHeight - 30));
+      // Title bar must stay reachable, above the taskbar
+      y = Math.max(0, Math.min(y, window.innerHeight - TASKBAR_HEIGHT));
       x = Math.max(60 - w, Math.min(x, window.innerWidth - 60));
       setPos({ x, y });
     };
@@ -68,20 +67,11 @@ export default function XPDialogFrame({
     };
   }, [dragging]);
 
-  const onBlockedClick = useCallback(
-    e => {
-      if (e.target !== e.currentTarget) return;
-      setFlashKey(k => k + 1);
-      try {
-        const audio = new Audio(dingSrc);
-        applyVolume(audio);
-        audio.play().catch(() => {});
-      } catch (err) {
-        // autoplay may be blocked
-      }
-    },
-    [applyVolume],
-  );
+  const onBlockedClick = useCallback(e => {
+    if (e.target !== e.currentTarget) return;
+    setFlashKey(k => k + 1);
+    playSystemSound('ding');
+  }, []);
 
   const posStyle = pos
     ? { left: pos.x, top: pos.y }

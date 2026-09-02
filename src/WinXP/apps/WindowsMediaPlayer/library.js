@@ -16,8 +16,8 @@ export const MEDIA_EXTENSIONS = new RegExp(
   'i',
 );
 
-const SHARED_MUSIC = 'C:/Documents and Settings/All Users/Documents/My Music';
-const SHARED_VIDEO = 'C:/Documents and Settings/All Users/Documents/My Videos';
+const SHARED_MUSIC = SPECIAL_FOLDERS.SHARED_MUSIC;
+const SHARED_VIDEO = SPECIAL_FOLDERS.SHARED_VIDEOS;
 
 /*
  * Resolved per scan, never captured.

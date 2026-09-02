@@ -6,9 +6,10 @@
  * per user profile — so it shows up (or vanishes) across Explorer, the Start
  * menu and the desktop live.
  */
-import { EXE_PATHS, getProfileRootFor } from '../../../context/vfsConstants';
+import { EXE_PATHS, profileFoldersFor } from '../../../context/vfsConstants';
 import { listUsers } from '../../../context/users';
-import { START_MENU_DEFAULTS } from '../../startMenuConfig';
+import { formatSize } from '../../../context/vfsUtils';
+import { scrubProgramRefs } from '../../startMenuConfig';
 import { PROGRAM_META } from '../programMeta';
 
 import pictochatIcon from 'assets/windowsIcons/pictochat.png';
@@ -321,9 +322,9 @@ function registeredUsers() {
   return users.length ? users : [{ name: 'Skillz' }];
 }
 
-/** The Shop Apps folder chain for a profile, deepest last. */
-function shopFolderChain(root, app) {
-  const shop = `${root}/Start Menu/Programs/Shop Apps`;
+/** The Shop Apps folder chain in one account's Start menu, deepest last. */
+function shopFolderChain(userName, app) {
+  const shop = `${profileFoldersFor(userName).PROGRAMS}/Shop Apps`;
   return [shop, `${shop}/${SHELF_LABELS[app.shelf] || 'XPWare'}`];
 }
 
@@ -331,7 +332,7 @@ function shopFolderChain(root, app) {
  *  Programs/Shop Apps/<Shelf>/<name>, keeping All Programs uncluttered. */
 function startShortcutPaths(app) {
   return registeredUsers().map(u => {
-    const chain = shopFolderChain(getProfileRootFor(u.name), app);
+    const chain = shopFolderChain(u.name, app);
     return `${chain[chain.length - 1]}/${app.shortcutName}`;
   });
 }
@@ -339,8 +340,8 @@ function startShortcutPaths(app) {
 /** Make sure the Shop Apps category folders exist for every profile. */
 function ensureShopFolders(vfs, app) {
   for (const u of registeredUsers()) {
-    for (const dir of shopFolderChain(getProfileRootFor(u.name), app)) {
-      if (!vfs.findNodeCI(dir)) {
+    for (const dir of shopFolderChain(u.name, app)) {
+      if (!vfs.exists(dir)) {
         vfs.createFolder(dir);
         vfs.setNodeAttributes(dir, { iconKey: 'menu-folder' });
       }
@@ -372,18 +373,18 @@ function shortcutsTargeting(vfs, app) {
     }
   };
   for (const u of registeredUsers()) {
-    const root = getProfileRootFor(u.name);
-    walk(`${root}/Start Menu`);
-    walk(`${root}/Desktop`);
+    const folders = profileFoldersFor(u.name);
+    walk(folders.START_MENU);
+    walk(folders.DESKTOP);
   }
   return out;
 }
 
 /** Where each media dest lands inside a profile. */
 const MEDIA_DESTS = {
-  music: root => `${root}/My Documents/My Music`,
-  pictures: root => `${root}/My Documents/My Pictures`,
-  documents: root => `${root}/My Documents`,
+  music: userName => profileFoldersFor(userName).MY_MUSIC,
+  pictures: userName => profileFoldersFor(userName).MY_PICTURES,
+  documents: userName => profileFoldersFor(userName).MY_DOCUMENTS,
 };
 
 /** Human name for where a media title's files go (completion screens). */
@@ -402,8 +403,7 @@ export function publicUrl(rel) {
 /** The pack's own folder inside one user's dest (media installs are
  *  per-profile and always land in a folder named after the title). */
 export function mediaPackDir(app, userName) {
-  const root = getProfileRootFor(userName);
-  const destDir = (MEDIA_DESTS[app.dest] || MEDIA_DESTS.documents)(root);
+  const destDir = (MEDIA_DESTS[app.dest] || MEDIA_DESTS.documents)(userName);
   return `${destDir}/${app.name}`;
 }
 
@@ -566,32 +566,7 @@ function scrubUserRefs(vfs, app) {
   const matches = v => typeof v === 'string' && v.toLowerCase() === lower;
   for (const u of registeredUsers()) {
     try {
-      const sm = vfs.getUserConfigFor(u.name, 'startMenu', null);
-      if (sm && typeof sm === 'object') {
-        const next = { ...sm };
-        let changed = false;
-        if (Array.isArray(sm.pinned) && sm.pinned.some(matches)) {
-          next.pinned = sm.pinned.filter(v => !matches(v));
-          changed = true;
-        }
-        if (sm.usage && Object.keys(sm.usage).some(matches)) {
-          next.usage = Object.fromEntries(
-            Object.entries(sm.usage).filter(([k]) => !matches(k)),
-          );
-          changed = true;
-        }
-        const ql = sm.taskbar && sm.taskbar.quickLaunch;
-        if (Array.isArray(ql) && ql.some(matches)) {
-          next.taskbar = {
-            ...sm.taskbar,
-            quickLaunch: ql.map((v, i) =>
-              matches(v) ? START_MENU_DEFAULTS.taskbar.quickLaunch[i] : v,
-            ),
-          };
-          changed = true;
-        }
-        if (changed) vfs.setUserConfigFor(u.name, 'startMenu', next);
-      }
+      scrubProgramRefs(vfs, u.name, app.exePath);
       const ov = vfs.getUserConfigFor(u.name, 'fileAssocOverrides', null);
       if (ov && typeof ov === 'object' && Object.values(ov).some(matches)) {
         vfs.setUserConfigFor(
@@ -630,10 +605,8 @@ export function uninstallApp(vfs, app, userName) {
   }
 }
 
-export function fmtSize(bytes) {
-  if (bytes >= 1024 * 1024) return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
-  return `${Math.round(bytes / 1024)} KB`;
-}
+/** A size as the shop lists it: the same words Explorer uses for the file. */
+export const fmtSize = formatSize;
 
 /**
  * One-time repairs for profiles created before the current shop layout:
@@ -642,16 +615,16 @@ export function fmtSize(bytes) {
  * old Games folder) move into Shop Apps/<Shelf>.
  */
 export function repairShopState(vfs, userName) {
-  let root;
+  let folders;
   try {
-    root = getProfileRootFor(userName);
+    folders = profileFoldersFor(userName);
   } catch {
     return;
   }
-  const programs = `${root}/Start Menu/Programs`;
+  const programs = folders.PROGRAMS;
   // the shop itself: "Store" -> "XP Shop"; if the login-time profile
   // repair already seeded the new shortcut, drop the old one outright
-  for (const p of [`${root}/Desktop/Store`, `${programs}/Store`]) {
+  for (const p of [`${folders.DESKTOP}/Store`, `${programs}/Store`]) {
     const n = vfs.findNodeCI(p);
     if (!n || n.type !== 'shortcut') continue;
     if ((n.target || '').toLowerCase() !== EXE_PATHS.STORE.toLowerCase())
@@ -682,7 +655,7 @@ export function repairShopState(vfs, userName) {
       if (!n || n.type !== 'shortcut') continue;
       if ((n.target || '').toLowerCase() !== target) continue;
       ensureShopFolders(vfs, app);
-      const chain = shopFolderChain(root, app);
+      const chain = shopFolderChain(userName, app);
       const dest = chain[chain.length - 1];
       if (vfs.findNodeCI(`${dest}/${app.shortcutName}`)) {
         vfs.deleteNodePermanently(n.path);
