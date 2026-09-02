@@ -6,7 +6,7 @@ import React, {
   useLayoutEffect,
   memo,
 } from 'react';
-import useWindowSize from 'react-use/lib/useWindowSize';
+import { useScreenSize } from '../screen';
 import styled from 'styled-components';
 
 import { useElementResize } from 'hooks';
@@ -18,6 +18,7 @@ import {
 import { TASKBAR_HEIGHT, WINDOW_FRAME_PADDING } from '../constants';
 import HeaderButtons from './HeaderButtons';
 import ProgramErrorBoundary from './ProgramErrorBoundary';
+import { AppVolumeScope } from '../../context/VolumeContext';
 
 const FLY_MS = 180;
 const MAX_MS = 150;
@@ -76,6 +77,8 @@ const Window = memo(function({
   // The program's component, rendered as an element so its hooks belong to
   // its own fiber rather than the frame's
   component: Program,
+  exePath,
+  displayName,
   zIndex,
   isFocus,
   className,
@@ -120,10 +123,18 @@ const Window = memo(function({
   );
   const dragRef = useRef(null);
   const ref = useRef(null);
-  const { width: windowWidth, height: windowHeight } = useWindowSize();
+  const { width: windowWidth, height: windowHeight } = useScreenSize();
 
   const onCommitGeometry = useCallback(
     geometry => onSetGeometry(id, geometry),
+    [onSetGeometry, id],
+  );
+  // A program may size its own window (the mixer grows with its columns);
+  // the position stays where the user left it
+  const offsetRef = useRef(storedOffset);
+  offsetRef.current = storedOffset;
+  const onSetSize = useCallback(
+    size => onSetGeometry(id, { offset: offsetRef.current, size }),
     [onSetGeometry, id],
   );
   const { offset, size } = useElementResize(ref, {
@@ -221,7 +232,7 @@ const Window = memo(function({
   return (
     <>
       <div
-        className={className}
+        className={`${className} xp-window`}
         ref={ref}
         onMouseDown={_onMouseDown}
         style={{
@@ -238,12 +249,19 @@ const Window = memo(function({
         }}
       >
         <div className="header__bg" />
+        {!header.invisible && (
+          <>
+            <div className="frame__left" />
+            <div className="frame__right" />
+            <div className="frame__bottom" />
+          </>
+        )}
         <header
           className="app__header"
           ref={dragRef}
           onDoubleClick={onDoubleClickHeader}
         >
-          {header.icon && (
+          {header.icon && !header.noIcon && (
             <img
               onDoubleClick={_onMouseUpClose}
               src={header.icon}
@@ -265,15 +283,22 @@ const Window = memo(function({
         </header>
         <div className="app__content">
           <ProgramErrorBoundary title={header.title} onClose={_onMouseUpClose}>
-            <Program
-              onClose={_onMouseUpClose}
-              onMinimize={_onMouseUpMinimize}
-              onShellOpen={onShellOpen}
-              onSetHeader={onSetHeader}
-              registerCloseInterceptor={registerCloseInterceptor}
-              isFocus={isFocus}
-              {...injectProps}
-            />
+            <AppVolumeScope
+              appKey={exePath || displayName || header.title}
+              name={displayName || header.title}
+              icon={header.icon}
+            >
+              <Program
+                onClose={_onMouseUpClose}
+                onMinimize={_onMouseUpMinimize}
+                onShellOpen={onShellOpen}
+                onSetHeader={onSetHeader}
+                onSetSize={onSetSize}
+                registerCloseInterceptor={registerCloseInterceptor}
+                isFocus={isFocus}
+                {...injectProps}
+              />
+            </AppVolumeScope>
           </ProgramErrorBoundary>
         </div>
       </div>
@@ -299,67 +324,93 @@ const Window = memo(function({
 const StyledWindow = styled(Window)`
   display: ${({ show }) => (show ? 'flex' : 'none')};
   position: absolute;
-  padding: ${({ header }) => (header.invisible ? 0 : WINDOW_FRAME_PADDING)}px;
-  background-color: ${({ isFocus }) => (isFocus ? '#0831d9' : '#6582f5')};
+  image-rendering: pixelated;
+  box-sizing: border-box;
+  /* the caption band on top, the sizing border on the other three sides */
+  padding: ${({ header }) =>
+    header.invisible
+      ? 0
+      : 'var(--xp-caption-total, 29px) var(--xp-frame-w, 4px) var(--xp-frame-w, 4px)'};
+  background-color: ${({ isFocus }) =>
+    isFocus
+      ? 'var(--xp-frame-active, transparent)'
+      : 'var(--xp-frame-inactive, transparent)'};
   flex-direction: column;
-  border-top-left-radius: ${({ maximized }) => (maximized ? 0 : 8)}px;
-  border-top-right-radius: ${({ maximized }) => (maximized ? 0 : 8)}px;
+  /* Luna: the style's caption bitmap; Classic: the scheme's gradient */
   .header__bg {
+    position: absolute;
+    left: 0;
+    top: 0;
+    right: 0;
+    height: var(--xp-caption-total, 29px);
+    pointer-events: none;
+    image-rendering: pixelated;
     background: ${({ isFocus }) =>
       isFocus
-        ? 'linear-gradient(to bottom,#0058ee 0%,#3593ff 4%,#288eff 6%,#127dff 8%,#036ffc 10%,#0262ee 14%,#0057e5 20%,#0054e3 24%,#0055eb 56%,#005bf5 66%,#026afe 76%,#0062ef 86%,#0052d6 92%,#0040ab 94%,#003092 100%)'
-        : 'linear-gradient(to bottom, #7697e7 0%,#7e9ee3 3%,#94afe8 6%,#97b4e9 8%,#82a5e4 14%,#7c9fe2 17%,#7996de 25%,#7b99e1 56%,#82a9e9 81%,#80a5e7 89%,#7b96e1 94%,#7a93df 97%,#abbae3 100%)'};
+        ? 'var(--xp-caption-active, none)'
+        : 'var(--xp-caption-inactive, none)'};
+    border: 0 solid transparent;
+    border-image: ${({ isFocus, maximized }) =>
+      maximized
+        ? `var(--xp-p-window-maxcaption-${isFocus ? 1 : 2}, none)`
+        : `var(--xp-p-window-caption-${isFocus ? 1 : 2}, none)`};
+  }
+  .frame__left,
+  .frame__right,
+  .frame__bottom {
     position: absolute;
-    left: 0;
-    top: 0;
-    right: 0;
-    height: 28px;
     pointer-events: none;
-    border-top-left-radius: ${({ maximized }) => (maximized ? 0 : 8)}px;
-    border-top-right-radius: ${({ maximized }) => (maximized ? 0 : 8)}px;
-    overflow: hidden;
+    border: 0 solid transparent;
+    image-rendering: pixelated;
   }
-  .header__bg:before {
-    content: '';
-    display: block;
-    position: absolute;
+  .frame__left,
+  .frame__right {
+    top: var(--xp-caption-total, 29px);
+    bottom: var(--xp-frame-w, 4px);
+    width: var(--xp-frame-w, 4px);
+  }
+  .frame__left {
     left: 0;
-    opacity: ${({ isFocus }) => (isFocus ? 1 : 0.3)};
-    background: linear-gradient(to right, #1638e6 0%, transparent 100%);
-    top: 0;
-    bottom: 0;
-    width: 15px;
+    border-image: ${({ isFocus }) =>
+      `var(--xp-p-window-frameleft-${isFocus ? 1 : 2}, none)`};
   }
-  .header__bg:after {
-    content: '';
-    opacity: ${({ isFocus }) => (isFocus ? 1 : 0.4)};
-    display: block;
-    position: absolute;
+  .frame__right {
     right: 0;
-    background: linear-gradient(to left, #1638e6 0%, transparent 100%);
-    top: 0;
+    border-image: ${({ isFocus }) =>
+      `var(--xp-p-window-frameright-${isFocus ? 1 : 2}, none)`};
+  }
+  .frame__bottom {
+    left: 0;
+    right: 0;
     bottom: 0;
-    width: 15px;
+    height: var(--xp-frame-w, 4px);
+    border-image: ${({ isFocus }) =>
+      `var(--xp-p-window-framebottom-${isFocus ? 1 : 2}, none)`};
   }
   .app__header {
     display: ${({ header }) => (header.invisible ? 'none' : 'flex')};
-    height: 25px;
-    line-height: 25px;
-    font-weight: 700;
-    font-size: 13px;
-    font-family: 'Trebuchet MS', Tahoma, sans-serif;
-    text-shadow: 1px 1px #000;
-    color: white;
     position: absolute;
-    left: 3px;
-    right: 3px;
+    top: var(--xp-frame-w, 4px);
+    left: var(--xp-frame-w, 4px);
+    right: var(--xp-frame-w, 4px);
+    height: var(--xp-caption-h, 25px);
+    line-height: var(--xp-caption-h, 25px);
+    font-weight: 700;
+    font-size: var(--xp-font-caption, 13px);
+    font-family: var(--xp-caption-font, 'Trebuchet MS', Tahoma, sans-serif);
+    text-shadow: 1px 1px var(--xp-caption-shadow, #000);
+    color: ${({ isFocus }) =>
+      isFocus
+        ? 'var(--xp-caption-text, #fff)'
+        : 'var(--xp-caption-text-inactive, #fff)'};
     align-items: center;
   }
+  /* the system menu icon sits 10px in from the window's edge (SysButton) */
   .app__header__icon {
-    width: 15px;
-    height: 15px;
-    margin-left: 1px;
-    margin-right: 3px;
+    width: 16px;
+    height: 16px;
+    margin-left: 6px;
+    margin-right: 4px;
   }
   .app__header__title {
     flex: 1;
@@ -373,54 +424,38 @@ const StyledWindow = styled(Window)`
   .app__content {
     flex: 1;
     position: relative;
-    margin-top: 25px;
-    height: calc(100% - 25px);
+    min-height: 0;
   }
 `;
 
 const CaptionFly = styled.div`
   position: absolute;
   z-index: 100000;
-  height: 28px;
-  padding: 3px 5px 0 4px;
+  height: var(--xp-caption-total, 29px);
+  padding: var(--xp-frame-w, 4px) 5px 0 10px;
   display: flex;
   align-items: center;
   overflow: hidden;
   pointer-events: none;
-  border-top-left-radius: 8px;
-  border-top-right-radius: 8px;
-  background: linear-gradient(
-    to bottom,
-    #0058ee 0%,
-    #3593ff 4%,
-    #288eff 6%,
-    #127dff 8%,
-    #036ffc 10%,
-    #0262ee 14%,
-    #0057e5 20%,
-    #0054e3 24%,
-    #0055eb 56%,
-    #005bf5 66%,
-    #026afe 76%,
-    #0062ef 86%,
-    #0052d6 92%,
-    #0040ab 94%,
-    #003092 100%
-  );
+  box-sizing: border-box;
+  background: var(--xp-caption-active, none);
+  border: 0 solid transparent;
+  border-image: var(--xp-p-window-caption-1, none);
   font-weight: 700;
-  font-size: 13px;
-  font-family: 'Trebuchet MS', Tahoma, sans-serif;
-  text-shadow: 1px 1px #000;
-  color: white;
+  font-size: var(--xp-font-caption, 13px);
+  font-family: var(--xp-caption-font, 'Trebuchet MS', Tahoma, sans-serif);
+  text-shadow: 1px 1px var(--xp-caption-shadow, #000);
+  color: var(--xp-caption-text, #fff);
   img {
-    width: 15px;
-    height: 15px;
-    margin-right: 3px;
+    width: 16px;
+    height: 16px;
+    margin-right: 4px;
     flex-shrink: 0;
   }
   div {
     overflow: hidden;
     white-space: nowrap;
+    text-overflow: ellipsis;
   }
 `;
 

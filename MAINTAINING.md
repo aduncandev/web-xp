@@ -43,7 +43,7 @@ place by recording a reason the code cannot show.
 | `src/context/vfsIcons.js` | `ICON_REGISTRY`, keyed by `iconKey`; `finishIcons` stamps a node. |
 | `src/context/vfsBackup.js` | The backup archive both the Backup tool and the recovery screen build and restore. |
 | `src/context/users.js` | The account registry in localStorage: names, avatars, passwords, the active user, fast boot. |
-| `src/context/VolumeContext.jsx` | Master volume and the mixer, per account in the hive. |
+| `src/context/VolumeContext.jsx` | The speakers: a master level and a level per program, per account in the hive. `useVolume()` inside a program follows that program's channel and gives it a mixer column. |
 | `src/context/DialogContext.jsx` | `useDialog()`: `alert`, `confirm`, `confirm3`, `prompt`, all XP message boxes. |
 | `src/WinXP/index.jsx` | The shell host for one session: the window reducer, focus, the desktop surface, and the hooks below. |
 | `src/WinXP/reducer.js` | Window state: each app carries `offset`, `size`, `zIndex`, `minimized`, `maximized`, `header`. |
@@ -160,7 +160,7 @@ Per-user settings live in the hive. Read with
 `vfs.setUserConfigFor(userName, key, value)`. Keys in use:
 
 `desktopLayout`, `explorerView`, `fileAssocOverrides`, `startMenu`,
-`taskbarLocked`, `wallpaper`, `screenSaver`, `sound`, `recentDocuments`,
+`taskbarLocked`, `wallpaper`, `appearance`, `screenSaver`, `sound`, `recentDocuments`,
 `runHistory`, `solitaireOptions`, `wmpOptions`, `mediaTagEdits`,
 `mediaLibrary`, `eggData`, `lastEggTime`, `xpPoints`, `deltascend`.
 
@@ -276,7 +276,14 @@ owns it (`Icons/index.jsx` or `Explorer/index.jsx`).
 ### Add a sound, art, or a dialog
 
 A sound is a key in `SOUNDS` (`sounds.js`) played with
-`playSystemSound(key)`; it follows the volume and mute automatically. Art is
+`playSystemSound(key)`; it plays on the System Sounds channel and follows
+the master and mute automatically. A program's own audio follows the mixer
+through `useVolume()`: `effectiveVolume` is the 0..1 gain for that program
+(master times its column) and `applyVolume(el)` keeps an element in step.
+Calling the hook is what puts the program in the mixer while it is open; a
+program that makes no sound never calls it and never gets a column. The
+frame gives every program its channel, keyed by exe path, so there is
+nothing to register. Art is
 a file dropped into `src/assets/xp/` under the name `getArt` asks for. A
 message box is `dlg.alert`, `dlg.confirm`, `dlg.confirm3` or `dlg.prompt`
 from `useDialog()`; they queue, return promises and ignore the tail of the
@@ -420,6 +427,109 @@ To add a screen: write `screens/Thing.jsx` taking `{ shop }`, add it to
 `SCREENS`, and `nav.go('thing', { ...bits })` to it. To add a title, edit
 `catalog.js` only; the invariants spec checks it against the program
 registry.
+
+## Themes
+
+`src/WinXP/theme/` is the one place the shell's colours, bitmaps and metrics
+live. Luna, the Windows XP style, is drawn from the real `luna.msstyles`:
+`tools/luna-export.py` exports every part bitmap of its three colour schemes
+into `src/assets/xp/luna/<scheme>/` with the states split and a
+`parts.json` of the style's INI (sizing margins, colours, fonts,
+`[SysMetrics]`). `lunaArt.js` reads them and `tokens.js` turns an appearance
+setting (`style`, `scheme`, `fontSize`, hive key `appearance`) into CSS
+custom properties on the document root: colours as `--xp-face`,
+`--xp-highlight` and so on, and each part's states as border-image values,
+`--xp-p-window-caption-1`, `--xp-p-taskband-toolbar-button-5`, with
+`--xp-g-…` for a part's glyph and `--xp-i-…` for a plain state image.
+Components draw with `border-image: var(--xp-p-…, none)` and
+`image-rendering: pixelated`, so a scheme switch is a variable switch and
+every portal sees it. The window frame, caption buttons (Minimize,
+Maximize, Close and the Help button property sheets ask for with
+`header.buttons`), the taskbar, tray, task buttons and Start button, the
+Start menu's bands, Explorer's bars and panes, tabs, group boxes, sliders,
+spin buttons, combo boxes, check boxes and scrollbars all come from parts. The session on screen applies its user's setting
+(`useAppearance` in `WinXP/index.jsx`); the Welcome screen and Setup stay
+Luna Blue, as XP's do.
+
+Windows Classic is built from a scheme's system colours (`classicSchemes.js`,
+the eighteen schemes XP ships as `R G B` tables) by `classicTokens`; the
+part variables are unset, so the `none` fallbacks apply, and `classic.css`,
+keyed on `html[data-xp-style='classic']` and the class hooks `xp-window`,
+`header__buttons`, `xp-taskbar`, `xp-startmenu`, `xp-menu`, `xp-submenu`,
+`xp-button`, `xp-select`, `xpdlg`, does the 3D drawing.
+
+Display Properties drives it: the Appearance tab edits the three fields and
+previews them in a `MiniDesktop` drawn from the pending tokens; the Themes
+tab maps Windows XP and Windows Classic onto an appearance plus a
+background. `tests/appearance.spec.js` pins both.
+
+To theme a new part: add its INI section to `PARTS` (or `IMAGES`) in
+`tokens.js`, then draw with the variable. To check a part's margins or
+states, read `parts.json`. To add a classic scheme, add its colour table to
+`CLASSIC_SCHEMES`.
+
+Three things bite when drawing with the parts. A border-image paints over
+the element's background, so a part's glyph (`--xp-g-…`) goes in a
+`::after` overlay, never in `background`; the caption buttons, the combo
+button and the spin buttons do this. A part variable is a border-image
+value and nothing else: `background: var(--xp-p-…)` is an invalid
+declaration and the element goes transparent, which is how the taskbar
+once lost its bitmap. Scrollbar pseudo-elements have no `::after`, so
+`lunaScrollbars.js` draws the arrows as two background layers (glyph over
+the plain 17x17 state image, `--xp-i-scrollbar-arrowbtn-…`) and the thumb
+as its nine-sliced edges without `fill` (`--xp-pn-…`) over the exporter's
+`-mid` slice of its middle; Chromium also needs
+`::-webkit-scrollbar-button { display: block }` before it draws buttons at
+all, and headless Chromium hides scrollbars unless launched with
+`ignoreDefaultArgs: ['--hide-scrollbars']`.
+
+Windows Classic was checked against a real Windows XP SP3 in QEMU; the
+1:1 captures of both styles (Display Properties' tabs and dialogs, the
+Start menu, Explorer, Notepad, Run, a message box, caption button states)
+are in `refkit/vm/`. The Classic glyphs in `src/assets/xp/classic/`
+(caption buttons, Help, the task pane chevrons, the combo and scrollbar
+arrows, the menu arrow) are cut from those captures as black-on-transparent
+masks and drawn with `mask-image` in the button-text colour, so every
+scheme recolours them; a pressed button shifts its glyph by a pixel, a
+disabled one etches it. Win32's raised edge runs face, white, then shadow
+and dark shadow on the far side; `classic.css` keeps that order on windows,
+dialogs, menus and the Start menu.
+
+Display Properties (`system/DisplayProperties/`) is laid out at XP's own
+coordinates, measured on the VM: the sheet is 402x454, its tab page 384x357
+at (8, 53), buttons 75x23 on a 6px gap, and every control of every tab sits
+where XP puts it (`at()` maps dialog coordinates into the page). The sample
+in the Themes and Appearance tabs draws real chrome at full size from the
+pending appearance's own tokens, Classic included. `EffectsDialog.jsx` is
+XP's Effects dialog; its settings ride on the appearance as `effects` and
+reach the document as `data-xp-menu-fade`, `data-xp-menu-shadow` and
+`data-xp-underlines` (see `index.css`), which the menus and the Start menu
+read.
+
+## The screen
+
+`src/WinXP/screen.js` is Display Properties' Settings tab. The desktop is
+laid out on a stage (`#xp-stage` in `App.jsx`) of the chosen resolution and
+the stage is scaled down, never up, to fit the browser window and centred,
+black around it where the shapes differ: a 1024x768 desktop in a wide
+window sits between two black bars. Fullscreen is the browser window
+itself. The DPI setting draws fewer, larger logical pixels on the same
+stage. Colour quality Medium (16 bit) is an SVG filter that steps colours
+to 5-6-5. The setting is machine state in localStorage, like XP's
+per-display settings, and applies only while the desktop is on screen
+(`enterScreen`/`leaveScreen`); the logon and boot screens draw at the
+browser's own size.
+
+The shell lays out in stage pixels and the browser reports pointer events,
+client rects and `innerWidth` in screen pixels, so code that touches either
+converts: `toLogicalX`/`toLogicalY` for a point, `toLogical` for a delta,
+and `screenSize()` or `useScreenSize()` instead of `window.innerWidth`.
+Portals mount inside the stage through `portalRoot()`, so a fixed position
+is a stage position. The window frame, icon drag, both rubber bands, list
+columns, Solitaire, Paint, the picture viewer, context menus, tooltips,
+drop-down lists and dialog dragging all do this; a new gesture must too, or
+it will move at the wrong speed under a scale. `tests/display.spec.js` drags
+a window and opens a menu at two thirds scale to prove the conversions.
 
 ## Tests
 

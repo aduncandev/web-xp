@@ -456,7 +456,7 @@ const Body = styled.div`
       width: 26px;
       height: 20px;
       box-sizing: border-box;
-      border: 1px solid #7f9db9;
+      border: 1px solid var(--xp-select-border, #7f9db9);
       border-right: none;
       padding: 0 3px;
       font-family: Tahoma, 'Noto Sans', sans-serif;
@@ -467,7 +467,7 @@ const Body = styled.div`
   .csm__spinner-buttons {
     display: flex;
     flex-direction: column;
-    border: 1px solid #7f9db9;
+    border: 1px solid var(--xp-select-border, #7f9db9);
     button {
       width: 14px;
       height: 9px;
@@ -482,7 +482,7 @@ const Body = styled.div`
       }
     }
     button + button {
-      border-top: 1px solid #aca899;
+      border-top: 1px solid var(--xp-face-shadow, #aca899);
     }
     i {
       display: block;
@@ -517,7 +517,7 @@ const Body = styled.div`
     flex: 1;
   }
   .csm__items {
-    border: 1px solid #7f9db9;
+    border: 1px solid var(--xp-select-border, #7f9db9);
     background: #fff;
     height: 110px;
     overflow-y: auto;

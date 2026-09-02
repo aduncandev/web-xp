@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { toLogical, toLogicalX, toLogicalY } from '../WinXP/screen';
 
 // Which edges a grip moves. A grip on the left or top edge changes the
 // offset as well as the size, so the opposite edge stays put.
@@ -40,10 +41,15 @@ function makeCover() {
   return cover;
 }
 
-const clampPoint = (e, b) => ({
-  x: b ? Math.min(Math.max(e.pageX, b.left), b.right) : e.pageX,
-  y: b ? Math.min(Math.max(e.pageY, b.top), b.bottom) : e.pageY,
-});
+// The pointer arrives in screen pixels; the geometry is in the shell's
+const clampPoint = (e, b) => {
+  const px = toLogicalX(e.pageX);
+  const py = toLogicalY(e.pageY);
+  return {
+    x: b ? Math.min(Math.max(px, b.left), b.right) : px,
+    y: b ? Math.min(Math.max(py, b.top), b.bottom) : py,
+  };
+};
 
 /** Where a gesture puts the window for the pointer at `e`. */
 function geometryFor(g, e, minWidth, minHeight) {
@@ -97,7 +103,8 @@ function useGrip(ref, threshold, resizable) {
         set('');
         return;
       }
-      const { offsetX, offsetY } = e;
+      const offsetX = toLogical(e.offsetX);
+      const offsetY = toLogical(e.offsetY);
       const { width, height } = target.getBoundingClientRect();
       const v =
         offsetY < threshold
@@ -230,7 +237,7 @@ function useElementResize(ref, options) {
       window.removeEventListener('mouseup', onUp);
     };
     const onDown = e => {
-      const origin = { x: e.pageX, y: e.pageY };
+      const origin = { x: toLogicalX(e.pageX), y: toLogicalY(e.pageY) };
       const start = live.current;
       const bounds = { ...boundsRef.current };
       if (dragTarget && e.target === dragTarget) {

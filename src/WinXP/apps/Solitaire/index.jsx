@@ -14,10 +14,12 @@ import {
   CARD_H,
   IS_RED,
   DECK_BACKS,
+  DEFAULT_BACK,
   buildDeck,
   shuffle,
   drawCardOnCanvas,
 } from './cards';
+import { toLogical } from '../../screen';
 
 // Board layout (fixed, like real sol.exe): stock col 0, waste col 1,
 // foundations cols 3-6, seven tableau columns below.
@@ -36,7 +38,7 @@ const DEFAULT_OPTS = {
   drawThree: true,
   scoring: 'standard',
   timed: true,
-  backIdx: 0,
+  backIdx: DEFAULT_BACK,
 };
 
 function newGame(opts) {
@@ -453,8 +455,8 @@ export default function Solitaire({ onClose, isFocus }) {
       source,
       cards,
       rect,
-      grabDX: e.clientX - rect.left - origin.x,
-      grabDY: e.clientY - rect.top - origin.y,
+      grabDX: toLogical(e.clientX - rect.left) - origin.x,
+      grabDY: toLogical(e.clientY - rect.top) - origin.y,
       startX: e.clientX,
       startY: e.clientY,
       moved: false,
@@ -477,8 +479,8 @@ export default function Solitaire({ onClose, isFocus }) {
     setDragState({
       source: d.source,
       cards: d.cards,
-      x: e.clientX - d.rect.left - d.grabDX,
-      y: e.clientY - d.rect.top - d.grabDY,
+      x: toLogical(e.clientX - d.rect.left) - d.grabDX,
+      y: toLogical(e.clientY - d.rect.top) - d.grabDY,
     });
   }
 
@@ -491,8 +493,8 @@ export default function Solitaire({ onClose, isFocus }) {
       setDragState(null);
       return;
     }
-    const x = e.clientX - d.rect.left - d.grabDX;
-    const y = e.clientY - d.rect.top - d.grabDY;
+    const x = toLogical(e.clientX - d.rect.left) - d.grabDX;
+    const y = toLogical(e.clientY - d.rect.top) - d.grabDY;
     const cx = x + CARD_W / 2;
     const cy = y + CARD_H / 2;
     const col = Math.max(
@@ -524,7 +526,6 @@ export default function Solitaire({ onClose, isFocus }) {
       {
         type: 'item',
         text: 'Undo',
-        hotkey: 'Ctrl+Z',
         disable: !undoRef.current,
       },
       { type: 'item', text: 'Deck...' },
@@ -565,7 +566,7 @@ export default function Solitaire({ onClose, isFocus }) {
 
   // --- Rendering ----------------------------------------------------------
 
-  const back = DECK_BACKS[opts.backIdx] || DECK_BACKS[0];
+  const back = DECK_BACKS[opts.backIdx] || DECK_BACKS[DEFAULT_BACK];
   const g = game;
   const noMorePasses =
     g.stock.length === 0 &&
@@ -801,14 +802,7 @@ function DeckDialog({ current, onOk, onCancel }) {
                 onClick={() => setSel(i)}
                 onDoubleClick={() => onOk(i)}
               >
-                <div
-                  className="deck__back"
-                  style={{
-                    backgroundColor: b.base,
-                    backgroundImage: b.pattern,
-                    backgroundSize: b.patternSize || 'auto',
-                  }}
-                />
+                <img className="deck__back" src={b.url} alt="" />
               </div>
             </XPTooltip>
           ))}
@@ -915,7 +909,7 @@ const Root = styled.div`
     height: 20px;
     flex-shrink: 0;
     border-bottom: 1px solid #d4d0c3;
-    background: #ece9d8;
+    background: var(--xp-face, #ece9d8);
     padding-left: 2px;
   }
   .sol__board {
@@ -930,13 +924,17 @@ const Root = styled.div`
     top: 0;
     z-index: 900;
   }
+  /* an empty pile: XP's black outline over a lattice of black dots, two per
+     4x4 cell, on the green */
   .sol__slot {
     position: absolute;
     width: ${CARD_W}px;
     height: ${CARD_H}px;
-    border: 1px solid rgba(0, 70, 0, 0.9);
+    border: 1px solid #000;
     border-radius: 5px;
-    background: rgba(0, 0, 0, 0.06);
+    background: radial-gradient(circle, #000 0.6px, transparent 0.7px) 1px 0 /
+        4px 4px,
+      radial-gradient(circle, #000 0.6px, transparent 0.7px) 3px 2px / 4px 4px;
     box-sizing: border-box;
   }
   .sol__stock-hit {
@@ -971,7 +969,7 @@ const Root = styled.div`
     flex-shrink: 0;
     display: flex;
     align-items: stretch;
-    background: #ece9d8;
+    background: var(--xp-face, #ece9d8);
     border-top: 1px solid #fff;
     font-size: 11px;
   }
@@ -981,7 +979,7 @@ const Root = styled.div`
   .sol__status-cell {
     min-width: 90px;
     padding: 2px 8px 0;
-    border-left: 1px solid #aca899;
+    border-left: 1px solid var(--xp-face-shadow, #aca899);
     box-shadow: inset 1px 0 0 #fff;
   }
 `;
@@ -1004,7 +1002,7 @@ const DialogBody = styled.div`
     justify-content: center;
   }
   .deck__choice--sel {
-    border-color: #316ac5;
+    border-color: var(--xp-highlight, #316ac5);
     background: #c1d2ee;
   }
   .deck__back {

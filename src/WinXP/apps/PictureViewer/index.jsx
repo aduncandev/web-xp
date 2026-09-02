@@ -14,6 +14,7 @@ import { EXE_PATHS } from '../../../context/vfsConstants';
 import { TOOL_BUTTONS, ToolIcon } from './toolbar';
 import Slideshow from './Slideshow';
 import FileDialog from '../../../components/FileDialog';
+import { toLogical } from '../../screen';
 
 // "Copy To" writes the picture out again; XP offers the format list here
 const COPY_FILTERS = [
@@ -228,8 +229,8 @@ function PictureViewer({
     const fromLeft = el.scrollLeft;
     const fromTop = el.scrollTop;
     const onMove = ev => {
-      el.scrollLeft = fromLeft - (ev.clientX - startX);
-      el.scrollTop = fromTop - (ev.clientY - startY);
+      el.scrollLeft = fromLeft - toLogical(ev.clientX - startX);
+      el.scrollTop = fromTop - toLogical(ev.clientY - startY);
     };
     const onUp = () => {
       document.removeEventListener('mousemove', onMove);

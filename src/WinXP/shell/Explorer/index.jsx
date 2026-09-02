@@ -123,7 +123,8 @@ export default function Explorer({
   const [viewMode, setViewMode] = useState('tiles');
   const [sortBy, setSortBy] = useState('name');
   const [sortAsc, setSortAsc] = useState(true);
-  const [statusBarVisible, setStatusBarVisible] = useState(true);
+  // XP ships Explorer with the status bar off; View > Status Bar turns it on
+  const [statusBarVisible, setStatusBarVisible] = useState(false);
   const [foldersPaneOpen, setFoldersPaneOpen] = useState(!!initialFoldersPane);
   const [propertiesPath, setPropertiesPath] = useState(null);
   const [shortcutWizardOpen, setShortcutWizardOpen] = useState(false);

@@ -5,6 +5,13 @@ import styled from 'styled-components';
 import { playSystemSound } from 'WinXP/sounds';
 import { TASKBAR_HEIGHT } from 'WinXP/constants';
 import { lunaScrollbars } from '../lunaScrollbars';
+import {
+  portalRoot,
+  screenSize,
+  toLogical,
+  toLogicalX,
+  toLogicalY,
+} from '../../WinXP/screen';
 
 /**
  * Draggable modal XP dialog window (no taskbar entry, close button only).
@@ -26,6 +33,7 @@ export default function XPDialogFrame({
   onClose,
   onKeyDown,
   zIndex = 99990,
+  help = false,
   children,
 }) {
   const frameRef = useRef(null);
@@ -38,10 +46,10 @@ export default function XPDialogFrame({
     if (e.button !== 0 || !frameRef.current) return;
     const rect = frameRef.current.getBoundingClientRect();
     dragOffsetRef.current = {
-      dx: e.clientX - rect.left,
-      dy: e.clientY - rect.top,
+      dx: toLogical(e.clientX - rect.left),
+      dy: toLogical(e.clientY - rect.top),
     };
-    setPos({ x: rect.left, y: rect.top });
+    setPos({ x: toLogicalX(rect.left), y: toLogicalY(rect.top) });
     setDragging(true);
     e.preventDefault();
   };
@@ -51,11 +59,12 @@ export default function XPDialogFrame({
     const onMove = e => {
       const { dx, dy } = dragOffsetRef.current;
       const w = frameRef.current ? frameRef.current.offsetWidth : 200;
-      let x = e.clientX - dx;
-      let y = e.clientY - dy;
+      const screen = screenSize();
+      let x = Math.round(toLogicalX(e.clientX) - dx);
+      let y = Math.round(toLogicalY(e.clientY) - dy);
       // Title bar must stay reachable, above the taskbar
-      y = Math.max(0, Math.min(y, window.innerHeight - TASKBAR_HEIGHT));
-      x = Math.max(60 - w, Math.min(x, window.innerWidth - 60));
+      y = Math.max(0, Math.min(y, screen.height - TASKBAR_HEIGHT));
+      x = Math.max(60 - w, Math.min(x, screen.width - 60));
       setPos({ x, y });
     };
     const onUp = () => setDragging(false);
@@ -90,8 +99,18 @@ export default function XPDialogFrame({
             flashKey ? 'xpdlg-header-bg xpdlg-flash' : 'xpdlg-header-bg'
           }
         />
+        <div className="xpdlg-frame xpdlg-frame--l" />
+        <div className="xpdlg-frame xpdlg-frame--r" />
+        <div className="xpdlg-frame xpdlg-frame--b" />
         <header className="xpdlg-header" onMouseDown={onHeaderMouseDown}>
           <div className="xpdlg-title">{title}</div>
+          {help && (
+            <button
+              className="xpdlg-close xpdlg-help"
+              type="button"
+              onMouseDown={e => e.stopPropagation()}
+            />
+          )}
           <button
             className="xpdlg-close"
             type="button"
@@ -102,7 +121,7 @@ export default function XPDialogFrame({
         <div className="xpdlg-content">{children}</div>
       </Frame>
     </Overlay>,
-    document.body,
+    portalRoot(),
   );
 }
 
@@ -111,14 +130,15 @@ const Overlay = styled.div`
   inset: 0;
 `;
 
-const Frame = styled.div`
+const Frame = styled.div.attrs({ className: 'xpdlg' })`
   position: fixed;
+  image-rendering: pixelated;
   display: flex;
   flex-direction: column;
-  padding: 3px;
-  background-color: #0831d9;
-  border-top-left-radius: 8px;
-  border-top-right-radius: 8px;
+  box-sizing: border-box;
+  padding: var(--xp-caption-total, 29px) var(--xp-frame-w, 4px)
+    var(--xp-frame-w, 4px);
+  background-color: var(--xp-frame-active, transparent);
   box-shadow: 2px 4px 8px rgba(0, 0, 0, 0.5);
   font-family: Tahoma, 'Noto Sans', sans-serif;
   font-size: 11px;
@@ -132,49 +152,39 @@ const Frame = styled.div`
     left: 0;
     top: 0;
     right: 0;
-    height: 28px;
+    height: var(--xp-caption-total, 29px);
     pointer-events: none;
-    border-top-left-radius: 8px;
-    border-top-right-radius: 8px;
-    overflow: hidden;
-    background: linear-gradient(
-      to bottom,
-      #0058ee 0%,
-      #3593ff 4%,
-      #288eff 6%,
-      #127dff 8%,
-      #036ffc 10%,
-      #0262ee 14%,
-      #0057e5 20%,
-      #0054e3 24%,
-      #0055eb 56%,
-      #005bf5 66%,
-      #026afe 76%,
-      #0062ef 86%,
-      #0052d6 92%,
-      #0040ab 94%,
-      #003092 100%
-    );
-    &:before {
-      content: '';
-      display: block;
-      position: absolute;
-      left: 0;
-      top: 0;
-      bottom: 0;
-      width: 15px;
-      background: linear-gradient(to right, #1638e6 0%, transparent 100%);
-    }
-    &:after {
-      content: '';
-      display: block;
-      position: absolute;
-      right: 0;
-      top: 0;
-      bottom: 0;
-      width: 15px;
-      background: linear-gradient(to left, #1638e6 0%, transparent 100%);
-    }
+    background: var(--xp-caption-active, none);
+    image-rendering: pixelated;
+    border: 0 solid transparent;
+    border-image: var(--xp-p-window-caption-1, none);
+  }
+  .xpdlg-frame {
+    position: absolute;
+    pointer-events: none;
+    border: 0 solid transparent;
+    image-rendering: pixelated;
+  }
+  .xpdlg-frame--l,
+  .xpdlg-frame--r {
+    top: var(--xp-caption-total, 29px);
+    bottom: var(--xp-frame-w, 4px);
+    width: var(--xp-frame-w, 4px);
+  }
+  .xpdlg-frame--l {
+    left: 0;
+    border-image: var(--xp-p-window-frameleft-1, none);
+  }
+  .xpdlg-frame--r {
+    right: 0;
+    border-image: var(--xp-p-window-frameright-1, none);
+  }
+  .xpdlg-frame--b {
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: var(--xp-frame-w, 4px);
+    border-image: var(--xp-p-window-framebottom-1, none);
   }
   .xpdlg-flash {
     animation: xpdlgTitleFlash 0.12s linear 4;
@@ -190,68 +200,83 @@ const Frame = styled.div`
   }
 
   .xpdlg-header {
-    position: relative;
-    height: 25px;
+    position: absolute;
+    top: var(--xp-frame-w, 4px);
+    left: var(--xp-frame-w, 4px);
+    right: var(--xp-frame-w, 4px);
+    height: var(--xp-caption-h, 25px);
     display: flex;
     align-items: center;
     z-index: 1;
   }
   .xpdlg-title {
     flex: 1;
-    color: #fff;
+    color: var(--xp-caption-text, #fff);
     font-weight: 700;
-    font-size: 13px;
-    font-family: 'Trebuchet MS', Tahoma, sans-serif;
-    text-shadow: 1px 1px #000;
-    padding-left: 3px;
+    font-size: var(--xp-font-caption, 13px);
+    font-family: var(--xp-caption-font, 'Trebuchet MS', Tahoma, sans-serif);
+    text-shadow: 1px 1px var(--xp-caption-shadow, #000);
+    padding-left: 10px;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
     pointer-events: none;
   }
   .xpdlg-close {
-    width: 22px;
-    height: 22px;
-    border: 1px solid white;
-    border-radius: 3px;
+    width: 21px;
+    height: 21px;
+    align-self: flex-start;
+    margin-top: 1px;
     position: relative;
-    cursor: pointer;
+    cursor: default;
     padding: 0;
     flex-shrink: 0;
-    box-shadow: inset 0 -1px 2px 1px #da4600;
-    background-image: radial-gradient(
-      circle at 90% 90%,
-      #cc4600 0%,
-      #dc6527 55%,
-      #cd7546 70%,
-      #ffccb2 90%,
-      white 100%
-    );
-    &:hover {
-      filter: brightness(120%);
-    }
-    &:active {
-      filter: brightness(90%);
-    }
-    &:before,
-    &:after {
+    border: 0 solid transparent;
+    border-image: var(--xp-p-window-closebutton-1, none);
+    background: transparent;
+    image-rendering: pixelated;
+    &::after {
       content: '';
       position: absolute;
-      left: 9px;
-      top: 2px;
-      height: 16px;
-      width: 2px;
-      background-color: white;
+      inset: 0;
+      background: var(--xp-g-window-closebutton-1, none) center no-repeat;
+      image-rendering: pixelated;
+      pointer-events: none;
     }
-    &:before {
-      transform: rotate(45deg);
+    &:hover {
+      border-image: var(--xp-p-window-closebutton-2, none);
     }
-    &:after {
-      transform: rotate(-45deg);
+    &:hover::after {
+      background-image: var(--xp-g-window-closebutton-2, none);
     }
+    &:hover:active {
+      border-image: var(--xp-p-window-closebutton-3, none);
+    }
+    &:hover:active::after {
+      background-image: var(--xp-g-window-closebutton-3, none);
+    }
+  }
+  .xpdlg-help {
+    margin-right: 2px;
+    border-image: var(--xp-p-window-helpbutton-1, none);
+  }
+  .xpdlg-help::after {
+    background-image: var(--xp-g-window-helpbutton-1, none);
+  }
+  .xpdlg-help:hover {
+    border-image: var(--xp-p-window-helpbutton-2, none);
+  }
+  .xpdlg-help:hover::after {
+    background-image: var(--xp-g-window-helpbutton-2, none);
+  }
+  .xpdlg-help:hover:active {
+    border-image: var(--xp-p-window-helpbutton-3, none);
+  }
+  .xpdlg-help:hover:active::after {
+    background-image: var(--xp-g-window-helpbutton-3, none);
   }
   .xpdlg-content {
     flex: 1;
-    background-color: #ece9d8;
+    background-color: var(--xp-face, #ece9d8);
   }
 `;

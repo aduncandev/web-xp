@@ -5,10 +5,9 @@ import Balloon from 'components/Balloon';
 import ContextMenu from 'components/ContextMenu';
 import TaskbarProperties from 'components/TaskbarProperties';
 import XPTooltip from 'components/XPTooltip';
-import startButton from 'assets/windowsIcons/start.png';
+import startFlag from 'assets/xp/StartFlag.png';
 import usb from 'assets/windowsIcons/394(16x16).png';
 import risk from 'assets/windowsIcons/229(16x16).png';
-import { getArt } from '../../xpArt';
 import {
   ARRANGE,
   requestArrange,
@@ -27,10 +26,8 @@ import QuickLaunch from './QuickLaunch';
 import FooterWindow from './FooterWindow';
 import { systemMenuItems, taskbarMenuItems } from './menus';
 import { Container } from './styles';
+import { screenSize } from '../screen';
 
-const startNormal = getArt('start', startButton);
-const startHover = getArt('start-hover', startNormal);
-const startPressed = getArt('start-pressed', startNormal);
 
 function Footer({
   userName,
@@ -43,7 +40,6 @@ function Footer({
   recentDocumentsData,
 }) {
   const [menuOn, setMenuOn] = useState(false);
-  const [startHovered, setStartHovered] = useState(false);
   const menu = useRef(null);
 
   const vfs = useVFS();
@@ -109,8 +105,8 @@ function Footer({
     }
   }
   const workArea = () => ({
-    width: window.innerWidth,
-    height: window.innerHeight - TASKBAR_HEIGHT,
+    width: screenSize().width,
+    height: screenSize().height - TASKBAR_HEIGHT,
   });
   function onTaskbarMenuAction(action) {
     switch (action) {
@@ -163,7 +159,11 @@ function Footer({
   }, [menuOn]);
 
   return (
-    <Container onMouseDown={_onMouseDown} onContextMenu={_onContextMenu}>
+    <Container
+      className="xp-taskbar"
+      onMouseDown={_onMouseDown}
+      onContextMenu={_onContextMenu}
+    >
       <div ref={menu} className="footer__start__menu">
         {menuOn && (
           <FooterMenu
@@ -176,16 +176,19 @@ function Footer({
       </div>
       <div className="footer__items left">
         <XPTooltip text="Click here to begin" disabled={menuOn}>
-          <img
-            src={
-              menuOn ? startPressed : startHovered ? startHover : startNormal
-            }
-            alt="start"
+          <button
+            type="button"
             className={`footer__start${menuOn ? ' active' : ''}`}
             onMouseDown={toggleMenu}
-            onMouseEnter={() => setStartHovered(true)}
-            onMouseLeave={() => setStartHovered(false)}
-          />
+          >
+            <img
+              src={startFlag}
+              alt="start"
+              className="footer__start__flag"
+              draggable={false}
+            />
+            <span className="footer__start__label">start</span>
+          </button>
         </XPTooltip>
         {smCfg.taskbar.showQuickLaunch && (
           <>

@@ -506,7 +506,7 @@ const Body = styled.div`
     margin-bottom: 4px;
   }
   .fo__adv {
-    border: 1px solid #7f9db9;
+    border: 1px solid var(--xp-select-border, #7f9db9);
     background: #fff;
     height: 250px;
     overflow-y: auto;
@@ -536,7 +536,7 @@ const Body = styled.div`
 
   /* ---- File Types tab ---- */
   .fo__types {
-    border: 1px solid #7f9db9;
+    border: 1px solid var(--xp-select-border, #7f9db9);
     background: #fff;
     height: 150px;
     display: flex;
@@ -565,7 +565,7 @@ const Body = styled.div`
       background-color: rgba(49, 106, 197, 0.08);
     }
     &.selected {
-      background-color: #316ac5;
+      background-color: var(--xp-highlight, #316ac5);
       color: #fff;
     }
   }

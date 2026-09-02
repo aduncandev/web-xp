@@ -40,6 +40,8 @@ export function buildPaintMenus({
         disable: !currentPath,
       },
       { type: 'separator' },
+      { type: 'item', text: 'Recent File', disable: true },
+      { type: 'separator' },
       { type: 'item', text: 'Exit', hotkey: 'Alt+F4' },
     ],
     Edit: [
@@ -49,7 +51,12 @@ export function buildPaintMenus({
         hotkey: 'Ctrl+Z',
         disable: stackLen.u === 0,
       },
-      { type: 'item', text: 'Repeat', hotkey: 'F4', disable: stackLen.r === 0 },
+      {
+        type: 'item',
+        text: 'Repeat',
+        hotkey: 'Ctrl+Y',
+        disable: stackLen.r === 0,
+      },
       { type: 'separator' },
       { type: 'item', text: 'Cut', hotkey: 'Ctrl+X', disable: !hasSelection },
       { type: 'item', text: 'Copy', hotkey: 'Ctrl+C', disable: !hasSelection },

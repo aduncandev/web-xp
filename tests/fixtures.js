@@ -33,8 +33,9 @@ export const test = base.extend({
   },
 });
 
-/** The taskbar's Start button — present only once the shell has mounted. */
-export const startButton = page => page.locator('img[alt="start"]');
+/** The taskbar's Start button (the Luna bitmap or the drawn classic one), present only once the shell has mounted. */
+export const startButton = page =>
+  page.locator('img[alt="start"]:visible, .footer__startc:visible');
 
 /**
  * Boot a fresh machine straight to a usable desktop.

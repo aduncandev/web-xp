@@ -11,6 +11,7 @@ import styled from 'styled-components';
 
 import { createSaver, SAVERS } from './savers';
 import { VFSContext } from '../../context/VFSContext';
+import { portalRoot } from '../../WinXP/screen';
 
 export { SAVERS, SAVER_NAMES, hasSettings, createSaver } from './savers';
 
@@ -300,7 +301,7 @@ export function ScreenSaverOverlay({ name, settings, onDismiss, pictures }) {
           meant to dismiss the saver; this catches it in the parent. */}
       <div className="ss-catcher" ref={catcherRef} tabIndex={-1} />
     </Overlay>,
-    document.body,
+    portalRoot(),
   );
 }
 

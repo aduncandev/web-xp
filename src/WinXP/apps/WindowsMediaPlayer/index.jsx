@@ -552,7 +552,7 @@ export default function WindowsMediaPlayer({ filePath, onClose }) {
       onDragOver={e => e.preventDefault()}
     >
       {menuBar && (
-        <section style={{ flex: 'none', background: '#ece9d8', height: 19 }}>
+        <section style={{ flex: 'none', background: 'var(--xp-face, #ece9d8)', height: 19 }}>
           <WindowDropDowns
             items={buildMenus({
               playing: playback.isPlaying,

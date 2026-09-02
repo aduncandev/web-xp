@@ -1,4 +1,5 @@
 import { useRef, useState } from 'react';
+import { toLogical } from '../../screen';
 
 // Where a drag may start a band: the empty parts of the file area, not an item
 const BAND_ORIGINS = [
@@ -56,11 +57,12 @@ export function useRubberBand({
         right: Math.min(Math.max(s.x0, ev.clientX), ar.right),
         bottom: Math.min(Math.max(s.y0, ev.clientY), ar.bottom),
       };
+      // screen pixels into the area's own, which scroll in logical ones
       setRubber({
-        left: rect.left - ar.left + area.scrollLeft,
-        top: rect.top - ar.top + area.scrollTop,
-        right: rect.right - ar.left + area.scrollLeft,
-        bottom: rect.bottom - ar.top + area.scrollTop,
+        left: toLogical(rect.left - ar.left) + area.scrollLeft,
+        top: toLogical(rect.top - ar.top) + area.scrollTop,
+        right: toLogical(rect.right - ar.left) + area.scrollLeft,
+        bottom: toLogical(rect.bottom - ar.top) + area.scrollTop,
       });
       const hit = [];
       area.querySelectorAll('[data-path]').forEach(el => {

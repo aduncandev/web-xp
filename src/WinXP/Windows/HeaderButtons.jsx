@@ -6,11 +6,19 @@ function HeaderButtons({
   onMaximize,
   onMinimize,
   onClose,
+  onHelp,
   maximized,
   resizable,
   className,
 }) {
   const buttonElements = {
+    help: (
+      <button
+        key="help"
+        className="header__button header__button--help"
+        onMouseUp={onHelp}
+      />
+    ),
     minimize: (
       <button
         key="minimize"
@@ -37,7 +45,7 @@ function HeaderButtons({
   };
 
   return (
-    <div className={className}>
+    <div className={`${className} header__buttons`}>
       {buttons ? (
         buttons.map(b => buttonElements[b])
       ) : (
@@ -51,136 +59,75 @@ function HeaderButtons({
   );
 }
 
+// State strips run normal, hot, pressed, disabled for an active window,
+// then the same four for an inactive one
+const state = (isFocus, n) => (isFocus ? n : n + 4);
+const part = (kind, n) => `var(--xp-p-window-${kind}-${n}, none)`;
+const glyph = (kind, n) => `var(--xp-g-window-${kind}-${n}, none)`;
+const button = (cls, kind, isFocus) => `
+  .header__button--${cls} {
+    border-image: ${part(kind, state(isFocus, 1))};
+  }
+  .header__button--${cls}::after {
+    background-image: ${glyph(kind, state(isFocus, 1))};
+  }
+  .header__button--${cls}:hover {
+    border-image: ${part(kind, state(isFocus, 2))};
+  }
+  .header__button--${cls}:hover::after {
+    background-image: ${glyph(kind, state(isFocus, 2))};
+  }
+  .header__button--${cls}:hover:active {
+    border-image: ${part(kind, state(isFocus, 3))};
+  }
+  .header__button--${cls}:hover:active::after {
+    background-image: ${glyph(kind, state(isFocus, 3))};
+  }
+  .header__button--${cls}.header__button--disable,
+  .header__button--${cls}.header__button--disable:hover {
+    border-image: ${part(kind, state(isFocus, 4))};
+  }
+  .header__button--${cls}.header__button--disable::after,
+  .header__button--${cls}.header__button--disable:hover::after {
+    background-image: ${glyph(kind, state(isFocus, 4))};
+  }
+`;
+
 export default styled(HeaderButtons)`
-  opacity: ${({ isFocus }) => (isFocus ? 1 : 0.6)};
-  height: 22px;
+  height: 21px;
   display: flex;
   align-items: center;
-  margin-top: -1px;
-  margin-right: 1px;
+  align-self: flex-start;
+  /* 5px from the window's top, 6px from its right (the style's offsets) */
+  margin-top: 1px;
+  margin-right: 2px;
+  gap: 3px;
   .header__button {
-    margin-right: 1px;
     position: relative;
-    width: 22px;
-    height: 22px;
-    border: 1px solid #fff;
-    border-radius: 3px;
-    &:hover {
-      filter: brightness(120%);
-    }
-    &:hover:active {
-      filter: brightness(90%);
-    }
+    width: 21px;
+    height: 21px;
+    padding: 0;
+    border: 0 solid transparent;
+    background: transparent;
+    image-rendering: pixelated;
+    cursor: default;
   }
-  .header__button--minimize {
-    box-shadow: inset 0 -1px 2px 1px #4646ff;
-    background-image: radial-gradient(
-      circle at 90% 90%,
-      #0054e9 0%,
-      #2263d5 55%,
-      #4479e4 70%,
-      #a3bbec 90%,
-      white 100%
-    );
-    &:before {
-      content: '';
-      position: absolute;
-      left: 4px;
-      top: 13px;
-      height: 3px;
-      width: 8px;
-      background-color: white;
-    }
-  }
-  .header__button--maximize {
-    box-shadow: inset 0 -1px 2px 1px #4646ff;
-    background-image: radial-gradient(
-      circle at 90% 90%,
-      #0054e9 0%,
-      #2263d5 55%,
-      #4479e4 70%,
-      #a3bbec 90%,
-      white 100%
-    );
-    &:before {
-      content: '';
-      position: absolute;
-      display: block;
-      left: 4px;
-      top: 4px;
-      box-shadow: inset 0 3px white, inset 0 0 0 1px white;
-      height: 12px;
-      width: 12px;
-    }
-  }
-  .header__button--maximized {
-    box-shadow: inset 0 -1px 2px 1px #4646ff;
-    background-image: radial-gradient(
-      circle at 90% 90%,
-      #0054e9 0%,
-      #2263d5 55%,
-      #4479e4 70%,
-      #a3bbec 90%,
-      white 100%
-    );
-    &:before {
-      content: '';
-      position: absolute;
-      display: block;
-      left: 7px;
-      top: 4px;
-      box-shadow: inset 0 2px white, inset 0 0 0 1px white;
-      height: 8px;
-      width: 8px;
-    }
-    &:after {
-      content: '';
-      position: absolute;
-      display: block;
-      left: 4px;
-      top: 7px;
-      box-shadow: inset 0 2px white, inset 0 0 0 1px white, 1px -1px #136dff;
-      height: 8px;
-      width: 8px;
-      background-color: #136dff;
-    }
-  }
-  .header__button--close {
-    box-shadow: inset 0 -1px 2px 1px #da4600;
-    background-image: radial-gradient(
-      circle at 90% 90%,
-      #cc4600 0%,
-      #dc6527 55%,
-      #cd7546 70%,
-      #ffccb2 90%,
-      white 100%
-    );
-    &:before {
-      content: '';
-      position: absolute;
-      left: 9px;
-      top: 2px;
-      transform: rotate(45deg);
-      height: 16px;
-      width: 2px;
-      background-color: white;
-    }
-    &:after {
-      content: '';
-      position: absolute;
-      left: 9px;
-      top: 2px;
-      transform: rotate(-45deg);
-      height: 16px;
-      width: 2px;
-      background-color: white;
-    }
+  /* the glyph sits above the face: a border-image paints over any background */
+  .header__button::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-repeat: no-repeat;
+    background-position: center;
+    image-rendering: pixelated;
+    pointer-events: none;
   }
   .header__button--disable {
     outline: none;
-    opacity: 0.5;
-    &:hover {
-      filter: brightness(100%);
-    }
   }
+  ${({ isFocus }) => button('minimize', 'minbutton', isFocus)}
+  ${({ isFocus }) => button('maximize', 'maxbutton', isFocus)}
+  ${({ isFocus }) => button('maximized', 'restorebutton', isFocus)}
+  ${({ isFocus }) => button('close', 'closebutton', isFocus)}
+  ${({ isFocus }) => button('help', 'helpbutton', isFocus)}
 `;

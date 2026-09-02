@@ -18,6 +18,7 @@ import {
   constrainSquare,
   drawShape,
 } from './helpers';
+import { toLogical } from '../../screen';
 
 /* ---- pointer helpers ---------------------------------------------------- */
 
@@ -25,8 +26,8 @@ export function getPos(paint, e) {
   const rect = paint.doc.canvasRef.current.getBoundingClientRect();
   const z = paint.live.current.zoom;
   return {
-    x: Math.floor((e.clientX - rect.left) / z),
-    y: Math.floor((e.clientY - rect.top) / z),
+    x: Math.floor(toLogical(e.clientX - rect.left) / z),
+    y: Math.floor(toLogical(e.clientY - rect.top) / z),
   };
 }
 

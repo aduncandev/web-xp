@@ -9,6 +9,13 @@ import React, {
 import { createPortal } from 'react-dom';
 import styled from 'styled-components';
 import { menuFade } from '../menuFade';
+import {
+  portalRoot,
+  screenSize,
+  toLogical,
+  toLogicalX,
+  toLogicalY,
+} from '../../WinXP/screen';
 
 const SHOW_DELAY_MS = 500;
 const AUTO_HIDE_MS = 5000;
@@ -90,7 +97,7 @@ export default function XPTooltip({ text, disabled, children }) {
       {anchor && !disabled && text
         ? createPortal(
             <Tip x={anchor.x} y={anchor.y} text={text} />,
-            document.body,
+            portalRoot(),
           )
         : null}
     </>
@@ -105,14 +112,19 @@ function Tip({ x, y, text }) {
     const el = ref.current;
     if (!el) return;
     const rect = el.getBoundingClientRect();
-    let left = x + 2;
-    let top = y + CURSOR_OFFSET_Y;
-    if (left + rect.width > window.innerWidth - 2) {
-      left = window.innerWidth - 2 - rect.width;
+    const w = toLogical(rect.width);
+    const h = toLogical(rect.height);
+    const screen = screenSize();
+    const lx = toLogicalX(x);
+    const ly = toLogicalY(y);
+    let left = lx + 2;
+    let top = ly + CURSOR_OFFSET_Y;
+    if (left + w > screen.width - 2) {
+      left = screen.width - 2 - w;
     }
     if (left < 0) left = 0;
-    if (top + rect.height > window.innerHeight - 2) {
-      top = y - rect.height - 2;
+    if (top + h > screen.height - 2) {
+      top = ly - h - 2;
     }
     if (top < 0) top = 0;
     setPos({ left, top });
@@ -136,11 +148,11 @@ const Bubble = styled.div`
   position: fixed;
   z-index: 100000;
   padding: 2px 4px 3px;
-  background: #ffffe1;
+  background: var(--xp-info, #ffffe1);
   border: 1px solid #000;
-  color: #000;
+  color: var(--xp-info-text, #000);
   font-family: Tahoma, 'Noto Sans', sans-serif;
-  font-size: 11px;
+  font-size: var(--xp-font-ui, 11px);
   line-height: 13px;
   white-space: nowrap;
   pointer-events: none;

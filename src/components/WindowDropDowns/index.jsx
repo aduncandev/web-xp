@@ -27,7 +27,10 @@ export function WindowDropDowns({
     };
   }, []);
   return (
-    <div className={className} ref={dropDown}>
+    <div
+      className={`${className} ${openOption ? 'drop-downs--open' : ''}`}
+      ref={dropDown}
+    >
       {Object.keys(items).map(name => (
         <div className="drop-down" key={name}>
           <div
@@ -61,19 +64,20 @@ export default styled(WindowDropDowns)`
   line-height: ${({ height }) => height || 20}px;
   position: relative;
   .drop-down {
-    font-size: 11px;
+    font-size: var(--xp-font-ui, 11px);
     height: 100%;
     position: relative;
   }
   .drop-down__label--active {
-    background-color: #316ac5;
-    color: #fff;
+    background-color: var(--xp-menu-highlight, #316ac5);
+    color: var(--xp-highlight-text, #fff);
   }
   .drop-down__label {
     padding: 0 7px;
-    &:hover {
-      background-color: #316ac5;
-      color: #fff;
-    }
+  }
+  /* titles light up under the pointer only while a menu is open */
+  &.drop-downs--open .drop-down__label:hover {
+    background-color: var(--xp-menu-highlight, #316ac5);
+    color: var(--xp-highlight-text, #fff);
   }
 `;

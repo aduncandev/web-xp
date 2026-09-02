@@ -270,13 +270,13 @@ const BoxBody = styled.div`
   .msg-input {
     margin-top: 8px;
     height: 20px;
-    border: 1px solid #7f9db9;
+    border: 1px solid var(--xp-select-border, #7f9db9);
     padding: 0 4px;
     font-family: Tahoma, 'Noto Sans', sans-serif;
     font-size: 11px;
     outline: none;
     &:focus {
-      border-color: #316ac5;
+      border-color: var(--xp-highlight, #316ac5);
     }
   }
   .msg-buttons {

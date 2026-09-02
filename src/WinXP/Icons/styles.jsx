@@ -199,7 +199,7 @@ export const StyledIcon = styled(Icon)`
 
   &__text__container {
     width: 100%;
-    font-size: 11px;
+    font-size: var(--xp-font-ui, 11px);
     line-height: ${LABEL_LINE_H}px;
     font-family: Tahoma, 'Noto Sans', sans-serif;
     color: white;
@@ -222,7 +222,7 @@ export const StyledIcon = styled(Icon)`
   &__text {
     padding: 0 3px 2px;
     background-color: ${({ isFocus, displayFocus, isDropTarget }) =>
-      (isFocus && displayFocus) || isDropTarget ? '#316ac5' : 'transparent'};
+      (isFocus && displayFocus) || isDropTarget ? 'var(--xp-highlight, #316ac5)' : 'transparent'};
     text-shadow: ${({ isFocus, displayFocus, isDropTarget }) =>
       (isFocus && displayFocus) || isDropTarget
         ? 'none'
@@ -282,11 +282,11 @@ export const StyledIcon = styled(Icon)`
   .icon-rename-input {
     width: 80px;
     user-select: text;
-    font-size: 11px;
+    font-size: var(--xp-font-ui, 11px);
     line-height: ${LABEL_LINE_H}px;
     font-family: Tahoma, 'Noto Sans', sans-serif;
     text-align: center;
-    border: 1px solid #316ac5;
+    border: 1px solid var(--xp-highlight, #316ac5);
     padding: 1px 2px;
     outline: none;
     background: #fff;
@@ -299,5 +299,3 @@ export const StyledIcon = styled(Icon)`
     display: block;
   }
 `;
-
-

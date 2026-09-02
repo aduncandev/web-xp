@@ -133,7 +133,7 @@ const Div = styled.div`
     position: relative;
     display: contents;
     &:hover > *:not(:nth-child(5)) {
-      background: #316ac5;
+      background: var(--xp-highlight, #316ac5);
       color: #fff;
     }
     &:hover > .drop-down__arrow:before {
@@ -144,7 +144,7 @@ const Div = styled.div`
     position: relative;
     display: contents;
     & > *:not(:nth-child(5)) {
-      background: #316ac5;
+      background: var(--xp-highlight, #316ac5);
       color: #fff;
     }
     & > .drop-down__arrow:before {
@@ -153,9 +153,9 @@ const Div = styled.div`
   }
   .drop-down__row--disable {
     display: contents;
-    color: #aca899;
+    color: var(--xp-face-shadow, #aca899);
     &:hover > *:not(:nth-child(5)) {
-      background: #316ac5;
+      background: var(--xp-highlight, #316ac5);
     }
   }
   .drop-down__title {
@@ -163,7 +163,7 @@ const Div = styled.div`
     height: 100%;
     line-height: 20px;
     color: white;
-    background-color: #316ac5;
+    background-color: var(--xp-highlight, #316ac5);
   }
   .drop-down__menu {
     background-color: #fff;
@@ -175,7 +175,7 @@ const Div = styled.div`
     display: grid;
     position: absolute;
     box-shadow: 2px 2px 4px rgba(0, 0, 0, 0.35);
-    border: 1px solid #aca899;
+    border: 1px solid var(--xp-face-shadow, #aca899);
     grid-template-columns: 16px auto auto 15px 0px;
     animation: ${menuFade} ${MENU_FADE_MS}ms;
   }
@@ -183,7 +183,7 @@ const Div = styled.div`
     grid-column: 1 / 5;
     height: 7px;
     padding: 3px 1px;
-    background-color: #aca899;
+    background-color: var(--xp-face-shadow, #aca899);
     background-clip: content-box;
   }
   .drop-down__check {

@@ -41,6 +41,7 @@ import dogshrineMp3 from 'assets/dogvirus/dogshrine.mp3';
 import baciMp3 from 'assets/dogvirus/baci_perugina2.mp3';
 import dogCheckOgg from 'assets/dogvirus/dogCheck.ogg';
 import victoryWav from 'assets/dogvirus/victory.wav';
+import { screenSize } from '../../screen';
 
 const MAX_WINDOWS = 100; // patient zero + children, total
 const AUDIO_GAIN = 0.8;
@@ -254,8 +255,8 @@ export default function DogVirus({
       opened += 1;
       const w = Math.round(rand(150, 320));
       const h = Math.round(rand(140, 290));
-      const vw = window.innerWidth;
-      const vh = window.innerHeight - TASKBAR_HEIGHT;
+      const vw = screenSize().width;
+      const vh = screenSize().height - TASKBAR_HEIGHT;
       const x = Math.round(rand(0, Math.max(0, vw - w)));
       const y = Math.round(rand(0, Math.max(0, vh - h)));
       if (onShellOpenRef.current)
@@ -303,7 +304,7 @@ export default function DogVirus({
 const Body = styled.div`
   width: 100%;
   height: 100%;
-  background: #ece9d8;
+  background: var(--xp-face, #ece9d8);
   overflow: hidden;
   /* Ctrl+A must not be able to grab the dog and drag it around. */
   user-select: none;

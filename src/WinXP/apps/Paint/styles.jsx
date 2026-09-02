@@ -39,7 +39,7 @@ export const DialogBody = styled.div`
     flex-direction: column;
   }
   .dlg-disabled {
-    color: #aca899;
+    color: var(--xp-face-shadow, #aca899);
   }
   fieldset {
     border: 1px solid #d0d0bf;
@@ -61,7 +61,7 @@ export const DialogBody = styled.div`
   input:not([type]) {
     width: 50px;
     height: 18px;
-    border: 1px solid #7f9db9;
+    border: 1px solid var(--xp-select-border, #7f9db9);
     font-family: Tahoma, 'Noto Sans', sans-serif;
     font-size: 11px;
     padding: 1px 3px;
@@ -74,7 +74,7 @@ export const Div = styled.div`
   display: flex;
   flex-direction: column;
   align-items: stretch;
-  background: #ece9d8;
+  background: var(--xp-face, #ece9d8);
   font-family: Tahoma, 'Noto Sans', sans-serif;
   font-size: 11px;
   user-select: none;
@@ -117,15 +117,15 @@ export const Div = styled.div`
     justify-content: center;
     outline: none;
     &:hover {
-      box-shadow: inset 1px 1px 0 #fff, inset -1px -1px 0 #aca899;
+      box-shadow: inset 1px 1px 0 #fff, inset -1px -1px 0 var(--xp-face-shadow, #aca899);
     }
     &:active {
-      box-shadow: inset 1px 1px 0 #aca899, inset -1px -1px 0 #fff;
+      box-shadow: inset 1px 1px 0 var(--xp-face-shadow, #aca899), inset -1px -1px 0 #fff;
     }
   }
   .paint__tool--active,
   .paint__tool--active:hover {
-    box-shadow: inset 1px 1px 0 #aca899, inset -1px -1px 0 #fff;
+    box-shadow: inset 1px 1px 0 var(--xp-face-shadow, #aca899), inset -1px -1px 0 #fff;
     background-image: conic-gradient(
       #fff 25%,
       #d6d3ce 0 50%,
@@ -148,7 +148,7 @@ export const Div = styled.div`
     height: 66px;
     border: 1px solid;
     border-color: #808080 #fff #fff #808080;
-    background: #ece9d8;
+    background: var(--xp-face, #ece9d8);
     overflow: hidden;
   }
   .paint__opt-list {
@@ -157,7 +157,7 @@ export const Div = styled.div`
     height: 100%;
   }
   .paint__opt--sel {
-    background: #316ac5 !important;
+    background: var(--xp-highlight, #316ac5) !important;
     > div {
       background-color: #fff;
     }
@@ -315,7 +315,7 @@ export const Div = styled.div`
     position: absolute;
     width: 3px;
     height: 3px;
-    background: #316ac5;
+    background: var(--xp-highlight, #316ac5);
   }
 
   /* --- Color box --- */
@@ -339,7 +339,7 @@ export const Div = styled.div`
     height: 15px;
     border: 1px solid;
     border-color: #808080 #fff #fff #808080;
-    background: #ece9d8;
+    background: var(--xp-face, #ece9d8);
     > div {
       width: 100%;
       height: 100%;

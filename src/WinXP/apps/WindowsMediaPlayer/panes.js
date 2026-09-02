@@ -170,7 +170,7 @@ export const PlaylistDropdown = styled.div`
   display: flex;
   align-items: center;
   background: #fff;
-  border: 1px solid #7f9db9;
+  border: 1px solid var(--xp-select-border, #7f9db9);
   font-size: 11px;
   color: #000;
   z-index: 5;
@@ -188,7 +188,7 @@ export const PlaylistDropdown = styled.div`
     height: 17px;
     margin: 1px;
     background: linear-gradient(to bottom, #f6f9ff 0, #c3d3f5 100%);
-    border: 1px solid #7f9db9;
+    border: 1px solid var(--xp-select-border, #7f9db9);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -203,14 +203,14 @@ export const DropdownList = styled.div`
   right: -1px;
   top: 20px;
   background: #fff;
-  border: 1px solid #7f9db9;
+  border: 1px solid var(--xp-select-border, #7f9db9);
   z-index: 20;
 
   > div {
     padding: 2px 4px;
   }
   > div[data-selected='true'] {
-    background: #316ac5;
+    background: var(--xp-highlight, #316ac5);
     color: #fff;
   }
 `;

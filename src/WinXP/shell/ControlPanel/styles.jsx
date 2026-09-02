@@ -208,7 +208,7 @@ export const Root = styled.div`
     cursor: pointer;
     background: linear-gradient(to bottom, #ffffff, #eef2fb);
     &:hover {
-      border-color: #316ac5;
+      border-color: var(--xp-highlight, #316ac5);
       background: #e8effc;
     }
     img {
@@ -256,7 +256,7 @@ export const Root = styled.div`
   .cp__input {
     width: 260px;
     height: 21px;
-    border: 1px solid #7f9db9;
+    border: 1px solid var(--xp-select-border, #7f9db9);
     padding: 2px 4px;
     font-family: Tahoma, 'Noto Sans', sans-serif;
     font-size: 11px;
@@ -295,7 +295,7 @@ export const Root = styled.div`
     }
   }
   .cp__avatar--sel {
-    border-color: #316ac5;
+    border-color: var(--xp-highlight, #316ac5);
   }
   .cp__buttons {
     display: flex;
@@ -334,7 +334,7 @@ export const Root = styled.div`
     color: #5a6b8c;
   }
   .cp__dt-cell--today {
-    background: #316ac5;
+    background: var(--xp-highlight, #316ac5);
     color: #fff;
     border-radius: 2px;
   }

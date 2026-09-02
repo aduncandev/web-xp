@@ -18,7 +18,7 @@ export const Body = styled.div`
     border-bottom: none;
     border-top-left-radius: 3px;
     border-top-right-radius: 3px;
-    background: linear-gradient(to bottom, #fff, #ece9d8);
+    background: linear-gradient(to bottom, #fff, var(--xp-face, #ece9d8));
     margin-right: 2px;
     cursor: default;
     &.active {
@@ -73,7 +73,7 @@ export const Body = styled.div`
     min-width: 0;
     font-size: 11px;
     font-family: Tahoma, 'Noto Sans', sans-serif;
-    border: 1px solid #7f9db9;
+    border: 1px solid var(--xp-select-border, #7f9db9);
     padding: 2px 3px;
     outline: none;
     background: #fff;
@@ -192,7 +192,7 @@ export const Body = styled.div`
   }
   .pr-verlist,
   .pr-vervalue {
-    border: 1px solid #7f9db9;
+    border: 1px solid var(--xp-select-border, #7f9db9);
     background: #fff;
     flex: 1;
     min-height: 110px;
@@ -205,7 +205,7 @@ export const Body = styled.div`
     cursor: default;
     white-space: nowrap;
     &.selected {
-      background: #316ac5;
+      background: var(--xp-highlight, #316ac5);
       color: #fff;
     }
   }
@@ -217,7 +217,7 @@ export const Body = styled.div`
 
   /* ---- Summary tab ---- */
   .pr-props {
-    border: 1px solid #7f9db9;
+    border: 1px solid var(--xp-select-border, #7f9db9);
     background: #fff;
     flex: 1;
     display: flex;
@@ -328,7 +328,7 @@ export const IconBody = styled.div`
     margin-bottom: 4px;
   }
   .ci-grid {
-    border: 1px solid #7f9db9;
+    border: 1px solid var(--xp-select-border, #7f9db9);
     background: #fff;
     height: 150px;
     overflow-y: auto;
@@ -354,8 +354,8 @@ export const IconBody = styled.div`
       background: rgba(49, 106, 197, 0.1);
     }
     &.selected {
-      background: #316ac5;
-      border-color: #316ac5;
+      background: var(--xp-highlight, #316ac5);
+      border-color: var(--xp-highlight, #316ac5);
     }
   }
   .ci-footer {

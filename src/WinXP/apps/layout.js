@@ -6,14 +6,13 @@
 //   maximized      true/false forces it; absent means "when the screen is too small"
 //   layout()       evaluated at launch; its fields win over the static ones
 
+import { screenSize } from '../screen';
+
 const getWinState = () => {
   if (typeof window === 'undefined')
     return { w: 1024, h: 768, isMobile: false };
-  return {
-    w: window.innerWidth,
-    h: window.innerHeight,
-    isMobile: window.innerWidth < 800,
-  };
+  const { width, height } = screenSize();
+  return { w: width, h: height, isMobile: width < 800 };
 };
 
 export const getCenter = (appW, appH) => {
@@ -21,8 +20,8 @@ export const getCenter = (appW, appH) => {
   const targetW = appW || 300;
   const targetH = appH || 300;
   return {
-    x: Math.max(0, w / 2 - targetW / 2),
-    y: Math.max(0, h / 2 - targetH / 2),
+    x: Math.max(0, Math.round(w / 2 - targetW / 2)),
+    y: Math.max(0, Math.round(h / 2 - targetH / 2)),
   };
 };
 

@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import XPTooltip from 'components/XPTooltip';
 import VolumeSlider from '../../components/VolumeSlider';
-import { useVolume } from '../../context/VolumeContext';
+import { useMixer } from '../../context/VolumeContext';
 import sound from 'assets/windowsIcons/690(16x16).png';
 
 /**
@@ -11,7 +11,7 @@ import sound from 'assets/windowsIcons/690(16x16).png';
  */
 export default function TrayVolume({ onOpenMixer }) {
   const [open, setOpen] = useState(false);
-  const { volume, setVolume, isMuted, setIsMuted } = useVolume();
+  const { volume, setVolume, isMuted, setIsMuted, previewVolume } = useMixer();
   const sliderRef = useRef(null);
   const iconRef = useRef(null);
 
@@ -55,6 +55,7 @@ export default function TrayVolume({ onOpenMixer }) {
             onVolumeChange={setVolume}
             isMuted={isMuted}
             onMuteChange={setIsMuted}
+            onCommit={previewVolume}
           />
         )}
       </div>

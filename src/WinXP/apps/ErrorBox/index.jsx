@@ -77,7 +77,7 @@ function Error({
 }
 
 const Div = styled.div`
-  background-color: #ece9d8;
+  background-color: var(--xp-face, #ece9d8);
   width: 100%;
   height: 100%;
   font-size: 11px;

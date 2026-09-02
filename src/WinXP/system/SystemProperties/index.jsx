@@ -402,7 +402,7 @@ export default function SystemProperties({ onClose, onSetHeader }) {
 const Root = styled.div`
   position: absolute;
   inset: 0;
-  background: #ece9d8;
+  background: var(--xp-face, #ece9d8);
   font-family: Tahoma, 'Noto Sans', sans-serif;
   font-size: 11px;
   display: flex;
@@ -428,7 +428,7 @@ const Root = styled.div`
     border: 1px solid #919b9c;
     border-bottom: none;
     border-radius: 3px 3px 0 0;
-    background: linear-gradient(to bottom, #fefefd, #ece9d8);
+    background: linear-gradient(to bottom, #fefefd, var(--xp-face, #ece9d8));
     cursor: default;
     white-space: nowrap;
     overflow: hidden;
@@ -554,7 +554,7 @@ const Root = styled.div`
   .sp__input {
     flex: 1;
     height: 19px;
-    border: 1px solid #7f9db9;
+    border: 1px solid var(--xp-select-border, #7f9db9);
     background: #fff;
     font-family: Tahoma, 'Noto Sans', sans-serif;
     font-size: 11px;
@@ -663,7 +663,7 @@ const Root = styled.div`
   }
   .sp__drivelist {
     flex: 1;
-    border: 1px solid #7f9db9;
+    border: 1px solid var(--xp-select-border, #7f9db9);
     background: #fff;
     overflow-y: auto;
     align-self: stretch;
@@ -672,7 +672,7 @@ const Root = styled.div`
   .sp__drivelist-header {
     display: flex;
     border-bottom: 1px solid #d0cdb9;
-    background: #ece9d8;
+    background: var(--xp-face, #ece9d8);
     span {
       padding: 1px 4px;
     }
@@ -690,7 +690,7 @@ const Root = styled.div`
     }
   }
   .sp__drivelist-item--sel {
-    background: #316ac5;
+    background: var(--xp-highlight, #316ac5);
     color: #fff;
   }
   .sp__drivebuttons {

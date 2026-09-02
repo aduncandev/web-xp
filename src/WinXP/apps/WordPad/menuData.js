@@ -3,7 +3,7 @@
 export default function buildMenus({ toolbar, formatBar, ruler, statusBar }) {
   return {
     File: [
-      { type: 'item', text: 'New', hotkey: 'Ctrl+N' },
+      { type: 'item', text: 'New...', action: 'New', hotkey: 'Ctrl+N' },
       { type: 'item', text: 'Open...', hotkey: 'Ctrl+O' },
       { type: 'item', text: 'Save', hotkey: 'Ctrl+S' },
       { type: 'item', text: 'Save As...' },
@@ -11,6 +11,10 @@ export default function buildMenus({ toolbar, formatBar, ruler, statusBar }) {
       { type: 'item', text: 'Print...', disable: true, hotkey: 'Ctrl+P' },
       { type: 'item', text: 'Print Preview', disable: true },
       { type: 'item', text: 'Page Setup...', disable: true },
+      { type: 'separator' },
+      { type: 'item', text: 'Recent File', disable: true },
+      { type: 'separator' },
+      { type: 'item', text: 'Send...', disable: true },
       { type: 'separator' },
       { type: 'item', text: 'Exit' },
     ],
@@ -20,11 +24,22 @@ export default function buildMenus({ toolbar, formatBar, ruler, statusBar }) {
       { type: 'item', text: 'Cut', hotkey: 'Ctrl+X' },
       { type: 'item', text: 'Copy', hotkey: 'Ctrl+C' },
       { type: 'item', text: 'Paste', hotkey: 'Ctrl+V' },
-      { type: 'separator' },
+      { type: 'item', text: 'Paste Special...', disable: true },
+      { type: 'item', text: 'Clear', disable: true, hotkey: 'Del' },
       { type: 'item', text: 'Select All', hotkey: 'Ctrl+A' },
       { type: 'separator' },
       { type: 'item', text: 'Find...', disable: true, hotkey: 'Ctrl+F' },
+      { type: 'item', text: 'Find Next', disable: true, hotkey: 'F3' },
       { type: 'item', text: 'Replace...', disable: true, hotkey: 'Ctrl+H' },
+      { type: 'separator' },
+      { type: 'item', text: 'Links...', disable: true },
+      {
+        type: 'item',
+        text: 'Object Properties',
+        disable: true,
+        hotkey: 'Alt+Enter',
+      },
+      { type: 'item', text: 'Object', disable: true },
     ],
     View: [
       { type: 'item', text: 'Toolbar', symbol: toolbar ? 'check' : undefined },

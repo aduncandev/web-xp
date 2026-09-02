@@ -244,7 +244,7 @@ const Body = styled.div`
   .sw__input {
     flex: 1;
     height: 21px;
-    border: 1px solid #7f9db9;
+    border: 1px solid var(--xp-select-border, #7f9db9);
     padding: 2px 4px;
     font-family: Tahoma, 'Noto Sans', sans-serif;
     font-size: 11px;

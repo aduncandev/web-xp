@@ -8,9 +8,10 @@
  */
 export const TASKBAR_HEIGHT = 30;
 
-// The Luna frame around a window's content. A maximized window is pulled
-// off-screen by this much on every side so only its content shows.
-export const WINDOW_FRAME_PADDING = 3;
+// The frame around a window's content: XP's sizing border is 4px in Luna
+// and Classic alike. A maximized window is pulled off-screen by this much
+// on every side so only its content shows.
+export const WINDOW_FRAME_PADDING = 4;
 
 export const FOCUSING = {
   WINDOW: 'WINDOW',

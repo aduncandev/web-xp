@@ -9,6 +9,13 @@ import { createPortal } from 'react-dom';
 import styled from 'styled-components';
 
 import dropdownIcon from 'assets/windowsIcons/dropdown.png';
+import {
+  portalRoot,
+  screenSize,
+  toLogical,
+  toLogicalX,
+  toLogicalY,
+} from '../../WinXP/screen';
 
 const itemHeight = option => (option.icon ? 17 : 13);
 
@@ -21,6 +28,7 @@ const itemHeight = option => (option.icon ? 17 : 13);
  *  - indent: tree depth for shell-style lists (Look in)
  *  - style: extra style for the popup row (e.g. fontFamily)
  * display: optional { icon?, label } override for the closed field
+ * width: fixed width in px (optional; content decides otherwise)
  * onChange(value, option)
  */
 const XPSelect = forwardRef(function XPSelect(
@@ -32,6 +40,7 @@ const XPSelect = forwardRef(function XPSelect(
     disabled = false,
     maxVisible = 30,
     className,
+    width,
   },
   outerRef,
 ) {
@@ -76,12 +85,18 @@ const XPSelect = forwardRef(function XPSelect(
 
   const openList = useCallback(() => {
     if (disabled || options.length === 0 || !rootRef.current) return;
-    const rect = rootRef.current.getBoundingClientRect();
+    const r = rootRef.current.getBoundingClientRect();
+    const rect = {
+      left: toLogicalX(r.left),
+      top: toLogicalY(r.top),
+      bottom: toLogicalY(r.bottom),
+      width: toLogical(r.width),
+    };
     const contentH = 2 + options.reduce((h, o) => h + itemHeight(o), 0);
     const capH =
       2 + options.slice(0, maxVisible).reduce((h, o) => h + itemHeight(o), 0);
     let height = Math.min(contentH, capH);
-    const spaceBelow = window.innerHeight - rect.bottom - 2;
+    const spaceBelow = screenSize().height - rect.bottom - 2;
     const spaceAbove = rect.top - 2;
     let top = rect.bottom;
     if (height > spaceBelow) {
@@ -227,6 +242,7 @@ const XPSelect = forwardRef(function XPSelect(
     <>
       <Root
         ref={rootRef}
+        style={width != null ? { width } : undefined}
         className={`${className || ''}${disabled ? ' disabled' : ''}`}
         tabIndex={disabled ? -1 : 0}
         onKeyDown={onKeyDown}
@@ -272,7 +288,7 @@ const XPSelect = forwardRef(function XPSelect(
               </div>
             ))}
           </List>,
-          document.body,
+          portalRoot(),
         )}
     </>
   );
@@ -280,13 +296,13 @@ const XPSelect = forwardRef(function XPSelect(
 
 export default XPSelect;
 
-const Root = styled.span`
+const Root = styled.span.attrs({ className: 'xp-select' })`
   position: relative;
   display: inline-flex;
   box-sizing: border-box;
   height: 21px;
-  border: 1px solid #7f9db9;
-  background: #fff;
+  border: 1px solid var(--xp-select-border, #7f9db9);
+  background: var(--xp-window, #fff);
   font-family: Tahoma, 'Noto Sans', sans-serif;
   font-size: 11px;
   color: #000;
@@ -318,24 +334,60 @@ const Root = styled.span`
     line-height: 15px;
   }
   &:focus .xs-value {
-    background: #316ac5;
-    color: #fff;
+    background: var(--xp-highlight, #316ac5);
+    color: var(--xp-highlight-text, #fff);
   }
+  /* the style's drop-down button and its glyph: normal, hot, pressed, disabled */
   .xs-button {
     flex-shrink: 0;
+    position: relative;
     width: 15px;
     height: 17px;
     margin: 1px 1px 1px 0;
-    background: url(${dropdownIcon}) no-repeat;
-    background-size: 15px 17px;
+    border: 0 solid transparent;
+    border-image: var(--xp-p-combobox-dropdownbutton-1, none);
+    background: transparent;
+    image-rendering: pixelated;
+  }
+  .xs-button::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: var(--xp-g-combobox-dropdownbutton-1, url(${dropdownIcon}))
+      center no-repeat;
+    image-rendering: pixelated;
+    pointer-events: none;
+  }
+  &:hover .xs-button {
+    border-image: var(--xp-p-combobox-dropdownbutton-2, none);
+  }
+  &:hover .xs-button::after {
+    background-image: var(
+      --xp-g-combobox-dropdownbutton-2,
+      url(${dropdownIcon})
+    );
+  }
+  &:active .xs-button {
+    border-image: var(--xp-p-combobox-dropdownbutton-3, none);
+  }
+  &:active .xs-button::after {
+    background-image: var(
+      --xp-g-combobox-dropdownbutton-3,
+      url(${dropdownIcon})
+    );
   }
   &.disabled {
     border-color: #c9c2b8;
     background: #f5f4ea;
     color: #a0a0a0;
     .xs-button {
-      filter: grayscale(1);
-      opacity: 0.5;
+      border-image: var(--xp-p-combobox-dropdownbutton-4, none);
+    }
+    .xs-button::after {
+      background-image: var(
+        --xp-g-combobox-dropdownbutton-4,
+        url(${dropdownIcon})
+      );
     }
   }
 `;
@@ -369,8 +421,8 @@ const List = styled.div`
     }
   }
   .xsl-item.hl {
-    background: #316ac5;
-    color: #fff;
+    background: var(--xp-highlight, #316ac5);
+    color: var(--xp-highlight-text, #fff);
   }
   .xsl-label {
     flex: 1;

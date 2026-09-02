@@ -18,8 +18,8 @@ const Host = styled.div`
   position: absolute;
   left: 0;
   top: -25px; /* cancel the window chrome's content inset */
-  width: 100vw;
-  height: calc(100vh - ${TASKBAR_HEIGHT}px); /* keep Winamp off the taskbar */
+  width: 100%;
+  height: calc(100% - ${TASKBAR_HEIGHT}px); /* keep Winamp off the taskbar */
   pointer-events: none;
   #webamp {
     pointer-events: auto;

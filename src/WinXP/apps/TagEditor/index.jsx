@@ -62,7 +62,7 @@ const Div = styled.div`
   height: 100%;
   display: flex;
   flex-direction: column;
-  background: #ece9d8;
+  background: var(--xp-face, #ece9d8);
   font-family: Tahoma, 'Noto Sans', sans-serif;
   font-size: 11px;
   color: #000;
@@ -79,7 +79,7 @@ const Toolbar = styled.div`
   align-items: center;
   gap: 6px;
   padding: 4px 6px;
-  border-bottom: 1px solid #aca899;
+  border-bottom: 1px solid var(--xp-face-shadow, #aca899);
 
   .te__path {
     flex: 1;
@@ -87,7 +87,7 @@ const Toolbar = styled.div`
     height: 19px;
     line-height: 17px;
     padding: 0 4px;
-    border: 1px solid #7f9db9;
+    border: 1px solid var(--xp-select-border, #7f9db9);
     background: #fff;
     overflow: hidden;
     white-space: nowrap;
@@ -108,7 +108,7 @@ const Panel = styled.div`
   width: 186px;
   padding: 8px;
   overflow: auto;
-  border-right: 1px solid #aca899;
+  border-right: 1px solid var(--xp-face-shadow, #aca899);
 
   h2 {
     margin: 0 0 8px;
@@ -125,7 +125,7 @@ const Panel = styled.div`
     height: 19px;
     margin-bottom: 7px;
     padding: 0 3px;
-    border: 1px solid #7f9db9;
+    border: 1px solid var(--xp-select-border, #7f9db9);
     font-family: inherit;
     font-size: 11px;
     background: ${({ $enabled }) => ($enabled ? '#fff' : '#f2f0e8')};
@@ -172,7 +172,7 @@ const Header = styled.div`
     line-height: 16px;
     padding: 0 4px;
     border-right: 1px solid #d5d2ca;
-    border-bottom: 1px solid #aca899;
+    border-bottom: 1px solid var(--xp-face-shadow, #aca899);
     overflow: hidden;
     white-space: nowrap;
     box-sizing: border-box;
@@ -183,7 +183,7 @@ const Row = styled.div`
   display: flex;
   height: 16px;
   line-height: 16px;
-  background: ${({ $selected }) => ($selected ? '#316ac5' : 'transparent')};
+  background: ${({ $selected }) => ($selected ? 'var(--xp-highlight, #316ac5)' : 'transparent')};
   color: ${({ $selected }) => ($selected ? '#fff' : '#000')};
 
   > div {
@@ -208,8 +208,8 @@ const Status = styled.div`
   align-items: center;
   padding: 0 6px;
   border-top: 1px solid #fff;
-  background: #ece9d8;
-  box-shadow: inset 0 1px 0 #aca899;
+  background: var(--xp-face, #ece9d8);
+  box-shadow: inset 0 1px 0 var(--xp-face-shadow, #aca899);
   color: #333;
 `;
 

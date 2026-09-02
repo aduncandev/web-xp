@@ -14,6 +14,7 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import styled from 'styled-components';
 import { useVFS } from '../../context/VFSContext';
+import { toLogical } from '../../WinXP/screen';
 
 /** Wide enough to still catch the divider once a column is dragged shut. */
 export const GRIP_WIDTH = 6;
@@ -93,7 +94,7 @@ export function useColumns(viewKey, defs) {
       const move = e => {
         const width = Math.max(
           GRIP_WIDTH,
-          Math.round(startW + (e.clientX - startX)),
+          Math.round(startW + toLogical(e.clientX - startX)),
         );
         latest = { ...latest, [id]: width };
         setWidths(prev => ({ ...prev, [id]: width }));
@@ -217,7 +218,7 @@ export function useSplitter({ key, initial, edge = 'start', boundsRef }) {
       const startSize = size;
       let latest = size;
       const move = e => {
-        const delta = e.clientX - startX;
+        const delta = toLogical(e.clientX - startX);
         const next = edge === 'end' ? startSize - delta : startSize + delta;
         latest = Math.max(0, Math.min(bounds, Math.round(next)));
         setState({ size: latest });

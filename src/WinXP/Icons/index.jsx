@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { createPortal } from 'react-dom';
-import useWindowSize from 'react-use/lib/useWindowSize';
+import { useScreenSize } from '../screen';
 import { useVFS } from '../../context/VFSContext';
 import { useDialog } from '../../context/DialogContext';
 import { SPECIAL_FOLDERS, EXE_PATHS } from '../../context/vfsConstants';
@@ -30,6 +30,7 @@ import { dropMoveInto } from '../shell/move';
 import { useDesktopIcons } from './useDesktopIcons';
 import { useDesktopLayout } from './useDesktopLayout';
 import { useIconDrag } from './useIconDrag';
+import { portalRoot } from '../screen';
 
 function Icons({
   userName,
@@ -49,7 +50,7 @@ function Icons({
 }) {
   const vfs = useVFS();
   const dialog = useDialog();
-  const { width: winWidth, height: winHeight } = useWindowSize();
+  const { width: winWidth, height: winHeight } = useScreenSize();
   const [contextMenu, setContextMenu] = useState(null);
   const [renamingPath, setRenamingPath] = useState(null);
   const [propertiesPath, setPropertiesPath] = useState(null);
@@ -560,7 +561,7 @@ function Icons({
                 );
               })}
           </DragGhostLayer>,
-          document.body,
+          portalRoot(),
         )}
       {contextMenu && (
         <ContextMenu

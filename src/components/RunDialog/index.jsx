@@ -234,7 +234,7 @@ const Body = styled.div`
   .run__input {
     flex: 1;
     height: 21px;
-    border: 1px solid #7f9db9;
+    border: 1px solid var(--xp-select-border, #7f9db9);
     border-right: none;
     padding: 2px 4px;
     font-family: Tahoma, 'Noto Sans', sans-serif;
@@ -244,7 +244,7 @@ const Body = styled.div`
   .run__drop-btn {
     width: 17px;
     height: 21px;
-    border: 1px solid #7f9db9;
+    border: 1px solid var(--xp-select-border, #7f9db9);
     background: linear-gradient(to bottom, #f2f6fb 0%, #c5d6ef 100%);
     font-size: 8px;
     color: #4d6185;
@@ -257,7 +257,7 @@ const Body = styled.div`
     left: 0;
     right: 0;
     background: #fff;
-    border: 1px solid #7f9db9;
+    border: 1px solid var(--xp-select-border, #7f9db9);
     z-index: 5;
     max-height: 130px;
     overflow-y: auto;
@@ -268,7 +268,7 @@ const Body = styled.div`
     overflow: hidden;
     text-overflow: ellipsis;
     &:hover {
-      background: #316ac5;
+      background: var(--xp-highlight, #316ac5);
       color: #fff;
     }
   }

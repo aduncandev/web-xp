@@ -373,8 +373,7 @@ const StyledTextarea = styled.textarea`
   ${props =>
     props.$wordWrap ? '' : 'white-space: nowrap; overflow-x: scroll;'}
   overflow-y: scroll;
-  border: 1px solid #96abff;
-  border-top: none;
+  border: none;
 `;
 
 const StatusBar = styled.div`

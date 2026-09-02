@@ -801,7 +801,7 @@ const Body = styled.div`
     min-width: 60px;
     font-size: 11px;
     font-family: Tahoma, 'Noto Sans', sans-serif;
-    border: 1px solid #7f9db9;
+    border: 1px solid var(--xp-select-border, #7f9db9);
     padding: 2px 3px;
     outline: none;
   }
@@ -809,7 +809,7 @@ const Body = styled.div`
     width: 52px;
     font-size: 11px;
     font-family: Tahoma, 'Noto Sans', sans-serif;
-    border: 1px solid #7f9db9;
+    border: 1px solid var(--xp-select-border, #7f9db9);
     padding: 1px 2px;
     outline: none;
     flex-shrink: 0;
@@ -818,7 +818,7 @@ const Body = styled.div`
     width: 40px;
     height: 18px;
     padding: 0;
-    border: 1px solid #7f9db9;
+    border: 1px solid var(--xp-select-border, #7f9db9);
     background: #fff;
     flex-shrink: 0;
   }

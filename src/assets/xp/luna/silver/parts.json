@@ -1,0 +1,3843 @@
+{
+ "scheme": "silver",
+ "parts": {
+  "globals": {
+   "edgelightcolor": "241 239 226",
+   "edgehighlightcolor": "255 255 255",
+   "edgeshadowcolor": "172 168 153",
+   "edgedkshadowcolor": "113 111 100",
+   "edgefillcolor": "236 233 216"
+  },
+  "SysMetrics": {
+   "scrollbarwidth": "17",
+   "scrollbarheight": "17",
+   "window": "255 255 255",
+   "menubar": "224 226 235",
+   "menu": "255 255 255",
+   "background": "88 87 104",
+   "btnface": "224 223 227",
+   "highlight": "178 180 191",
+   "activecaption": "192 192 192",
+   "captiontext": "14 16 16",
+   "inactivecaption": "255 255 255",
+   "inactivecaptiontext": "162 161 161",
+   "gradientactivecaption": "200 200 200",
+   "gradientinactivecaption": "238 239 247",
+   "highlighttext": "0 0 0",
+   "menuhilight": "187 183 199",
+   "hottracking": "100 139 203",
+   "btnshadow": "157 157 161",
+   "graytext": "172 168 153",
+   "btnhighlight": "255 255 255",
+   "dkshadow3d": "113 111 100",
+   "light3d": "241 239 226",
+   "captionfont": "Trebuchet MS, 10, bold",
+   "captionbarheight": "25",
+   "smallcaptionfont": "Tahoma, 8, bold",
+   "smcaptionbarheight": "17",
+   "smcaptionbarwidth": "17",
+   "menufont": "Tahoma, 8",
+   "statusfont": "Tahoma, 8",
+   "msgboxfont": "Tahoma, 8",
+   "icontitlefont": "Tahoma, 8",
+   "flatmenus": "true",
+   "cssname": "cpwebvw.css",
+   "xmlname": "default.xml",
+   "mincolordepth": "15"
+  },
+  "button": {},
+  "button.pushbutton": {
+   "bgtype": "imagefile",
+   "sizingmargins": "8, 8, 9, 9",
+   "sizingtype": "Stretch",
+   "contentmargins": "3, 3, 3, 3",
+   "imagefile": "Metallic\\button.bmp",
+   "imagecount": "5",
+   "imagelayout": "vertical",
+   "textcolor": "0 0 0",
+   "fillcolorhint": "240 241 245",
+   "bordercolorhint": "0 60 116",
+   "accentcolorhint": "250 196 88",
+   "minsize": "10, 5"
+  },
+  "button.pushbutton(disabled)": {
+   "textcolor": "161 161 146"
+  },
+  "button.pushbutton(defaulted)": {
+   "accentcolorhint": "240 241 245"
+  },
+  "button.checkbox": {
+   "bgtype": "imagefile",
+   "imagelayout": "vertical",
+   "sizingtype": "TrueSize",
+   "sizingmargins": "0, 0, 0, 0",
+   "contentmargins": "0, 0, 0, 0",
+   "imagecount": "12",
+   "mirrorimage": "false",
+   "fillcolorhint": "33 161 33",
+   "bordercolorhint": "119 119 92",
+   "accentcolorhint": "250 196 88",
+   "imageselecttype": "Dpi",
+   "truesizescalingtype": "Dpi",
+   "truesizestretchmark": "50",
+   "uniformsizing": "true",
+   "imagefile1": "Metallic\\CheckBox13.bmp",
+   "imagefile2": "Metallic\\CheckBox16.bmp",
+   "imagefile3": "Metallic\\CheckBox25.bmp",
+   "mindpi1": "96",
+   "mindpi2": "118",
+   "mindpi3": "185"
+  },
+  "button.checkbox(checkeddisabled)": {
+   "textcolor": "161 161 146"
+  },
+  "button.checkbox(uncheckeddisabled)": {
+   "textcolor": "161 161 146"
+  },
+  "button.checkbox(mixeddisabled)": {
+   "textcolor": "161 161 146"
+  },
+  "button.radiobutton": {
+   "bgtype": "imagefile",
+   "imagelayout": "vertical",
+   "transparent": "true",
+   "sizingtype": "TrueSize",
+   "sizingmargins": "0, 0, 0, 0",
+   "contentmargins": "0, 0, 0, 0",
+   "imagecount": "8",
+   "fillcolorhint": "33 161 33",
+   "bordercolorhint": "119 119 92",
+   "accentcolorhint": "250 196 88",
+   "imageselecttype": "Dpi",
+   "truesizescalingtype": "Dpi",
+   "truesizestretchmark": "50",
+   "uniformsizing": "true",
+   "imagefile1": "Metallic\\RadioButton13.bmp",
+   "imagefile2": "Metallic\\RadioButton16.bmp",
+   "imagefile3": "Metallic\\RadioButton25.bmp",
+   "mindpi1": "96",
+   "mindpi2": "118",
+   "mindpi3": "185"
+  },
+  "button.radiobutton(checkeddisabled)": {
+   "textcolor": "161 161 146"
+  },
+  "button.radiobutton(uncheckeddisabled)": {
+   "textcolor": "161 161 146"
+  },
+  "button.groupbox": {
+   "textcolor": "0 70 213",
+   "bgtype": "imagefile",
+   "sizingmargins": "4, 4, 4, 4",
+   "sizingtype": "Tile",
+   "imagefile": "Metallic\\GroupBox.bmp",
+   "borderonly": "true",
+   "transparent": "true",
+   "bordercolorhint": "119 119 92",
+   "normalsize": "9999, 9999"
+  },
+  "Combobox": {
+   "bgtype": "BorderFill",
+   "bordersize": "1",
+   "fillcolor": "255 255 255",
+   "bordercolor": "127 157 185"
+  },
+  "Combobox(Hot)": {
+   "bordercolor": "127 157 185"
+  },
+  "Combobox(Disabled)": {
+   "bordercolor": "201 199 186",
+   "fillcolor": "245 244 234"
+  },
+  "Combobox.DropDownButton": {
+   "bgtype": "imagefile",
+   "imagelayout": "vertical",
+   "sizingtype": "Stretch",
+   "imagefile": "Metallic\\ComboButton.bmp",
+   "sizingmargins": "3, 3, 3, 3",
+   "contentmargins": "0, 0, 0, 0",
+   "imagecount": "4",
+   "glyphtype": "ImageGlyph",
+   "glyphimagefile": "Metallic\\ComboButtonGlyph.bmp",
+   "glyphtransparent": "true",
+   "fillcolorhint": "240 241 245",
+   "bordercolorhint": "255 255 255"
+  },
+  "edit": {
+   "bgtype": "BorderFill",
+   "bordersize": "1",
+   "fillcolor": "255 255 255",
+   "bordercolor": "165 172 178"
+  },
+  "edit.edittext(Disabled)": {
+   "fillcolor": "235 235 228",
+   "textcolor": "161 161 146"
+  },
+  "edit.edittext(ReadOnly)": {
+   "fillcolor": "235 235 228",
+   "textcolor": "0 0 0"
+  },
+  "Listbox": {
+   "bgtype": "BorderFill",
+   "bordersize": "1",
+   "fillcolor": "255 255 255",
+   "bordercolor": "127 157 185"
+  },
+  "ScrollBar": {},
+  "ScrollBar.ArrowBtn": {
+   "bgtype": "ImageFile",
+   "sizingmargins": "5, 5, 5, 5",
+   "contentmargins": "0, 0, 3, 3",
+   "sizingtype": "Stretch",
+   "imagefile": "Metallic\\ScrollArrows.bmp",
+   "imagecount": "16",
+   "imagelayout": "Vertical",
+   "glyphtype": "ImageGlyph",
+   "glyphtransparent": "True",
+   "fillcolorhint": "240 241 245",
+   "bordercolorhint": "255 255 255",
+   "imageselecttype": "size",
+   "truesizescalingtype": "size",
+   "sourceshrink": "True",
+   "truesizestretchmark": "150",
+   "uniformsizing": "true",
+   "imagefile1": "Metallic\\ScrollArrowGlyphsSmall.bmp",
+   "imagefile2": "Metallic\\ScrollArrowGlyphs.bmp",
+   "minsize1": "7, 7",
+   "minsize2": "9, 9",
+   "normalsize": "7, 10"
+  },
+  "Scrollbar.ThumbBtnHorz": {
+   "bgtype": "ImageFile",
+   "sizingmargins": "5, 5, 5, 5",
+   "contentmargins": "4, 4, 0, 0",
+   "imagefile": "Metallic\\ScrollThumbHorizontal.bmp",
+   "imagecount": "4",
+   "imagelayout": "Vertical",
+   "fillcolorhint": "240 241 245",
+   "bordercolorhint": "255 255 255"
+  },
+  "Scrollbar.GripperHorz": {
+   "bgtype": "ImageFile",
+   "sizingtype": "TrueSize",
+   "imagefile": "Metallic\\ScrollThumbGripperHorizontal.BMP",
+   "imagelayout": "vertical",
+   "transparent": "True",
+   "imagecount": "4"
+  },
+  "Scrollbar.ThumbBtnVert": {
+   "bgtype": "ImageFile",
+   "sizingmargins": "5, 5, 5, 5",
+   "contentmargins": "0, 0, 4, 4",
+   "imagefile": "Metallic\\ScrollThumbVertical.bmp",
+   "imagecount": "4",
+   "imagelayout": "vertical",
+   "fillcolorhint": "240 241 245",
+   "bordercolorhint": "255 255 255"
+  },
+  "Scrollbar.GripperVert": {
+   "bgtype": "ImageFile",
+   "sizingtype": "TrueSize",
+   "imagefile": "Metallic\\ScrollThumbGripperVertical.BMP",
+   "imagecount": "4",
+   "transparent": "True",
+   "imagelayout": "Vertical"
+  },
+  "Scrollbar.LowerTrackHorz": {
+   "bgtype": "imagefile",
+   "imagefile": "Metallic\\ScrollShaftHorizontal.bmp",
+   "sizingmargins": "0, 0, 1, 1",
+   "imagecount": "4",
+   "imagelayout": "Vertical",
+   "fillcolorhint": "240 241 245"
+  },
+  "Scrollbar.UpperTrackHorz": {
+   "bgtype": "imagefile",
+   "imagefile": "Metallic\\ScrollShaftHorizontal.bmp",
+   "sizingmargins": "0, 0, 1, 1",
+   "imagecount": "4",
+   "imagelayout": "Vertical",
+   "fillcolorhint": "240 241 245"
+  },
+  "Scrollbar.LowerTrackVert": {
+   "bgtype": "imagefile",
+   "imagefile": "Metallic\\ScrollShaftVertical.bmp",
+   "sizingmargins": "1, 1, 0, 0",
+   "imagecount": "4",
+   "imagelayout": "Vertical",
+   "fillcolorhint": "240 241 245"
+  },
+  "Scrollbar.UpperTrackVert": {
+   "bgtype": "imagefile",
+   "imagefile": "Metallic\\ScrollShaftVertical.bmp",
+   "sizingmargins": "1, 1, 0, 0",
+   "imagecount": "4",
+   "imagelayout": "Vertical",
+   "fillcolorhint": "240 241 245"
+  },
+  "ScrollBar.SizeBox": {
+   "imagefile": "Metallic\\ResizeGrip2.bmp",
+   "bgtype": "imagefile",
+   "imagecount": "2",
+   "sizingtype": "trueSize",
+   "transparent": "True",
+   "transparentcolor": "255 0 0",
+   "fillcolorhint": "119 119 92",
+   "valign": "Bottom"
+  },
+  "spin": {
+   "bgtype": "imagefile",
+   "sizingtype": "tile",
+   "imagefile": "Metallic\\FieldOutlineBlue.bmp",
+   "sizingmargins": "2, 2, 2, 2",
+   "imagecount": "1"
+  },
+  "Spin.Up": {
+   "bgtype": "imagefile",
+   "sizingtype": "stretch",
+   "imagefile": "Metallic\\SpinButtonBackgroundUp.bmp",
+   "sizingmargins": "4, 4, 4, 4",
+   "contentmargins": "0, 0, 0, 0",
+   "imagecount": "4",
+   "imagelayout": "Vertical",
+   "glyphtype": "ImageGlyph",
+   "glyphimagefile": "Metallic\\SpinUpGlyph.bmp",
+   "glyphtransparent": "True",
+   "fillcolorhint": "240 241 245",
+   "bordercolorhint": "255 255 255"
+  },
+  "Spin.Down": {
+   "bgtype": "imagefile",
+   "sizingtype": "tile",
+   "imagefile": "Metallic\\SpinButtonBackgroundDown.bmp",
+   "sizingmargins": "4, 4, 4, 4",
+   "contentmargins": "0, 0, 0, 0",
+   "imagecount": "4",
+   "imagelayout": "Vertical",
+   "glyphtype": "ImageGlyph",
+   "glyphimagefile": "Metallic\\SpinDownGlyph.bmp",
+   "glyphtransparent": "True",
+   "fillcolorhint": "240 241 245",
+   "bordercolorhint": "255 255 255"
+  },
+  "Spin.Uphorz": {
+   "bgtype": "imagefile",
+   "sizingtype": "stretch",
+   "imagefile": "Metallic\\SpinButtonBackgroundRight.bmp",
+   "sizingmargins": "4, 4, 4, 4",
+   "contentmargins": "0, 0, 0, 0",
+   "imagecount": "4",
+   "imagelayout": "Vertical",
+   "glyphtype": "ImageGlyph",
+   "glyphimagefile": "Metallic\\SpinRightGlyph.bmp",
+   "glyphtransparent": "True",
+   "fillcolorhint": "240 241 245",
+   "bordercolorhint": "255 255 255"
+  },
+  "Spin.Downhorz": {
+   "bgtype": "imagefile",
+   "sizingtype": "Stretch",
+   "imagefile": "Metallic\\SpinButtonBackgroundLeft.bmp",
+   "sizingmargins": "4, 4, 4, 4",
+   "contentmargins": "0, 0, 0, 0",
+   "imagecount": "4",
+   "imagelayout": "Vertical",
+   "glyphtype": "ImageGlyph",
+   "glyphimagefile": "Metallic\\SpinLeftGlyph.bmp",
+   "glyphtransparent": "True",
+   "fillcolorhint": "240 241 245",
+   "bordercolorhint": "255 255 255"
+  },
+  "Rebar": {
+   "bgtype": "imagefile",
+   "sizingtype": "stretch",
+   "imagefile": "Metallic\\ToolbarBackground.bmp",
+   "sizingmargins": "0, 0, 0, 4",
+   "font": "Tahoma, 8",
+   "textcolor": "127 124 115",
+   "fillcolorhint": "244 245 249"
+  },
+  "Rebar.Band": {
+   "bgtype": "none",
+   "contentmargins": "2, 0, 0, 0",
+   "edgeshadowcolor": "216 210 189"
+  },
+  "Rebar.Gripper": {
+   "bgtype": "imagefile",
+   "sizingmargins": "2, 1, 4, 2",
+   "contentmargins": "2, 1, 0, 0",
+   "imagefile": "Metallic\\ToolbarGripper.bmp",
+   "sizingtype": "Tile",
+   "transparent": "true",
+   "fillcolorhint": "119 119 92"
+  },
+  "Rebar.GripperVert": {
+   "bgtype": "imagefile",
+   "sizingmargins": "3, 3, 2, 1",
+   "contentmargins": "1, 2, 0, 0",
+   "imagefile": "Metallic\\ToolbarGripperVert.bmp",
+   "sizingtype": "Tile",
+   "transparent": "true",
+   "fillcolorhint": "119 119 92"
+  },
+  "Rebar.Chevron": {
+   "sizingmargins": "4, 4, 4, 4",
+   "contentmargins": "0, 0, 0, 0",
+   "imagefile": "Metallic\\ToolbarButtons.bmp",
+   "bgtype": "imagefile",
+   "imagelayout": "vertical",
+   "imagecount": "6",
+   "sizingtype": "Stretch",
+   "transparent": "true",
+   "glyphtype": "ImageGlyph",
+   "glyphimagefile": "Metallic\\Chevron.bmp",
+   "glyphtransparent": "true",
+   "valign": "Top",
+   "fillcolorhint": "0 0 0"
+  },
+  "Rebar.ChevronVert": {
+   "sizingmargins": "4, 4, 4, 4",
+   "contentmargins": "0, 0, 0, 0",
+   "imagefile": "Metallic\\ToolbarButtons.bmp",
+   "bgtype": "imagefile",
+   "imagelayout": "vertical",
+   "imagecount": "6",
+   "sizingtype": "Stretch",
+   "transparent": "true",
+   "glyphtype": "ImageGlyph",
+   "glyphimagefile": "Metallic\\Chevron.bmp",
+   "glyphtransparent": "true",
+   "valign": "Top",
+   "fillcolorhint": "0 0 0"
+  },
+  "Toolbar": {
+   "bgtype": "Borderfill",
+   "bordersize": "0",
+   "fillcolor": "239 239 237",
+   "textcolor": "0 0 0"
+  },
+  "Toolbar(Pressed)": {
+   "textcolor": "255 255 255"
+  },
+  "Toolbar.Button": {
+   "sizingmargins": "4, 4, 4, 4",
+   "contentmargins": "0, 0, 0, 0",
+   "imagefile": "Metallic\\ToolbarButtons.bmp",
+   "bgtype": "imagefile",
+   "imagelayout": "vertical",
+   "imagecount": "6",
+   "sizingtype": "Stretch",
+   "transparent": "true",
+   "transparentcolor": "255 0 255",
+   "fillcolorhint": "240 241 245",
+   "bordercolorhint": "119 119 92"
+  },
+  "Toolbar.Separator": {
+   "sizingmargins": "5, 2, 2, 1",
+   "imagefile": "Metallic\\Separator.bmp",
+   "bgtype": "imagefile",
+   "imagecount": "1",
+   "sizingtype": "tile",
+   "transparent": "true",
+   "transparentcolor": "255 0 0",
+   "fillcolorhint": "177 183 187"
+  },
+  "Toolbar.SeparatorVert": {
+   "sizingmargins": "2, 1, 5, 1",
+   "imagefile": "Metallic\\SeparatorVert.bmp",
+   "bgtype": "imagefile",
+   "imagecount": "1",
+   "sizingtype": "tile",
+   "transparent": "true",
+   "transparentcolor": "255 0 0",
+   "fillcolorhint": "177 183 187"
+  },
+  "Toolbar.DropdownButton": {
+   "sizingmargins": "4, 4, 4, 4",
+   "contentmargins": "0, 0, 0, 0",
+   "imagefile": "Metallic\\ToolbarButtons.bmp",
+   "bgtype": "imagefile",
+   "imagelayout": "vertical",
+   "imagecount": "6",
+   "sizingtype": "Stretch",
+   "transparent": "true",
+   "transparentcolor": "255 0 255",
+   "fillcolorhint": "240 241 245",
+   "bordercolorhint": "119 119 92"
+  },
+  "Toolbar.SplitButton": {
+   "sizingmargins": "4, 2, 4, 4",
+   "imagefile": "Metallic\\ToolbarButtonsSplit.bmp",
+   "bgtype": "imagefile",
+   "imagelayout": "vertical",
+   "imagecount": "6",
+   "sizingtype": "Stretch",
+   "transparent": "true",
+   "transparentcolor": "255 0 255",
+   "fillcolorhint": "240 241 245",
+   "bordercolorhint": "119 119 92"
+  },
+  "Toolbar.SplitButtonDropdown": {
+   "sizingmargins": "2, 4, 4, 4",
+   "imagefile": "Metallic\\ToolbarButtonsSplitDropdown.bmp",
+   "bgtype": "imagefile",
+   "imagelayout": "vertical",
+   "imagecount": "6",
+   "sizingtype": "Stretch",
+   "transparent": "true",
+   "transparentcolor": "255 0 255",
+   "glyphtype": "ImageGlyph",
+   "glyphimagefile": "Metallic\\ToolbarButtonsSplitDropdownGlyph.bmp",
+   "glyphtransparent": "true",
+   "fillcolorhint": "240 241 245",
+   "bordercolorhint": "119 119 92"
+  },
+  "Status": {
+   "sizingmargins": "50, 17, 5, 9",
+   "imagefile": "Metallic\\StatusBackground.bmp",
+   "bgtype": "imagefile",
+   "imagecount": "1",
+   "sizingtype": "Tile",
+   "fillcolorhint": "177 183 187"
+  },
+  "Status.Pane": {
+   "sizingmargins": "0, 2, 2, 2",
+   "imagefile": "Metallic\\StatusPane.bmp",
+   "bgtype": "imagefile",
+   "imagecount": "1",
+   "sizingtype": "Tile",
+   "transparent": "True",
+   "transparentcolor": "255 0 0",
+   "fillcolorhint": "119 119 92"
+  },
+  "Status.GripperPane": {
+   "bgtype": "none"
+  },
+  "Status.Gripper": {
+   "contentmargins": "0,0,0,0",
+   "imagefile": "Metallic\\ResizeGrip2.bmp",
+   "bgtype": "imagefile",
+   "imagecount": "2",
+   "sizingtype": "trueSize",
+   "transparent": "True",
+   "transparentcolor": "255 0 0",
+   "fillcolorhint": "119 119 92",
+   "valign": "Bottom"
+  },
+  "ListView": {
+   "bgtype": "BorderFill",
+   "bordersize": "1",
+   "fillcolor": "255 255 255",
+   "bordercolor": "127 157 185"
+  },
+  "TreeView": {
+   "bgtype": "BorderFill",
+   "bordersize": "1",
+   "fillcolor": "255 255 255",
+   "bordercolor": "127 157 185"
+  },
+  "TreeView.Glyph": {
+   "bgtype": "imagefile",
+   "sizingtype": "TrueSize",
+   "imagecount": "2",
+   "imagelayout": "vertical",
+   "imageselecttype": "Dpi",
+   "truesizescalingtype": "Dpi",
+   "truesizestretchmark": "50",
+   "uniformsizing": "true",
+   "imagefile1": "Metallic\\treeExpandCollapse.bmp",
+   "imagefile2": "Metallic\\treeExpandCollapse10.bmp",
+   "imagefile3": "Metallic\\treeExpandCollapse15.bmp",
+   "mindpi1": "96",
+   "mindpi2": "133",
+   "mindpi3": "150"
+  },
+  "Header": {
+   "bgtype": "imagefile",
+   "sizingmargins": "0, 0, 0, 3",
+   "imagefile": "Metallic\\ListviewHeaderBackground.bmp",
+   "sizingtype": "tile"
+  },
+  "Header.HeaderItem": {
+   "bgtype": "imagefile",
+   "sizingmargins": "8, 8, 3, 4",
+   "contentmargins": "3, 0, 0, 0",
+   "imagefile": "Metallic\\ListViewHeader.bmp",
+   "imagecount": "5",
+   "imagelayout": "vertical",
+   "sizingtype": "tile",
+   "transparent": "true",
+   "transparentcolor": "255 0 0",
+   "fillcolorhint": "240 241 245",
+   "accentcolorhint": "252 194 71"
+  },
+  "Progress": {
+   "progresschunksize": "6",
+   "progressspacesize": "2",
+   "bgtype": "borderFill",
+   "filltype": "Solid",
+   "fillcolor": "235 235 228",
+   "bordersize": "1",
+   "bordercolor": "235 235 228"
+  },
+  "Progress.Bar": {
+   "bgtype": "imagefile",
+   "imagefile": "Metallic\\ProgressTrack.bmp",
+   "minsize": "10,10",
+   "sizingmargins": "4, 4, 3, 3",
+   "sizingtype": "tile",
+   "fillcolorhint": "255 255 255",
+   "bordercolorhint": "104 104 104",
+   "normalsize": "100, 18",
+   "sourceshrink": "true"
+  },
+  "Progress.Chunk": {
+   "bgtype": "imagefile",
+   "imagefile": "Metallic\\ProgressChunk.bmp",
+   "sizingmargins": "0, 0, 6, 5",
+   "sizingtype": "tile"
+  },
+  "Progress.BarVert": {
+   "bgtype": "imagefile",
+   "imagefile": "Metallic\\ProgressTrackVert.bmp",
+   "sizingmargins": "3, 3, 4, 4",
+   "sizingtype": "tile",
+   "fillcolorhint": "255 255 255",
+   "bordercolorhint": "104 104 104"
+  },
+  "Progress.ChunkVert": {
+   "bgtype": "imagefile",
+   "imagefile": "Metallic\\ProgressChunkVert.bmp",
+   "sizingmargins": "6, 5, 0, 0",
+   "sizingtype": "tile",
+   "fillcolorhint": "46 211 49"
+  },
+  "Tab": {
+   "bgtype": "borderFill",
+   "filltype": "Solid",
+   "fillcolor": "224 224 227",
+   "bordersize": "0"
+  },
+  "Tab.Pane": {
+   "bgtype": "imagefile",
+   "imagefile": "Metallic\\TabPaneEdge.bmp",
+   "sizingmargins": "2, 4, 2, 4",
+   "sizingtype": "stretch",
+   "imagecount": "1",
+   "fillcolorhint": "247 247 249",
+   "bordercolorhint": "145 155 156"
+  },
+  "Tab.TabItem": {
+   "sizingmargins": "6, 6, 6, 6",
+   "contentmargins": "0, 0, 0, 0",
+   "bgtype": "imagefile",
+   "imagefile": "Metallic\\tabItem.bmp",
+   "imagecount": "5",
+   "imagelayout": "vertical",
+   "fillcolorhint": "240 241 245",
+   "bordercolorhint": "146 146 146",
+   "accentcolorhint": "255 200 60"
+  },
+  "Tab.TabItemLeftEdge": {
+   "sizingmargins": "6, 6, 6, 6",
+   "contentmargins": "0, 0, 0, 0",
+   "bgtype": "imagefile",
+   "imagefile": "Metallic\\tabItemLeft.bmp",
+   "imagecount": "5",
+   "imagelayout": "vertical",
+   "fillcolorhint": "240 241 245",
+   "bordercolorhint": "240 241 245",
+   "accentcolorhint": "255 200 60"
+  },
+  "Tab.TabItemRightEdge": {
+   "sizingmargins": "6, 6, 6, 6",
+   "contentmargins": "0, 0, 0, 0",
+   "bgtype": "imagefile",
+   "imagefile": "Metallic\\tabItemRight.bmp",
+   "imagecount": "5",
+   "imagelayout": "vertical",
+   "fillcolorhint": "240 241 245",
+   "bordercolorhint": "240 241 245",
+   "accentcolorhint": "255 200 60"
+  },
+  "Tab.TabItemBothEdge": {
+   "sizingmargins": "6, 6, 6, 6",
+   "contentmargins": "0, 0, 0, 0",
+   "bgtype": "imagefile",
+   "imagefile": "Metallic\\tabItemBoth.bmp",
+   "imagecount": "5",
+   "imagelayout": "vertical",
+   "fillcolorhint": "240 241 245",
+   "bordercolorhint": "240 241 245",
+   "accentcolorhint": "255 200 60"
+  },
+  "Tab.TopTabItem": {
+   "sizingmargins": "6, 6, 6, 6",
+   "contentmargins": "0, 0, 0, 0",
+   "bgtype": "imagefile",
+   "imagefile": "Metallic\\tabItemTop.bmp",
+   "imagecount": "5",
+   "imagelayout": "vertical",
+   "fillcolorhint": "240 241 245",
+   "bordercolorhint": "240 241 245",
+   "accentcolorhint": "255 200 60"
+  },
+  "Tab.TopTabItemLeftEdge": {
+   "sizingmargins": "6, 6, 6, 6",
+   "contentmargins": "0, 0, 0, 0",
+   "bgtype": "imagefile",
+   "imagefile": "Metallic\\tabItemTopLeft.bmp",
+   "imagecount": "5",
+   "imagelayout": "vertical",
+   "fillcolorhint": "240 241 245",
+   "bordercolorhint": "240 241 245",
+   "accentcolorhint": "255 200 60"
+  },
+  "Tab.TopTabItemRightEdge": {
+   "sizingmargins": "6, 6, 6, 6",
+   "contentmargins": "0, 0, 0, 0",
+   "bgtype": "imagefile",
+   "imagefile": "Metallic\\tabItemTopRight.bmp",
+   "imagecount": "5",
+   "imagelayout": "vertical",
+   "fillcolorhint": "240 241 245",
+   "bordercolorhint": "240 241 245",
+   "accentcolorhint": "255 200 60"
+  },
+  "Tab.TopTabItemBothEdge": {
+   "sizingmargins": "6, 6, 6, 6",
+   "contentmargins": "0, 0, 0, 0",
+   "bgtype": "imagefile",
+   "imagefile": "Metallic\\tabItemTopBoth.bmp",
+   "imagecount": "5",
+   "imagelayout": "vertical",
+   "fillcolorhint": "240 241 245",
+   "bordercolorhint": "240 241 245",
+   "accentcolorhint": "255 200 60"
+  },
+  "Tab.Body": {
+   "bgtype": "imagefile",
+   "stockimagefile": "Metallic\\TabBackground.bmp",
+   "fillcolorhint": "247 247 249",
+   "imageselecttype": "Dpi",
+   "truesizescalingtype": "Dpi",
+   "truesizestretchmark": "50",
+   "imagefile1": "Metallic\\TabBackground.bmp",
+   "imagefile2": "Metallic\\TabBackground133.bmp",
+   "mindpi1": "96",
+   "mindpi2": "164"
+  },
+  "TrackBar": {
+   "bgtype": "borderFill",
+   "filltype": "Solid",
+   "fillcolor": "235 235 228",
+   "bordersize": "1",
+   "bordercolor": "235 235 228"
+  },
+  "TrackBar.Thumb": {
+   "bgtype": "imagefile",
+   "imagefile": "Metallic\\TrackbarHorizontal.bmp",
+   "imagecount": "5",
+   "imagelayout": "vertical",
+   "sizingmargins": "3, 4, 3, 4",
+   "sizingtype": "tile",
+   "fillcolorhint": "240 241 245",
+   "bordercolorhint": "240 241 245",
+   "accentcolorhint": "71 196 70"
+  },
+  "TrackBar.ThumbTop": {
+   "bgtype": "imagefile",
+   "imagecount": "5",
+   "imagelayout": "vertical",
+   "transparent": "true",
+   "sizingtype": "truesize",
+   "transparentcolor": "242 241 231",
+   "fillcolorhint": "240 241 245",
+   "bordercolorhint": "240 241 245",
+   "accentcolorhint": "71 196 70",
+   "imageselecttype": "Dpi",
+   "truesizescalingtype": "Dpi",
+   "truesizestretchmark": "50",
+   "uniformsizing": "true",
+   "imagefile1": "Metallic\\TrackBarUp13.bmp",
+   "imagefile2": "Metallic\\TrackBarUp16.bmp",
+   "imagefile3": "Metallic\\TrackBarUp25.bmp",
+   "mindpi1": "96",
+   "mindpi2": "118",
+   "mindpi3": "185"
+  },
+  "TrackBar.ThumbBottom": {
+   "bgtype": "imagefile",
+   "imagecount": "5",
+   "transparent": "true",
+   "sizingmargins": "3, 6, 6, 10",
+   "sizingtype": "truesize",
+   "transparentcolor": "242 241 231",
+   "imagelayout": "vertical",
+   "fillcolorhint": "240 241 245",
+   "bordercolorhint": "240 241 245",
+   "accentcolorhint": "71 196 70",
+   "imageselecttype": "Dpi",
+   "truesizescalingtype": "Dpi",
+   "truesizestretchmark": "50",
+   "uniformsizing": "true",
+   "imagefile1": "Metallic\\TrackBarDown13.bmp",
+   "imagefile2": "Metallic\\TrackBarDown16.bmp",
+   "imagefile3": "Metallic\\TrackBarDown25.bmp",
+   "mindpi1": "96",
+   "mindpi2": "118",
+   "mindpi3": "185"
+  },
+  "TrackBar.ThumbVert": {
+   "bgtype": "imagefile",
+   "imagefile": "Metallic\\TrackbarVertical.bmp",
+   "sizingmargins": "3, 4, 3, 4",
+   "sizingtype": "tile",
+   "imagecount": "5",
+   "imagelayout": "vertical",
+   "fillcolorhint": "240 241 245",
+   "bordercolorhint": "240 241 245",
+   "accentcolorhint": "71 196 70"
+  },
+  "TrackBar.ThumbLeft": {
+   "bgtype": "imagefile",
+   "sizingtype": "truesize",
+   "imagecount": "5",
+   "transparent": "true",
+   "transparentcolor": "242 241 231",
+   "imagelayout": "vertical",
+   "fillcolorhint": "240 241 245",
+   "bordercolorhint": "240 241 245",
+   "accentcolorhint": "71 196 70",
+   "imageselecttype": "Dpi",
+   "truesizescalingtype": "Dpi",
+   "truesizestretchmark": "50",
+   "uniformsizing": "true",
+   "imagefile1": "Metallic\\TrackBarLeft13.bmp",
+   "imagefile2": "Metallic\\TrackBarLeft16.bmp",
+   "imagefile3": "Metallic\\TrackBarLeft25.bmp",
+   "mindpi1": "96",
+   "mindpi2": "118",
+   "mindpi3": "185"
+  },
+  "TrackBar.ThumbRight": {
+   "bgtype": "imagefile",
+   "imagefile": "Metallic\\TrackbarRight13.bmp",
+   "sizingtype": "truesize",
+   "imagecount": "5",
+   "transparent": "true",
+   "transparentcolor": "242 241 231",
+   "imagelayout": "vertical",
+   "fillcolorhint": "240 241 245",
+   "bordercolorhint": "240 241 245",
+   "accentcolorhint": "71 196 70",
+   "imageselecttype": "Dpi",
+   "truesizescalingtype": "Dpi",
+   "truesizestretchmark": "50",
+   "uniformsizing": "true",
+   "imagefile1": "Metallic\\TrackBarRight13.bmp",
+   "imagefile2": "Metallic\\TrackBarRight16.bmp",
+   "imagefile3": "Metallic\\TrackBarRight25.bmp",
+   "mindpi1": "96",
+   "mindpi2": "118",
+   "mindpi3": "185"
+  },
+  "TrackBar.Track": {
+   "bgtype": "imagefile",
+   "imagefile": "Metallic\\sliderTrack.bmp",
+   "imagecount": "1",
+   "sizingtype": "stretch",
+   "sizingmargins": "2, 2, 2, 2",
+   "fillcolorhint": "240 241 245",
+   "bordercolorhint": "240 241 245"
+  },
+  "TrackBar.TrackVert": {
+   "bgtype": "imagefile",
+   "imagefile": "Metallic\\sliderTrack.bmp",
+   "imagecount": "1",
+   "sizingtype": "stretch",
+   "sizingmargins": "2, 2, 2, 2",
+   "fillcolorhint": "240 241 245",
+   "bordercolorhint": "119 119 92"
+  },
+  "TrackBar.Tics": {
+   "color": "161 161 146"
+  },
+  "TrackBar.TicsVert": {
+   "color": "161 161 146"
+  },
+  "Tooltip.Close": {
+   "bgtype": "ImageFile",
+   "imagefile": "Metallic\\BalloonClose.bmp",
+   "imagecount": "3",
+   "sizingtype": "truesize",
+   "imagelayout": "vertical"
+  },
+  "Window": {
+   "bgtype": "ImageFile",
+   "transparent": "true",
+   "textshadowoffset": "1,1",
+   "textshadowcolor": "199 194 209"
+  },
+  "Window.Caption": {
+   "imagefile": "Metallic\\Framecaption.bmp",
+   "sizingmargins": "28, 35, 9, 17",
+   "contentmargins": "1, 1, 1, 1",
+   "captionmargins": "4, 3, 0, 0",
+   "sizingtype": "stretch",
+   "imagelayout": "vertical",
+   "imagecount": "2",
+   "transparent": "True",
+   "fillcolorhint": "164 163 190"
+  },
+  "Window.Caption(active)": {
+   "textshadowtype": "Single"
+  },
+  "Window.CaptionSizingTemplate": {
+   "imagefile": "Metallic\\FrameCaptionSizing.bmp",
+   "sizingmargins": "28, 35, 9, 17",
+   "contentmargins": "18, 18, 26, 0",
+   "sizingtype": "tile",
+   "imagelayout": "vertical",
+   "imagecount": "2",
+   "transparent": "True",
+   "transparentcolor": "0 0 0"
+  },
+  "Window.SmallCaption": {
+   "imagefile": "Metallic\\SmallFrameCaption.bmp",
+   "sizingmargins": "24, 37, 3, 15",
+   "contentmargins": "1, 1, 1, 1",
+   "sizingtype": "tile",
+   "imagelayout": "vertical",
+   "imagecount": "2",
+   "fillcolorhint": "164 163 190"
+  },
+  "Window.SmallCaptionSizingTemplate": {
+   "imagefile": "Metallic\\SmallFrameCaptionSizing.bmp",
+   "sizingmargins": "24, 37, 9, 8",
+   "contentmargins": "14, 14, 16, 0",
+   "sizingtype": "tile",
+   "imagelayout": "vertical",
+   "imagecount": "2",
+   "transparent": "True",
+   "transparentcolor": "0 0 0"
+  },
+  "Window.MinCaption": {
+   "imagefile": "Metallic\\FrameCaptionMin.bmp",
+   "imagecount": "2",
+   "imagelayout": "vertical",
+   "sizingtype": "stretch",
+   "sizingmargins": "23, 26, 12, 8",
+   "contentmargins": "3, 3, 0, 3",
+   "captionmargins": "4, 3, 0, 0",
+   "fillcolorhint": "164 163 190"
+  },
+  "Window.MaxCaption": {
+   "imagefile": "Metallic\\FrameMaximized.bmp",
+   "sizingmargins": "28, 35, 9, 17",
+   "contentmargins": "1, 1, 1, 1",
+   "sizingtype": "Tile",
+   "imagelayout": "vertical",
+   "imagecount": "2",
+   "captionmargins": "10, 3, 4, 2",
+   "contentalignment": "left",
+   "fillcolorhint": "164 163 190"
+  },
+  "Window.MaxCaption(Active)": {
+   "textshadowtype": "Single"
+  },
+  "Window.FrameLeft": {
+   "imagefile": "Metallic\\frameLeft.bmp",
+   "sizingmargins": "1, 1, 0, 0",
+   "sizingtype": "stretch",
+   "imagelayout": "vertical",
+   "imagecount": "2",
+   "transparent": "FALSE",
+   "borderonly": "FALSE"
+  },
+  "Window.FrameRight": {
+   "imagefile": "Metallic\\frameRight.bmp",
+   "sizingmargins": "1, 1, 0, 0",
+   "sizingtype": "stretch",
+   "imagelayout": "vertical",
+   "imagecount": "2",
+   "transparent": "FALSE",
+   "borderonly": "FALSE"
+  },
+  "Window.FrameBottom": {
+   "imagefile": "Metallic\\frameBottom.bmp",
+   "sizingmargins": "5, 5, 1, 2",
+   "sizingtype": "stretch",
+   "imagelayout": "vertical",
+   "imagecount": "2",
+   "transparent": "FALSE",
+   "borderonly": "FALSE"
+  },
+  "Window.SmallFrameLeft": {
+   "imagefile": "Metallic\\frameLeft.bmp",
+   "sizingmargins": "1, 2, 0, 0",
+   "sizingtype": "stretch",
+   "imagelayout": "vertical",
+   "imagecount": "2",
+   "transparent": "FALSE",
+   "borderonly": "FALSE"
+  },
+  "Window.SmallFrameRight": {
+   "imagefile": "Metallic\\frameRight.bmp",
+   "sizingmargins": "1, 2, 0, 0",
+   "sizingtype": "stretch",
+   "imagelayout": "vertical",
+   "imagecount": "2",
+   "transparent": "FALSE",
+   "borderonly": "FALSE"
+  },
+  "Window.SmallFrameBottom": {
+   "imagefile": "Metallic\\frameBottom.bmp",
+   "sizingmargins": "5, 5, 1, 2",
+   "sizingtype": "stretch",
+   "imagelayout": "vertical",
+   "imagecount": "2",
+   "transparent": "FALSE",
+   "borderonly": "FALSE"
+  },
+  "Window.dialog": {
+   "bgtype": "BorderFill",
+   "fillcolor": "255 233 216",
+   "bordercolor": "255 233 216"
+  },
+  "Window.CloseButton": {
+   "bgtype": "ImageFile",
+   "sizingmargins": "5, 5, 5, 5",
+   "contentmargins": "2, 2, 2, 2",
+   "sizingtype": "Stretch",
+   "imagefile": "Metallic\\CloseButton.bmp",
+   "glyphtype": "ImageGlyph",
+   "glyphtransparent": "True",
+   "imagecount": "8",
+   "imagelayout": "Vertical",
+   "offsettype": "TopRight",
+   "offset": "-25, 5",
+   "fillcolorhint": "228 93 61",
+   "bordercolorhint": "255 255 255",
+   "imageselecttype": "size",
+   "uniformsizing": "true",
+   "imagefile1": "metallic\\CloseGlyph6.bmp",
+   "imagefile2": "metallic\\CloseGlyph9.bmp",
+   "imagefile3": "metallic\\CloseGlyph.bmp",
+   "imagefile4": "metallic\\CloseGlyph19.bmp",
+   "imagefile5": "metallic\\CloseGlyph23.bmp",
+   "mindpi1": "96",
+   "mindpi2": "126",
+   "mindpi3": "170"
+  },
+  "Window.MaxButton": {
+   "bgtype": "ImageFile",
+   "sizingmargins": "5, 5, 5, 5",
+   "contentmargins": "2, 2, 2, 2",
+   "sizingtype": "Stretch",
+   "imagefile": "Metallic\\CaptionButton.bmp",
+   "glyphtype": "ImageGlyph",
+   "glyphtransparent": "True",
+   "imagecount": "8",
+   "imagelayout": "Vertical",
+   "offsettype": "TopRight",
+   "offset": "-49, 5",
+   "fillcolorhint": "177 183 187",
+   "bordercolorhint": "255 255 255",
+   "imageselecttype": "size",
+   "uniformsizing": "true",
+   "imagefile1": "metallic\\MaximizeGlyph6.bmp",
+   "imagefile2": "metallic\\MaximizeGlyph9.bmp",
+   "imagefile3": "metallic\\MaximizeGlyph.bmp",
+   "imagefile4": "metallic\\MaximizeGlyph19.bmp",
+   "imagefile5": "metallic\\MaximizeGlyph23.bmp",
+   "mindpi1": "96",
+   "mindpi2": "126",
+   "mindpi3": "170"
+  },
+  "Window.RestoreButton": {
+   "bgtype": "ImageFile",
+   "sizingmargins": "5, 5, 5, 5",
+   "contentmargins": "2, 2, 2, 2",
+   "sizingtype": "Stretch",
+   "imagefile": "Metallic\\CaptionButton.bmp",
+   "glyphtype": "ImageGlyph",
+   "glyphtransparent": "True",
+   "imagecount": "8",
+   "imagelayout": "Vertical",
+   "offsettype": "TopRight",
+   "offset": "-49, 5",
+   "fillcolorhint": "177 183 187",
+   "bordercolorhint": "255 255 255",
+   "imageselecttype": "size",
+   "uniformsizing": "true",
+   "imagefile1": "metallic\\RestoreGlyph6.bmp",
+   "imagefile2": "metallic\\RestoreGlyph9.bmp",
+   "imagefile3": "metallic\\RestoreGlyph.bmp",
+   "imagefile4": "metallic\\RestoreGlyph19.bmp",
+   "imagefile5": "metallic\\RestoreGlyph23.bmp",
+   "mindpi1": "96",
+   "mindpi2": "126",
+   "mindpi3": "170"
+  },
+  "Window.MinButton": {
+   "bgtype": "ImageFile",
+   "sizingmargins": "5, 5, 5, 5",
+   "contentmargins": "2, 2, 2, 2",
+   "sizingtype": "Stretch",
+   "imagefile": "Metallic\\CaptionButton.bmp",
+   "glyphtype": "ImageGlyph",
+   "glyphtransparent": "True",
+   "imagecount": "8",
+   "imagelayout": "Vertical",
+   "offsettype": "TopRight",
+   "offset": "-73, 5",
+   "fillcolorhint": "177 183 187",
+   "bordercolorhint": "255 255 255",
+   "imageselecttype": "size",
+   "uniformsizing": "true",
+   "imagefile1": "metallic\\MinimizeGlyph6.bmp",
+   "imagefile2": "metallic\\MinimizeGlyph9.bmp",
+   "imagefile3": "metallic\\MinimizeGlyph.bmp",
+   "imagefile4": "metallic\\MinimizeGlyph19.bmp",
+   "imagefile5": "metallic\\MinimizeGlyph23.bmp",
+   "mindpi1": "96",
+   "mindpi2": "126",
+   "mindpi3": "170"
+  },
+  "Window.HelpButton": {
+   "bgtype": "ImageFile",
+   "sizingmargins": "5, 5, 5, 5",
+   "contentmargins": "2, 2, 2, 2",
+   "sizingtype": "Stretch",
+   "imagefile": "Metallic\\CaptionButton.bmp",
+   "glyphtype": "ImageGlyph",
+   "glyphtransparent": "True",
+   "imagecount": "8",
+   "imagelayout": "Vertical",
+   "offsettype": "TopRight",
+   "offset": "-73, 5",
+   "mirrorimage": "true",
+   "fillcolorhint": "177 183 187",
+   "bordercolorhint": "255 255 255",
+   "imageselecttype": "size",
+   "uniformsizing": "true",
+   "imagefile1": "metallic\\HelpGlyph6.bmp",
+   "imagefile2": "metallic\\HelpGlyph9.bmp",
+   "imagefile3": "metallic\\HelpGlyph.bmp",
+   "imagefile4": "metallic\\HelpGlyph19.bmp",
+   "imagefile5": "metallic\\HelpGlyph23.bmp",
+   "mindpi1": "96",
+   "mindpi2": "126",
+   "mindpi3": "170"
+  },
+  "Window.SysButton": {
+   "offsettype": "TopLeft",
+   "offset": "10, 3"
+  },
+  "Window.SmallCloseButton": {
+   "bgtype": "ImageFile",
+   "sizingmargins": "5, 5, 5, 5",
+   "contentmargins": "0, 0, 0, 0",
+   "sizingtype": "Stretch",
+   "imagefile": "Metallic\\SmallCloseButton.bmp",
+   "glyphtype": "ImageGlyph",
+   "glyphimagefile": "Metallic\\SmallCloseGlyph.bmp",
+   "glyphtransparent": "True",
+   "imagecount": "8",
+   "imagelayout": "Vertical",
+   "offsettype": "TopRight",
+   "offset": "-16, 3",
+   "fillcolorhint": "228 93 61",
+   "bordercolorhint": "255 255 255"
+  },
+  "Window.MDICloseButton": {
+   "bgtype": "ImageFile",
+   "sizingtype": "stretch",
+   "imagefile": "Metallic\\MDICaptionButton.bmp",
+   "imagecount": "4",
+   "imagelayout": "Vertical",
+   "sizingmargins": "4, 4, 4, 4",
+   "contentmargins": "0, 0, 0, 0",
+   "offsettype": "TopRight",
+   "offset": "-19, 1",
+   "glyphtype": "ImageGlyph",
+   "glyphimagefile": "Metallic\\MDIGlyphClose.bmp",
+   "glyphtransparent": "true",
+   "fillcolorhint": "240 241 245",
+   "bordercolorhint": "255 255 255"
+  },
+  "Window.MDIRestoreButton": {
+   "bgtype": "ImageFile",
+   "sizingtype": "stretch",
+   "imagefile": "Metallic\\MDICaptionButton.bmp",
+   "imagecount": "4",
+   "imagelayout": "Vertical",
+   "sizingmargins": "4, 4, 4, 4",
+   "contentmargins": "0, 0, 0, 0",
+   "offsettype": "TopRight",
+   "offset": "-37, 1",
+   "glyphtype": "ImageGlyph",
+   "glyphimagefile": "Metallic\\MDIGlyphRestore.bmp",
+   "glyphtransparent": "true",
+   "fillcolorhint": "240 241 245",
+   "bordercolorhint": "255 255 255"
+  },
+  "Window.MDIMinButton": {
+   "bgtype": "ImageFile",
+   "sizingtype": "stretch",
+   "imagefile": "Metallic\\MDICaptionButton.bmp",
+   "imagecount": "4",
+   "imagelayout": "Vertical",
+   "sizingmargins": "4, 4, 4, 4",
+   "contentmargins": "0, 0, 0, 0",
+   "offsettype": "TopRight",
+   "offset": "-53, 1",
+   "glyphtype": "ImageGlyph",
+   "glyphimagefile": "Metallic\\MDIGlyphMinimize.bmp",
+   "glyphtransparent": "true",
+   "fillcolorhint": "240 241 245",
+   "bordercolorhint": "255 255 255"
+  },
+  "StartPanel": {
+   "bgtype": "none",
+   "defaultpanesize": "0, 0, 380, 440"
+  },
+  "StartPanel.UserPane": {
+   "userpicture": "True",
+   "imagelayout": "Horizontal",
+   "textcolor": "255 255 255",
+   "font": "Franklin Gothic Medium, 14",
+   "defaultpanesize": "0, 0, 380, 64",
+   "bgtype": "Imagefile",
+   "transparent": "True",
+   "imagefile": "Metallic\\StartUserPanel.bmp",
+   "imagecount": "1",
+   "sizingmargins": "59, 60, 62, 0",
+   "sizingtype": "Stretch",
+   "textshadowoffset": "2, 2",
+   "textshadowcolor": "31 34 38",
+   "textshadowtype": "continuous",
+   "fillcolorhint": "206 206 219"
+  },
+  "StartPanel.UserPicture": {
+   "bgtype": "ImageFile",
+   "imagefile": "Metallic\\UserTileBackground.bmp",
+   "imagecount": "1",
+   "sizingtype": "Stretch",
+   "sizingmargins": "6, 10, 6, 10",
+   "contentmargins": "8, 6, 8, 6",
+   "transparent": "true",
+   "fillcolorhint": "240 241 245"
+  },
+  "StartPanel.ProgList": {
+   "defaultpanesize": "0, 0, 190, 306",
+   "contentmargins": "6 4 9 5",
+   "textcolor": "55 55 56",
+   "hottracking": "48 112 208",
+   "captiontext": "128 128 128",
+   "bgtype": "ImageFile",
+   "sizingtype": "Stretch",
+   "sizingmargins": "2, 153, 3, 0",
+   "imagefile": "Metallic\\StartPanelMFUBackground.bmp",
+   "imagecount": "1",
+   "fillcolorhint": "240 241 245"
+  },
+  "StartPanel.ProgListSeparator": {
+   "bgtype": "ImageFile",
+   "sizingtype": "TrueSize",
+   "imagefile": "Metallic\\StartProgramsSeparator.bmp"
+  },
+  "StartPanel.MorePrograms": {
+   "defaultpanesize": "0, 0, 190, 30",
+   "textcolor": "55 55 56",
+   "hottracking": "48 112 208",
+   "font": "Tahoma, 8, Bold",
+   "bgtype": "ImageFile",
+   "sizingtype": "Stretch",
+   "sizingmargins": "3, 0, 0, 1",
+   "contentmargins": "8, 8, 0, 6",
+   "imagefile": "Metallic\\StartPanelMoreProgBackGround.BMP",
+   "imagecount": "1"
+  },
+  "StartPanel.MoreProgramsArrow": {
+   "bgtype": "ImageFile",
+   "sizingtype": "TrueSize",
+   "imagefile": "Metallic\\StartPanelMoreProgArrow.bmp",
+   "imagecount": "1",
+   "fillcolorhint": "108 207 108"
+  },
+  "StartPanel.MoreProgramsArrow(hot)": {
+   "bgtype": "ImageFile",
+   "sizingtype": "TrueSize",
+   "imagefile": "Metallic\\StartPanelMoreProgArrowHot.bmp",
+   "imagecount": "1",
+   "fillcolorhint": "107 239 107"
+  },
+  "StartPanel.PlacesList": {
+   "defaultpanesize": "0, 0, 190, 336",
+   "contentmargins": "4 6 9 5",
+   "textcolor": "10 36 106",
+   "hottracking": "80 150 248",
+   "bgtype": "imageFile",
+   "imagefile": "Metallic\\StartPanelPlacesBackground.bmp",
+   "imagecount": "1",
+   "sizingmargins": "172, 7, 3, 1",
+   "sizingtype": "Stretch",
+   "fillcolorhint": "240 241 245"
+  },
+  "StartPanel.PlacesListSeparator": {
+   "bgtype": "ImageFile",
+   "sizingtype": "TrueSize",
+   "imagefile": "Metallic\\StartPlacesSeparator.bmp"
+  },
+  "StartPanel.Logoff": {
+   "contentmargins": "0, 0, 4, 2",
+   "defaultpanesize": "0, 0, 380, 40",
+   "textcolor": "0 0 0",
+   "hottracking": "255 255 255",
+   "bgtype": "imagefile",
+   "imagefile": "Metallic\\StartPanelLogoffBackground.bmp",
+   "imagecount": "1",
+   "sizingmargins": "49, 47, 0, 38",
+   "sizingtype": "Stretch",
+   "fillcolorhint": "177 183 187"
+  },
+  "StartPanel.LogoffButtons": {
+   "bgtype": "ImageFile",
+   "transparent": "True",
+   "sizingtype": "TrueSize",
+   "imagefile": "Metallic\\StartPanelLogoffButtons.bmp",
+   "imagecount": "1"
+  },
+  "StartPanel.LogoffButtons(hot)": {
+   "bgtype": "ImageFile",
+   "transparent": "True",
+   "sizingtype": "TrueSize",
+   "imagefile": "Metallic\\StartPanelLogoffButtonsHot.bmp",
+   "imagecount": "1"
+  },
+  "Start::Button": {
+   "bgtype": "ImageFile",
+   "sizingtype": "Stretch",
+   "sizingmargins": "6, 52, 13, 14",
+   "contentmargins": "10, 24, 2, 4",
+   "imagefile": "Metallic\\StartButton.bmp",
+   "imagecount": "3",
+   "imagelayout": "Vertical",
+   "transparent": "True",
+   "font": "Franklin Gothic Medium, 14, italic",
+   "textcolor": "255 255 255",
+   "textshadowoffset": "2, 2",
+   "textshadowcolor": "69 76 16",
+   "textshadowtype": "continuous",
+   "fillcolorhint": "74 153 73"
+  },
+  "StartMenu::MenuBand": {
+   "textcolor": "0 0 0"
+  },
+  "StartMenu::MenuBand(Hot)": {
+   "textcolor": "255 255 255"
+  },
+  "StartMenu::MenuBand.NewAppButton": {
+   "bgtype": "ImageFile",
+   "sizingtype": "Stretch",
+   "sizingmargins": "6, 1, 0, 0",
+   "contentmargins": "10, 0, 3, 0",
+   "imagefile": "Metallic\\StartGroupNewAppButton.bmp",
+   "imagecount": "1",
+   "transparent": "True",
+   "transparentcolor": "255 0 0",
+   "fillcolorhint": "254 234 182"
+  },
+  "StartMenu::MenuBand.Seperator": {
+   "bgtype": "ImageFile",
+   "sizingtype": "Stretch",
+   "sizingmargins": "6, 1, 3, 0",
+   "contentmargins": "10, 0, 3, 0",
+   "imagefile": "Metallic\\StartGroupSeperator.bmp",
+   "imagecount": "1",
+   "transparent": "True",
+   "transparentcolor": "255 0 0",
+   "fillcolorhint": "211 211 200"
+  },
+  "StartMenu::Toolbar": {
+   "bgtype": "ImageFile",
+   "imagefile": "Metallic\\StartGroupBackground.bmp",
+   "sizingtype": "Stretch",
+   "sizingmargins": "6, 5, 3, 4",
+   "contentmargins": "0, 0, 0, 0",
+   "font": "Tahoma, 8",
+   "textcolor": "0 0 0",
+   "fillcolorhint": "255 255 255",
+   "accentcolorhint": "240 241 245"
+  },
+  "StartMenu::Toolbar(Hot)": {
+   "textcolor": "255 255 255"
+  },
+  "StartMenu::Toolbar.Button": {
+   "bgtype": "ImageFile",
+   "sizingtype": "Stretch",
+   "sizingmargins": "6, 1, 0, 0",
+   "contentmargins": "10, 0, 3, 0",
+   "imagefile": "Metallic\\StartGroupToolbarButton.bmp",
+   "imagecount": "3",
+   "imagelayout": "vertical",
+   "transparent": "True",
+   "transparentcolor": "255 0 0",
+   "fillcolorhint": "177 83 187"
+  },
+  "TaskBar::Toolbar": {
+   "bgtype": "None",
+   "font": "Tahoma, 8",
+   "textcolor": "0 0 0"
+  },
+  "TaskBar::Toolbar.Button": {
+   "bgtype": "ImageFile",
+   "sizingtype": "Stretch",
+   "sizingmargins": "4, 4, 16, 8",
+   "contentmargins": "0, 0, 4, 4",
+   "imagefile": "Metallic\\TaskBandButtonNoEdge.bmp",
+   "imagecount": "6",
+   "imagelayout": "vertical",
+   "transparent": "True",
+   "fillcolorhint": "177 183 187"
+  },
+  "TaskBar::Toolbar.DropdownButton": {
+   "bgtype": "ImageFile",
+   "sizingtype": "Stretch",
+   "sizingmargins": "4, 4, 16, 8",
+   "contentmargins": "2, 0, 4, 4",
+   "imagefile": "Metallic\\TaskBandButtonNoEdge.bmp",
+   "imagecount": "6",
+   "imagelayout": "vertical",
+   "transparent": "True",
+   "fillcolorhint": "177 183 187"
+  },
+  "TaskBarVert::Toolbar": {
+   "bgtype": "None",
+   "font": "Tahoma, 8",
+   "textcolor": "0 0 0"
+  },
+  "TaskBar::Toolbar(checked)": {
+   "textcolor": "255 255 255"
+  },
+  "TaskBar::Toolbar(pressed)": {
+   "textcolor": "255 255 255"
+  },
+  "TaskBar::Toolbar(hotchecked)": {
+   "textcolor": "255 255 255"
+  },
+  "TaskBarVert::Toolbar(checked)": {
+   "textcolor": "255 255 255"
+  },
+  "TaskBarVert::Toolbar(pressed)": {
+   "textcolor": "255 255 255"
+  },
+  "TaskBarVert::Toolbar(hotchecked)": {
+   "textcolor": "255 255 255"
+  },
+  "TaskBarVert::Toolbar.Button": {
+   "bgtype": "ImageFile",
+   "sizingtype": "Stretch",
+   "sizingmargins": "4, 4, 15, 3",
+   "contentmargins": "1, 1, 1, 1",
+   "imagefile": "Metallic\\TaskBandButtonNoEdgeVertical.bmp",
+   "imagecount": "6",
+   "imagelayout": "vertical",
+   "transparent": "True",
+   "fillcolorhint": "177 183 187"
+  },
+  "TaskBarVert::Toolbar.DropdownButton": {
+   "bgtype": "ImageFile",
+   "sizingtype": "Stretch",
+   "sizingmargins": "4, 4, 15, 3",
+   "contentmargins": "1, 1, 1, 1",
+   "imagefile": "Metallic\\TaskBandButtonNoEdgeVertical.bmp",
+   "imagecount": "6",
+   "imagelayout": "vertical",
+   "transparent": "True",
+   "fillcolorhint": "177 183 187"
+  },
+  "TaskBar::Rebar": {
+   "bgtype": "None",
+   "font": "Tahoma, 8",
+   "textcolor": "0 0 0"
+  },
+  "TaskBar::Rebar.Band": {
+   "bgtype": "None"
+  },
+  "TaskBar::Rebar.Gripper": {
+   "bgtype": "ImageFile",
+   "sizingtype": "Tile",
+   "sizingmargins": "0, 0, 6, 4",
+   "contentmargins": "2, 1, 0, 0",
+   "imagefile": "Metallic\\TaskbarGripper.bmp",
+   "imagecount": "1",
+   "transparent": "True",
+   "transparentcolor": "255 0 255",
+   "fillcolorhint": "119 119 92"
+  },
+  "TaskBar::Rebar.GripperVert": {
+   "bgtype": "ImageFile",
+   "sizingtype": "Tile",
+   "sizingmargins": "4, 6, 0, 0",
+   "contentmargins": "0, 0, 2, 1",
+   "imagefile": "Metallic\\TaskbarGripperVertical.bmp",
+   "imagecount": "1",
+   "transparent": "True",
+   "transparentcolor": "255 0 255",
+   "fillcolorhint": "119 119 92"
+  },
+  "TaskBar::Rebar.Chevron": {
+   "bgtype": "ImageFile",
+   "sizingtype": "Stretch",
+   "sizingmargins": "4, 4, 16, 8",
+   "contentmargins": "0, 0, 0, 10",
+   "imagefile": "Metallic\\TaskBandButtonNoEdge.bmp",
+   "imagecount": "6",
+   "imagelayout": "vertical",
+   "transparent": "True",
+   "glyphtype": "ImageGlyph",
+   "glyphimagefile": "Metallic\\TaskbarChevron.bmp",
+   "glyphtransparent": "true",
+   "valign": "Top",
+   "fillcolorhint": "255 255 255"
+  },
+  "TaskBar::Rebar.ChevronVert": {
+   "bgtype": "ImageFile",
+   "sizingtype": "Stretch",
+   "sizingmargins": "4, 4, 15, 3",
+   "contentmargins": "0, 0, 0, 0",
+   "imagefile": "Metallic\\TaskBandButtonNoEdgeVertical.bmp",
+   "imagecount": "6",
+   "imagelayout": "vertical",
+   "transparent": "True",
+   "glyphtype": "ImageGlyph",
+   "glyphimagefile": "Metallic\\TaskbarChevronVert.bmp",
+   "glyphtransparent": "true",
+   "fillcolorhint": "255 255 255",
+   "transparentcolor": "255 0 255"
+  },
+  "TaskBar.BackgroundBottom": {
+   "bgtype": "ImageFile",
+   "sizingtype": "Tile",
+   "sizingmargins": "0, 0, 17, 12",
+   "imagefile": "Metallic\\TaskbarBackground.bmp",
+   "imagecount": "1",
+   "fillcolorhint": "168 169 191"
+  },
+  "TaskBar.SizingBarBottom": {
+   "bgtype": "ImageFile",
+   "sizingtype": "Tile",
+   "imagefile": "Metallic\\TaskbarSizingBarBottom.bmp",
+   "imagecount": "1",
+   "fillcolorhint": "166 167 193"
+  },
+  "TaskBar.BackgroundLeft": {
+   "bgtype": "ImageFile",
+   "sizingtype": "Tile",
+   "sizingmargins": "17, 12, 0, 0",
+   "imagefile": "Metallic\\TaskbarBackgroundVertical.bmp",
+   "imagecount": "1",
+   "fillcolorhint": "177 183 187"
+  },
+  "TaskBar.SizingBarLeft": {
+   "bgtype": "ImageFile",
+   "sizingtype": "Tile",
+   "imagefile": "Metallic\\TaskbarSizingBarLeft.bmp",
+   "imagecount": "1",
+   "fillcolorhint": "166 167 193"
+  },
+  "TaskBar.BackgroundTop": {
+   "bgtype": "ImageFile",
+   "sizingtype": "Tile",
+   "sizingmargins": "0, 0, 17, 12",
+   "imagefile": "Metallic\\TaskbarBackground.bmp",
+   "imagecount": "1",
+   "fillcolorhint": "177 183 187"
+  },
+  "TaskBar.SizingBarTop": {
+   "bgtype": "ImageFile",
+   "sizingtype": "Tile",
+   "imagefile": "Metallic\\TaskbarSizingBarTop.bmp",
+   "imagecount": "1",
+   "fillcolorhint": "166 167 193"
+  },
+  "TaskBar.BackgroundRight": {
+   "bgtype": "ImageFile",
+   "sizingtype": "Tile",
+   "sizingmargins": "17, 12, 0, 0",
+   "imagefile": "Metallic\\TaskbarBackgroundVertical.bmp",
+   "imagecount": "1",
+   "fillcolorhint": "177 183 187"
+  },
+  "TaskBar.SizingBarRight": {
+   "bgtype": "ImageFile",
+   "sizingtype": "Stretch",
+   "imagefile": "Metallic\\TaskbarSizingBarRight.bmp",
+   "imagecount": "1",
+   "fillcolorhint": "166 167 193"
+  },
+  "TaskBand.FlashButton": {
+   "bgtype": "ImageFile",
+   "sizingtype": "Stretch",
+   "sizingmargins": "17, 6, 12, 12",
+   "contentmargins": "0, 0, 4, 4",
+   "imagefile": "Metallic\\TaskBandFlashButton.bmp",
+   "imagecount": "1",
+   "imagelayout": "vertical",
+   "transparent": "True",
+   "fillcolorhint": "218 219 229",
+   "accentcolorhint": "255 192 91",
+   "transparentcolor": "255 0 255"
+  },
+  "TaskBand.FlashButtonGroupMenu": {
+   "bgtype": "ImageFile",
+   "sizingtype": "Stretch",
+   "sizingmargins": "17, 5, 12, 7",
+   "contentmargins": "0, 0, 4, 4",
+   "imagefile": "Metallic\\TaskBandFlashButtonGroupMenu.bmp",
+   "imagecount": "1",
+   "transparent": "True",
+   "fillcolorhint": "218 219 229",
+   "accentcolorhint": "255 192 91",
+   "transparentcolor": "255 0 0"
+  },
+  "TaskBand.GroupCount": {
+   "font": "Tahoma, 8, Bold",
+   "textcolor": "255 116 66"
+  },
+  "TaskBand::Toolbar": {
+   "bgtype": "None",
+   "font": "Tahoma, 8",
+   "textcolor": "64 64 64"
+  },
+  "TaskBand::Toolbar(checked)": {
+   "textcolor": "255 255 255"
+  },
+  "TaskBand::Toolbar(pressed)": {
+   "textcolor": "255 255 255"
+  },
+  "TaskBand::Toolbar(hotchecked)": {
+   "textcolor": "255 255 255"
+  },
+  "TaskBand::Toolbar.Button": {
+   "bgtype": "ImageFile",
+   "sizingtype": "Stretch",
+   "sizingmargins": "17, 5, 15, 8",
+   "contentmargins": "0, 4, 4, 4",
+   "imagefile": "Metallic\\TaskBandButton.bmp",
+   "imagecount": "6",
+   "imagelayout": "vertical",
+   "transparent": "True",
+   "fillcolorhint": "218 219 229"
+  },
+  "TaskBand::Toolbar.DropdownButton": {
+   "bgtype": "ImageFile",
+   "sizingtype": "Stretch",
+   "sizingmargins": "17, 5, 15, 8",
+   "contentmargins": "0, 4, 4, 4",
+   "imagefile": "Metallic\\TaskBandButton.bmp",
+   "imagecount": "6",
+   "imagelayout": "vertical",
+   "transparent": "True",
+   "fillcolorhint": "218 219 229"
+  },
+  "TaskBandVert::Toolbar": {
+   "bgtype": "None",
+   "font": "Tahoma, 8",
+   "textcolor": "0 0 0"
+  },
+  "TaskBandVert::Toolbar(checked)": {
+   "textcolor": "255 255 255"
+  },
+  "TaskBandVert::Toolbar(pressed)": {
+   "textcolor": "255 255 255"
+  },
+  "TaskBandVert::Toolbar(hotchecked)": {
+   "textcolor": "255 255 255"
+  },
+  "TaskBandVert::Toolbar.Button": {
+   "bgtype": "ImageFile",
+   "sizingtype": "Stretch",
+   "sizingmargins": "16, 7, 12, 6",
+   "contentmargins": "0, 4, 4, 4",
+   "imagefile": "Metallic\\TaskBandButtonVertical.bmp",
+   "imagecount": "6",
+   "imagelayout": "vertical",
+   "transparent": "True",
+   "fillcolorhint": "218 219 229"
+  },
+  "TaskBandVert::Toolbar.DropdownButton": {
+   "bgtype": "ImageFile",
+   "sizingtype": "Stretch",
+   "sizingmargins": "16, 7, 12, 6",
+   "contentmargins": "0, 4, 4, 4",
+   "imagefile": "Metallic\\TaskBandButtonVertical.bmp",
+   "imagecount": "6",
+   "imagelayout": "vertical",
+   "transparent": "True",
+   "fillcolorhint": "218 219 229"
+  },
+  "TaskBand::ScrollBar.ArrowBtn": {
+   "bgtype": "ImageFile",
+   "sizingmargins": "5, 5, 5, 5",
+   "contentmargins": "0, 0, 0, 0",
+   "sizingtype": "Stretch",
+   "imagefile": "Metallic\\TaskbandScrollArrows.bmp",
+   "imagecount": "16",
+   "imagelayout": "Vertical",
+   "glyphtype": "ImageGlyph",
+   "glyphimagefile": "Metallic\\TaskBandScrollArrowGlyphs.bmp",
+   "glyphtransparent": "True",
+   "fillcolorhint": "119 119 92"
+  },
+  "TaskBand::Scrollbar.ThumbBtnHorz": {
+   "bgtype": "ImageFile",
+   "sizingmargins": "5, 5, 5, 5",
+   "contentmargins": "4, 4, 0, 0",
+   "imagefile": "Metallic\\TaskBandScrollThumbHorizontal.bmp",
+   "imagecount": "4",
+   "imagelayout": "Vertical",
+   "fillcolorhint": "119 119 92"
+  },
+  "TaskBand::Scrollbar.GripperHorz": {
+   "bgtype": "ImageFile",
+   "sizingtype": "TrueSize",
+   "imagefile": "Metallic\\TaskBandScrollThumbGripperHorizontal.BMP",
+   "imagelayout": "vertical",
+   "transparent": "True",
+   "imagecount": "4",
+   "fillcolorhint": "177 183 187"
+  },
+  "TaskBand::Scrollbar.ThumbBtnVert": {
+   "bgtype": "ImageFile",
+   "sizingmargins": "5, 5, 5, 5",
+   "contentmargins": "0, 0, 4, 4",
+   "imagefile": "Metallic\\TaskBandScrollThumbVertical.bmp",
+   "imagecount": "4",
+   "imagelayout": "vertical",
+   "transparent": "True",
+   "transparentcolor": "255 0 255"
+  },
+  "TaskBand::Scrollbar.GripperVert": {
+   "bgtype": "ImageFile",
+   "sizingtype": "TrueSize",
+   "imagefile": "Metallic\\TaskBandScrollThumbGripperVertical.BMP",
+   "imagecount": "4",
+   "transparent": "True",
+   "imagelayout": "Vertical",
+   "fillcolorhint": "177 183 187"
+  },
+  "TaskBand::Scrollbar.LowerTrackHorz": {
+   "bgtype": "imagefile",
+   "imagefile": "Metallic\\TaskBandScrollShaftHorizontal.bmp",
+   "sizingmargins": "0, 0, 1, 1",
+   "imagecount": "4",
+   "imagelayout": "Vertical",
+   "fillcolorhint": "177 183 187"
+  },
+  "TaskBand::Scrollbar.UpperTrackHorz": {
+   "bgtype": "imagefile",
+   "imagefile": "Metallic\\TaskBandScrollShaftHorizontal.bmp",
+   "sizingmargins": "0, 0, 1, 1",
+   "imagecount": "4",
+   "imagelayout": "Vertical",
+   "fillcolorhint": "240 241 245"
+  },
+  "TaskBand::Scrollbar.LowerTrackVert": {
+   "bgtype": "imagefile",
+   "imagefile": "Metallic\\TaskBandScrollShaftVertical.bmp",
+   "sizingmargins": "1, 1, 0, 0",
+   "imagecount": "4",
+   "imagelayout": "Vertical",
+   "fillcolorhint": "240 241 245"
+  },
+  "TaskBand::Scrollbar.UpperTrackVert": {
+   "bgtype": "imagefile",
+   "imagefile": "Metallic\\TaskBandScrollShaftVertical.bmp",
+   "sizingmargins": "1, 1, 0, 0",
+   "imagecount": "4",
+   "imagelayout": "Vertical",
+   "fillcolorhint": "240 241 245"
+  },
+  "TaskBandGroupMenu::Toolbar": {
+   "bgtype": "ImageFile",
+   "imagefile": "Metallic\\TaskBandBackground.bmp",
+   "sizingtype": "Tile",
+   "sizingmargins": "3, 3, 3, 3",
+   "contentmargins": "9, 0, 0, 0",
+   "font": "Tahoma, 8",
+   "textcolor": "0 0 0",
+   "fillcolorhint": "177 183 187",
+   "accentcolorhint": "255 199 60"
+  },
+  "TaskBandGroupMenu::Toolbar.Button": {
+   "bgtype": "ImageFile",
+   "sizingtype": "stretch",
+   "sizingmargins": "3, 3, 0, 0",
+   "contentmargins": "9, 0, 3, 3",
+   "imagefile": "Metallic\\TaskBandHover.bmp",
+   "imagecount": "3",
+   "imagelayout": "vertical",
+   "transparent": "True",
+   "transparentcolor": "255 0 0"
+  },
+  "TrayNotify::Toolbar": {
+   "bgtype": "None"
+  },
+  "TrayNotify::Toolbar.Button": {
+   "bgtype": "None"
+  },
+  "TrayNotifyHoriz::TrayNotify.Background": {
+   "bgtype": "ImageFile",
+   "sizingtype": "Stretch",
+   "sizingmargins": "34, 10, 12, 12",
+   "contentmargins": "19, 7, 0, 0",
+   "imagefile": "Metallic\\TaskbarTray.bmp",
+   "imagecount": "1",
+   "transparent": "True",
+   "transparentcolor": "255 0 0",
+   "fillcolorhint": "203 204 218"
+  },
+  "TrayNotifyHoriz::Button": {
+   "bgtype": "ImageFile",
+   "sizingtype": "TrueSize",
+   "imagefile": "Metallic\\TrayChevronHorizontal.bmp",
+   "imagecount": "3",
+   "imagelayout": "vertical",
+   "transparent": "True",
+   "transparentcolor": "255 0 255"
+  },
+  "TrayNotifyHorizOpen::Button": {
+   "bgtype": "ImageFile",
+   "sizingtype": "TrueSize",
+   "imagefile": "Metallic\\TrayChevronHorizontalOpen.bmp",
+   "imagecount": "3",
+   "imagelayout": "vertical",
+   "transparent": "True",
+   "transparentcolor": "255 0 255"
+  },
+  "TrayNotifyVert::TrayNotify.Background": {
+   "bgtype": "ImageFile",
+   "sizingtype": "Stretch",
+   "sizingmargins": "12, 12, 34, 10",
+   "contentmargins": "0, 0, 19, 7",
+   "imagefile": "Metallic\\TaskbarTrayVertical.bmp",
+   "imagecount": "1",
+   "transparent": "True",
+   "transparentcolor": "255 0 0",
+   "fillcolorhint": "203 204 218"
+  },
+  "TrayNotifyVert::Button": {
+   "bgtype": "ImageFile",
+   "sizingtype": "TrueSize",
+   "transparent": "True",
+   "imagefile": "Metallic\\TrayChevronHorizontal.bmp",
+   "imagecount": "3",
+   "imagelayout": "vertical",
+   "fillcolorhint": "203 204 218"
+  },
+  "TrayNotifyVertOpen::Button": {
+   "bgtype": "ImageFile",
+   "sizingtype": "TrueSize",
+   "transparent": "True",
+   "imagefile": "Metallic\\TrayChevronHorizontalOpen.bmp",
+   "imagecount": "3",
+   "imagelayout": "vertical",
+   "fillcolorhint": "203 204 218"
+  },
+  "TrayNotify::Clock": {
+   "font": "Tahoma, 8",
+   "textcolor": "0 0 0"
+  },
+  "Placesbar::Toolbar": {
+   "sizingmargins": "4, 4, 4, 4",
+   "contentmargins": "0, 0, 0, 0",
+   "imagefile": "Metallic\\PlaceBarBackground.bmp",
+   "bgtype": "imagefile",
+   "imagecount": "1",
+   "sizingtype": "tile",
+   "fillcolorhint": "204 241 245"
+  },
+  "Placesbar::Toolbar.Button": {
+   "sizingmargins": "4, 4, 4, 4",
+   "contentmargins": "0, 0, 4, 2",
+   "imagefile": "Metallic\\PlaceBarButtons.bmp",
+   "bgtype": "imagefile",
+   "imagelayout": "vertical",
+   "imagecount": "6",
+   "sizingtype": "stretch",
+   "transparent": "true",
+   "fillcolorhint": "255 255 255",
+   "bordercolorhint": "177 183 187"
+  },
+  "ExplorerBar": {
+   "bgtype": "BorderFill",
+   "filltype": "VertGradient",
+   "gradientratio1": "0",
+   "gradientcolor1": "224 224 223",
+   "gradientratio2": "255",
+   "gradientcolor2": "166 164 186",
+   "bordersize": "0",
+   "contentmargins": "12, 12, 12, 12"
+  },
+  "ExplorerBar.HeaderBackground": {
+   "bgtype": "ImageFile",
+   "sizingtype": "Stretch",
+   "imagefile": "Metallic\\ExplorerBarHeaderBackground.bmp",
+   "sizingmargins": "202, 1, 0, 0",
+   "font": "Tahoma, 8, Bold",
+   "textcolor": "255 255 255",
+   "contentmargins": "8, 8, 7, 7",
+   "fillcolorhint": "195 193 204"
+  },
+  "ExplorerBar.HeaderClose": {
+   "bgtype": "ImageFile",
+   "sizingtype": "TrueSize",
+   "imagelayout": "Vertical",
+   "imagefile": "Metallic\\ExplorerBarHeaderClose.bmp",
+   "imagecount": "3",
+   "transparent": "true",
+   "offsettype": "TopRight",
+   "offset": "-4, 4",
+   "fillcolorhint": "204 207 214",
+   "accentcolorhint": "114 138 152"
+  },
+  "ExplorerBar.HeaderPin": {
+   "bgtype": "ImageFile",
+   "sizingtype": "TrueSize",
+   "imagelayout": "Vertical",
+   "imagefile": "Metallic\\ExplorerBarHeaderPin.bmp",
+   "imagecount": "6",
+   "transparent": "true",
+   "offsettype": "TopRight",
+   "offset": "-6, 4",
+   "fillcolorhint": "178 182 201"
+  },
+  "ExplorerBar.IEBarMenu": {
+   "bgtype": "ImageFile",
+   "sizingtype": "TrueSize",
+   "imagelayout": "Vertical",
+   "imagefile": "Metallic\\IE_PersonalBarMenu.bmp",
+   "imagecount": "3",
+   "transparent": "true",
+   "offsettype": "TopRight",
+   "offset": "-3, 1",
+   "fillcolorhint": "192 190 202",
+   "bordercolorhint": "84 82 104"
+  },
+  "ExplorerBar.NormalGroupBackground": {
+   "bgtype": "ImageFile",
+   "fillcolor": "242 240 255",
+   "bordercolor": "255 255 255",
+   "sizingtype": "Stretch",
+   "imagefile": "Metallic\\NormalGroupBackground.bmp",
+   "sizingmargins": "3, 3, 3, 3",
+   "font": "Tahoma, 8",
+   "textcolor": "85 83 103",
+   "contentmargins": "8, 8, 7, 7"
+  },
+  "ExplorerBar.NormalGroupCollapse": {
+   "bgtype": "ImageFile",
+   "sizingtype": "TrueSize",
+   "imagelayout": "Vertical",
+   "imagefile": "Metallic\\NormalGroupCollapse.bmp",
+   "imagecount": "3",
+   "transparent": "true",
+   "offsettype": "TopRight",
+   "offset": "-3, 1",
+   "fillcolorhint": "219 217 239",
+   "bordercolorhint": "177 183 187"
+  },
+  "ExplorerBar.NormalGroupExpand": {
+   "bgtype": "ImageFile",
+   "sizingtype": "TrueSize",
+   "imagelayout": "Vertical",
+   "imagefile": "Metallic\\NormalGroupExpand.bmp",
+   "imagecount": "3",
+   "transparent": "true",
+   "offsettype": "TopRight",
+   "offset": "-3, 1",
+   "fillcolorhint": "219 217 239",
+   "bordercolorhint": "177 183 187"
+  },
+  "ExplorerBar.NormalGroupHead": {
+   "bgtype": "ImageFile",
+   "sizingtype": "Stretch",
+   "imagefile": "Metallic\\NormalGroupHead.bmp",
+   "sizingmargins": "3, 106, 3, 1",
+   "transparent": "true",
+   "font": "Tahoma, 8, Bold",
+   "textcolor": "62 60 82",
+   "contentmargins": "8, 8, 7, 7",
+   "fillcolorhint": "209 207 229"
+  },
+  "ExplorerBar.SpecialGroupBackground": {
+   "bgtype": "ImageFile",
+   "sizingtype": "Stretch",
+   "imagefile": "Metallic\\SpecialGroupBackground.bmp",
+   "sizingmargins": "3, 3, 3, 3",
+   "font": "Tahoma, 8",
+   "textcolor": "38 92 192",
+   "contentmargins": "8, 8, 7, 7",
+   "fillcolorhint": "242 240 255"
+  },
+  "ExplorerBar.SpecialGroupCollapse": {
+   "bgtype": "ImageFile",
+   "sizingtype": "TrueSize",
+   "imagelayout": "Vertical",
+   "imagefile": "Metallic\\SpecialGroupCollapse.bmp",
+   "imagecount": "3",
+   "transparent": "true",
+   "offsettype": "TopRight",
+   "offset": "-3, 1",
+   "fillcolorhint": "115 113 135",
+   "bordercolorhint": "84 82 104"
+  },
+  "ExplorerBar.SpecialGroupExpand": {
+   "bgtype": "ImageFile",
+   "sizingtype": "TrueSize",
+   "imagelayout": "Vertical",
+   "imagefile": "Metallic\\SpecialGroupExpand.bmp",
+   "imagecount": "3",
+   "transparent": "true",
+   "offsettype": "TopRight",
+   "offset": "-3, 1",
+   "fillcolorhint": "115 113 135",
+   "bordercolorhint": "84 82 104"
+  },
+  "ExplorerBar.SpecialGroupHead": {
+   "bgtype": "ImageFile",
+   "sizingtype": "Stretch",
+   "imagefile": "Metallic\\SpecialGroupHead.bmp",
+   "sizingmargins": "3, 106, 3, 1",
+   "transparent": "true",
+   "font": "Tahoma, 8, Bold",
+   "textcolor": "255 255 255",
+   "fillcolor": "62 60 82",
+   "contentmargins": "8, 8, 7, 7"
+  },
+  "ExplorerBar::Rebar": {
+   "bgtype": "imagefile",
+   "sizingtype": "stretch",
+   "imagefile": "Metallic\\ExplorerBarToolbarBackground.bmp",
+   "sizingmargins": "0, 0, 0, 4",
+   "font": "Tahoma, 8",
+   "textcolor": "127 124 115",
+   "fillcolorhint": "246 246 246"
+  },
+  "ExplorerBar::Rebar.Band": {
+   "bgtype": "none",
+   "contentmargins": "2, 0, 0, 0"
+  },
+  "ExplorerBar::Rebar.Gripper": {
+   "bgtype": "imagefile",
+   "sizingmargins": "0, 0, 6, 4",
+   "contentmargins": "3, 0, 0, 0",
+   "imagefile": "Metallic\\Gripper.bmp",
+   "sizingtype": "Tile",
+   "transparent": "true",
+   "transparentcolor": "255 0 0",
+   "fillcolorhint": "119 119 92"
+  },
+  "ExplorerBar::Rebar.GripperVert": {
+   "bgtype": "imagefile",
+   "sizingmargins": "9, 8, 0, 0",
+   "imagefile": "Metallic\\GripperVert.bmp",
+   "sizingtype": "Tile",
+   "transparent": "true",
+   "transparentcolor": "255 0 0",
+   "fillcolorhint": "119 119 92"
+  },
+  "ExplorerBar::Rebar.Chevron": {
+   "sizingmargins": "4, 4, 4, 4",
+   "contentmargins": "0, 0, 0, 0",
+   "imagefile": "Metallic\\ExplorerBarToolbarButtons.bmp",
+   "bgtype": "imagefile",
+   "imagelayout": "vertical",
+   "imagecount": "6",
+   "sizingtype": "Stretch",
+   "transparent": "true",
+   "glyphtype": "ImageGlyph",
+   "glyphimagefile": "Metallic\\Chevron.bmp",
+   "glyphtransparent": "true",
+   "valign": "Top",
+   "fillcolorhint": "0 0 0"
+  },
+  "ExplorerBar::Rebar.ChevronVert": {
+   "sizingmargins": "4, 4, 4, 4",
+   "contentmargins": "0, 0, 0, 0",
+   "imagefile": "Metallic\\ExplorerBarToolbarButtons.bmp",
+   "bgtype": "imagefile",
+   "imagelayout": "vertical",
+   "imagecount": "6",
+   "sizingtype": "Stretch",
+   "transparent": "true",
+   "glyphtype": "ImageGlyph",
+   "glyphimagefile": "Metallic\\Chevron.bmp",
+   "glyphtransparent": "true",
+   "valign": "Top",
+   "fillcolorhint": "0 0 0"
+  },
+  "ExplorerBar::Toolbar.Button": {
+   "sizingmargins": "4, 4, 4, 4",
+   "contentmargins": "0, 0, 0, 0",
+   "imagefile": "Metallic\\ExplorerBarToolbarButtons.bmp",
+   "bgtype": "imagefile",
+   "imagelayout": "vertical",
+   "imagecount": "6",
+   "sizingtype": "Stretch",
+   "transparent": "true",
+   "transparentcolor": "255 0 255",
+   "fillcolorhint": "240 241 245",
+   "bordercolorhint": "177 183 187"
+  },
+  "ExplorerBar::Toolbar.DropdownButton": {
+   "sizingmargins": "4, 4, 4, 4",
+   "contentmargins": "0, 0, 0, 0",
+   "imagefile": "Metallic\\ExplorerBarToolbarButtons.bmp",
+   "bgtype": "imagefile",
+   "imagelayout": "vertical",
+   "imagecount": "6",
+   "sizingtype": "Stretch",
+   "transparent": "true",
+   "transparentcolor": "255 0 255",
+   "fillcolorhint": "238 243 248",
+   "bordercolorhint": "177 183 187"
+  },
+  "ExplorerBar::Toolbar.SplitButton": {
+   "sizingmargins": "4, 2, 4, 4",
+   "imagefile": "Metallic\\ExplorerBarToolbarButtonsSplit.bmp",
+   "bgtype": "imagefile",
+   "imagelayout": "vertical",
+   "imagecount": "6",
+   "sizingtype": "Stretch",
+   "transparent": "true",
+   "transparentcolor": "255 0 255",
+   "fillcolorhint": "240 241 245",
+   "bordercolorhint": "177 183 187"
+  },
+  "ExplorerBar::Toolbar.SplitButtonDropdown": {
+   "sizingmargins": "2, 4, 4, 4",
+   "imagefile": "Metallic\\ExplorerBarToolbarButtonsSplitDropdown.bmp",
+   "bgtype": "imagefile",
+   "imagelayout": "vertical",
+   "imagecount": "6",
+   "sizingtype": "Stretch",
+   "transparent": "true",
+   "transparentcolor": "255 0 255",
+   "glyphtype": "ImageGlyph",
+   "glyphimagefile": "Metallic\\ToolbarButtonsSplitDropdownGlyph.bmp",
+   "glyphtransparent": "true",
+   "fillcolorhint": "240 241 245",
+   "bordercolorhint": "177 183 187"
+  },
+  "ExplorerBar::Toolbar.Separator": {
+   "sizingmargins": "5, 2, 2, 1",
+   "imagefile": "Metallic\\Separator.bmp",
+   "bgtype": "imagefile",
+   "imagecount": "1",
+   "sizingtype": "tile",
+   "transparent": "true",
+   "transparentcolor": "255 0 0",
+   "fillcolorhint": "119 119 92"
+  },
+  "ExplorerBar::Toolbar.SeparatorVert": {
+   "sizingmargins": "2, 1, 5, 1",
+   "imagefile": "Metallic\\SeparatorVert.bmp",
+   "bgtype": "imagefile",
+   "imagecount": "1",
+   "sizingtype": "tile",
+   "transparent": "true",
+   "transparentcolor": "255 0 0",
+   "fillcolorhint": "119 119 92"
+  }
+ },
+ "images": {
+  "button": {
+   "size": [
+    20,
+    115
+   ],
+   "states": 5,
+   "layout": "vertical",
+   "bpp": 32
+  },
+  "CheckBox13": {
+   "size": [
+    13,
+    156
+   ],
+   "states": 12,
+   "layout": "vertical",
+   "bpp": 32
+  },
+  "CheckBox16": {
+   "size": [
+    16,
+    192
+   ],
+   "states": 12,
+   "layout": "vertical",
+   "bpp": 32
+  },
+  "CheckBox25": {
+   "size": [
+    25,
+    300
+   ],
+   "states": 12,
+   "layout": "vertical",
+   "bpp": 32
+  },
+  "RadioButton13": {
+   "size": [
+    13,
+    104
+   ],
+   "states": 8,
+   "layout": "vertical",
+   "bpp": 32
+  },
+  "RadioButton16": {
+   "size": [
+    16,
+    128
+   ],
+   "states": 8,
+   "layout": "vertical",
+   "bpp": 32
+  },
+  "RadioButton25": {
+   "size": [
+    25,
+    200
+   ],
+   "states": 8,
+   "layout": "vertical",
+   "bpp": 32
+  },
+  "GroupBox": {
+   "size": [
+    22,
+    20
+   ],
+   "states": 1,
+   "layout": "vertical",
+   "bpp": 24
+  },
+  "ComboButton": {
+   "size": [
+    15,
+    64
+   ],
+   "states": 4,
+   "layout": "vertical",
+   "bpp": 24
+  },
+  "ComboButtonGlyph": {
+   "size": [
+    10,
+    28
+   ],
+   "states": 4,
+   "layout": "vertical",
+   "bpp": 24
+  },
+  "ScrollArrows": {
+   "size": [
+    17,
+    272
+   ],
+   "states": 16,
+   "layout": "vertical",
+   "bpp": 24
+  },
+  "ScrollArrowGlyphsSmall": {
+   "size": [
+    7,
+    112
+   ],
+   "states": 16,
+   "layout": "vertical",
+   "bpp": 8
+  },
+  "ScrollArrowGlyphs": {
+   "size": [
+    9,
+    144
+   ],
+   "states": 16,
+   "layout": "vertical",
+   "bpp": 8
+  },
+  "ScrollThumbHorizontal": {
+   "size": [
+    22,
+    60
+   ],
+   "states": 4,
+   "layout": "vertical",
+   "bpp": 24
+  },
+  "ScrollThumbGripperHorizontal": {
+   "size": [
+    8,
+    32
+   ],
+   "states": 4,
+   "layout": "vertical",
+   "bpp": 24
+  },
+  "ScrollThumbVertical": {
+   "size": [
+    15,
+    88
+   ],
+   "states": 4,
+   "layout": "vertical",
+   "bpp": 24
+  },
+  "ScrollThumbGripperVertical": {
+   "size": [
+    8,
+    32
+   ],
+   "states": 4,
+   "layout": "vertical",
+   "bpp": 24
+  },
+  "ScrollShaftHorizontal": {
+   "size": [
+    17,
+    68
+   ],
+   "states": 4,
+   "layout": "vertical",
+   "bpp": 24
+  },
+  "ScrollShaftVertical": {
+   "size": [
+    17,
+    68
+   ],
+   "states": 4,
+   "layout": "vertical",
+   "bpp": 24
+  },
+  "ResizeGrip2": {
+   "size": [
+    32,
+    17
+   ],
+   "states": 2,
+   "layout": "vertical",
+   "bpp": 4
+  },
+  "FieldOutlineBlue": {
+   "size": [
+    14,
+    7
+   ],
+   "states": 1,
+   "layout": "vertical",
+   "bpp": 8
+  },
+  "SpinButtonBackgroundUp": {
+   "size": [
+    15,
+    64
+   ],
+   "states": 4,
+   "layout": "vertical",
+   "bpp": 24
+  },
+  "SpinUpGlyph": {
+   "size": [
+    7,
+    24
+   ],
+   "states": 4,
+   "layout": "vertical",
+   "bpp": 24
+  },
+  "SpinButtonBackgroundDown": {
+   "size": [
+    15,
+    64
+   ],
+   "states": 4,
+   "layout": "vertical",
+   "bpp": 24
+  },
+  "SpinDownGlyph": {
+   "size": [
+    7,
+    24
+   ],
+   "states": 4,
+   "layout": "vertical",
+   "bpp": 24
+  },
+  "SpinButtonBackgroundRight": {
+   "size": [
+    15,
+    64
+   ],
+   "states": 4,
+   "layout": "vertical",
+   "bpp": 24
+  },
+  "SpinRightGlyph": {
+   "size": [
+    6,
+    28
+   ],
+   "states": 4,
+   "layout": "vertical",
+   "bpp": 24
+  },
+  "SpinButtonBackgroundLeft": {
+   "size": [
+    15,
+    64
+   ],
+   "states": 4,
+   "layout": "vertical",
+   "bpp": 24
+  },
+  "SpinLeftGlyph": {
+   "size": [
+    6,
+    28
+   ],
+   "states": 4,
+   "layout": "vertical",
+   "bpp": 24
+  },
+  "ToolbarBackground": {
+   "size": [
+    320,
+    13
+   ],
+   "states": 1,
+   "layout": "vertical",
+   "bpp": 24
+  },
+  "ToolbarGripper": {
+   "size": [
+    6,
+    10
+   ],
+   "states": 1,
+   "layout": "vertical",
+   "bpp": 24
+  },
+  "ToolbarGripperVert": {
+   "size": [
+    10,
+    6
+   ],
+   "states": 1,
+   "layout": "vertical",
+   "bpp": 24
+  },
+  "ToolbarButtons": {
+   "size": [
+    20,
+    138
+   ],
+   "states": 6,
+   "layout": "vertical",
+   "bpp": 24
+  },
+  "Chevron": {
+   "size": [
+    10,
+    54
+   ],
+   "states": 6,
+   "layout": "vertical",
+   "bpp": 8
+  },
+  "Separator": {
+   "size": [
+    8,
+    5
+   ],
+   "states": 1,
+   "layout": "vertical",
+   "bpp": 24
+  },
+  "SeparatorVert": {
+   "size": [
+    5,
+    8
+   ],
+   "states": 1,
+   "layout": "vertical",
+   "bpp": 24
+  },
+  "ToolbarButtonsSplit": {
+   "size": [
+    24,
+    138
+   ],
+   "states": 6,
+   "layout": "vertical",
+   "bpp": 24
+  },
+  "ToolbarButtonsSplitDropdown": {
+   "size": [
+    11,
+    138
+   ],
+   "states": 6,
+   "layout": "vertical",
+   "bpp": 24
+  },
+  "ToolbarButtonsSplitDropdownGlyph": {
+   "size": [
+    5,
+    18
+   ],
+   "states": 6,
+   "layout": "vertical",
+   "bpp": 8
+  },
+  "StatusBackground": {
+   "size": [
+    68,
+    15
+   ],
+   "states": 1,
+   "layout": "vertical",
+   "bpp": 24
+  },
+  "StatusPane": {
+   "size": [
+    3,
+    15
+   ],
+   "states": 1,
+   "layout": "vertical",
+   "bpp": 8
+  },
+  "treeExpandCollapse": {
+   "size": [
+    9,
+    18
+   ],
+   "states": 2,
+   "layout": "vertical",
+   "bpp": 8
+  },
+  "treeExpandCollapse10": {
+   "size": [
+    10,
+    20
+   ],
+   "states": 2,
+   "layout": "vertical",
+   "bpp": 8
+  },
+  "treeExpandCollapse15": {
+   "size": [
+    15,
+    30
+   ],
+   "states": 2,
+   "layout": "vertical",
+   "bpp": 8
+  },
+  "ListviewHeaderBackground": {
+   "size": [
+    1,
+    17
+   ],
+   "states": 1,
+   "layout": "vertical",
+   "bpp": 8
+  },
+  "ListViewHeader": {
+   "size": [
+    18,
+    90
+   ],
+   "states": 5,
+   "layout": "vertical",
+   "bpp": 24
+  },
+  "ProgressTrack": {
+   "size": [
+    9,
+    19
+   ],
+   "states": 1,
+   "layout": "vertical",
+   "bpp": 24
+  },
+  "ProgressChunk": {
+   "size": [
+    10,
+    12
+   ],
+   "states": 1,
+   "layout": "vertical",
+   "bpp": 24
+  },
+  "ProgressTrackVert": {
+   "size": [
+    19,
+    9
+   ],
+   "states": 1,
+   "layout": "vertical",
+   "bpp": 8
+  },
+  "ProgressChunkVert": {
+   "size": [
+    12,
+    10
+   ],
+   "states": 1,
+   "layout": "vertical",
+   "bpp": 24
+  },
+  "TabPaneEdge": {
+   "size": [
+    48,
+    48
+   ],
+   "states": 1,
+   "layout": "vertical",
+   "bpp": 24
+  },
+  "tabItem": {
+   "size": [
+    18,
+    90
+   ],
+   "states": 5,
+   "layout": "vertical",
+   "bpp": 24
+  },
+  "tabItemLeft": {
+   "size": [
+    18,
+    90
+   ],
+   "states": 5,
+   "layout": "vertical",
+   "bpp": 24
+  },
+  "tabItemRight": {
+   "size": [
+    18,
+    90
+   ],
+   "states": 5,
+   "layout": "vertical",
+   "bpp": 24
+  },
+  "tabItemBoth": {
+   "size": [
+    18,
+    90
+   ],
+   "states": 5,
+   "layout": "vertical",
+   "bpp": 24
+  },
+  "tabItemTop": {
+   "size": [
+    18,
+    90
+   ],
+   "states": 5,
+   "layout": "vertical",
+   "bpp": 24
+  },
+  "tabItemTopLeft": {
+   "size": [
+    18,
+    90
+   ],
+   "states": 5,
+   "layout": "vertical",
+   "bpp": 24
+  },
+  "tabItemTopRight": {
+   "size": [
+    18,
+    90
+   ],
+   "states": 5,
+   "layout": "vertical",
+   "bpp": 24
+  },
+  "tabItemTopBoth": {
+   "size": [
+    18,
+    90
+   ],
+   "states": 5,
+   "layout": "vertical",
+   "bpp": 24
+  },
+  "TabBackground": {
+   "size": [
+    10,
+    600
+   ],
+   "states": 1,
+   "layout": "vertical",
+   "bpp": 24
+  },
+  "TabBackground133": {
+   "size": [
+    10,
+    1024
+   ],
+   "states": 1,
+   "layout": "vertical",
+   "bpp": 24
+  },
+  "TrackbarHorizontal": {
+   "size": [
+    11,
+    105
+   ],
+   "states": 5,
+   "layout": "vertical",
+   "bpp": 24
+  },
+  "TrackBarUp13": {
+   "size": [
+    11,
+    105
+   ],
+   "states": 5,
+   "layout": "vertical",
+   "bpp": 24
+  },
+  "TrackBarUp16": {
+   "size": [
+    13,
+    130
+   ],
+   "states": 5,
+   "layout": "vertical",
+   "bpp": 24
+  },
+  "TrackBarUp25": {
+   "size": [
+    21,
+    220
+   ],
+   "states": 5,
+   "layout": "vertical",
+   "bpp": 24
+  },
+  "TrackBarDown13": {
+   "size": [
+    11,
+    105
+   ],
+   "states": 5,
+   "layout": "vertical",
+   "bpp": 24
+  },
+  "TrackBarDown16": {
+   "size": [
+    13,
+    130
+   ],
+   "states": 5,
+   "layout": "vertical",
+   "bpp": 24
+  },
+  "TrackBarDown25": {
+   "size": [
+    21,
+    220
+   ],
+   "states": 5,
+   "layout": "vertical",
+   "bpp": 24
+  },
+  "TrackbarVertical": {
+   "size": [
+    21,
+    55
+   ],
+   "states": 5,
+   "layout": "vertical",
+   "bpp": 24
+  },
+  "TrackBarLeft13": {
+   "size": [
+    21,
+    55
+   ],
+   "states": 5,
+   "layout": "vertical",
+   "bpp": 24
+  },
+  "TrackBarLeft16": {
+   "size": [
+    26,
+    65
+   ],
+   "states": 5,
+   "layout": "vertical",
+   "bpp": 24
+  },
+  "TrackBarLeft25": {
+   "size": [
+    44,
+    105
+   ],
+   "states": 5,
+   "layout": "vertical",
+   "bpp": 24
+  },
+  "TrackbarRight13": {
+   "size": [
+    21,
+    55
+   ],
+   "states": 5,
+   "layout": "vertical",
+   "bpp": 24
+  },
+  "TrackBarRight13": {
+   "size": [
+    21,
+    55
+   ],
+   "states": 5,
+   "layout": "vertical",
+   "bpp": 24
+  },
+  "TrackBarRight16": {
+   "size": [
+    26,
+    65
+   ],
+   "states": 5,
+   "layout": "vertical",
+   "bpp": 24
+  },
+  "TrackBarRight25": {
+   "size": [
+    44,
+    105
+   ],
+   "states": 5,
+   "layout": "vertical",
+   "bpp": 24
+  },
+  "sliderTrack": {
+   "size": [
+    5,
+    5
+   ],
+   "states": 1,
+   "layout": "vertical",
+   "bpp": 32
+  },
+  "BalloonClose": {
+   "size": [
+    18,
+    54
+   ],
+   "states": 3,
+   "layout": "vertical",
+   "bpp": 8
+  },
+  "Framecaption": {
+   "size": [
+    66,
+    58
+   ],
+   "states": 2,
+   "layout": "vertical",
+   "bpp": 24
+  },
+  "FrameCaptionSizing": {
+   "size": [
+    66,
+    58
+   ],
+   "states": 2,
+   "layout": "vertical",
+   "bpp": 1
+  },
+  "SmallFrameCaption": {
+   "size": [
+    66,
+    38
+   ],
+   "states": 2,
+   "layout": "vertical",
+   "bpp": 24
+  },
+  "SmallFrameCaptionSizing": {
+   "size": [
+    66,
+    38
+   ],
+   "states": 2,
+   "layout": "vertical",
+   "bpp": 1
+  },
+  "FrameCaptionMin": {
+   "size": [
+    66,
+    58
+   ],
+   "states": 2,
+   "layout": "vertical",
+   "bpp": 24
+  },
+  "FrameMaximized": {
+   "size": [
+    66,
+    52
+   ],
+   "states": 2,
+   "layout": "vertical",
+   "bpp": 24
+  },
+  "frameLeft": {
+   "size": [
+    5,
+    62
+   ],
+   "states": 2,
+   "layout": "vertical",
+   "bpp": 24
+  },
+  "frameRight": {
+   "size": [
+    5,
+    62
+   ],
+   "states": 2,
+   "layout": "vertical",
+   "bpp": 24
+  },
+  "frameBottom": {
+   "size": [
+    49,
+    10
+   ],
+   "states": 2,
+   "layout": "vertical",
+   "bpp": 24
+  },
+  "CloseButton": {
+   "size": [
+    21,
+    168
+   ],
+   "states": 8,
+   "layout": "vertical",
+   "bpp": 24
+  },
+  "CloseGlyph6": {
+   "size": [
+    6,
+    48
+   ],
+   "states": 8,
+   "layout": "vertical",
+   "bpp": 24
+  },
+  "CloseGlyph9": {
+   "size": [
+    9,
+    72
+   ],
+   "states": 8,
+   "layout": "vertical",
+   "bpp": 24
+  },
+  "CloseGlyph": {
+   "size": [
+    13,
+    104
+   ],
+   "states": 8,
+   "layout": "vertical",
+   "bpp": 24
+  },
+  "CloseGlyph19": {
+   "size": [
+    19,
+    152
+   ],
+   "states": 8,
+   "layout": "vertical",
+   "bpp": 24
+  },
+  "CloseGlyph23": {
+   "size": [
+    23,
+    184
+   ],
+   "states": 8,
+   "layout": "vertical",
+   "bpp": 24
+  },
+  "CaptionButton": {
+   "size": [
+    21,
+    168
+   ],
+   "states": 8,
+   "layout": "vertical",
+   "bpp": 24
+  },
+  "MaximizeGlyph6": {
+   "size": [
+    6,
+    48
+   ],
+   "states": 8,
+   "layout": "vertical",
+   "bpp": 24
+  },
+  "MaximizeGlyph9": {
+   "size": [
+    9,
+    72
+   ],
+   "states": 8,
+   "layout": "vertical",
+   "bpp": 24
+  },
+  "MaximizeGlyph": {
+   "size": [
+    13,
+    104
+   ],
+   "states": 8,
+   "layout": "vertical",
+   "bpp": 24
+  },
+  "MaximizeGlyph19": {
+   "size": [
+    19,
+    152
+   ],
+   "states": 8,
+   "layout": "vertical",
+   "bpp": 24
+  },
+  "MaximizeGlyph23": {
+   "size": [
+    23,
+    184
+   ],
+   "states": 8,
+   "layout": "vertical",
+   "bpp": 24
+  },
+  "RestoreGlyph6": {
+   "size": [
+    6,
+    48
+   ],
+   "states": 8,
+   "layout": "vertical",
+   "bpp": 24
+  },
+  "RestoreGlyph9": {
+   "size": [
+    9,
+    72
+   ],
+   "states": 8,
+   "layout": "vertical",
+   "bpp": 24
+  },
+  "RestoreGlyph": {
+   "size": [
+    13,
+    104
+   ],
+   "states": 8,
+   "layout": "vertical",
+   "bpp": 24
+  },
+  "RestoreGlyph19": {
+   "size": [
+    19,
+    152
+   ],
+   "states": 8,
+   "layout": "vertical",
+   "bpp": 24
+  },
+  "RestoreGlyph23": {
+   "size": [
+    23,
+    184
+   ],
+   "states": 8,
+   "layout": "vertical",
+   "bpp": 24
+  },
+  "MinimizeGlyph6": {
+   "size": [
+    6,
+    48
+   ],
+   "states": 8,
+   "layout": "vertical",
+   "bpp": 24
+  },
+  "MinimizeGlyph9": {
+   "size": [
+    9,
+    72
+   ],
+   "states": 8,
+   "layout": "vertical",
+   "bpp": 24
+  },
+  "MinimizeGlyph": {
+   "size": [
+    13,
+    104
+   ],
+   "states": 8,
+   "layout": "vertical",
+   "bpp": 24
+  },
+  "MinimizeGlyph19": {
+   "size": [
+    19,
+    152
+   ],
+   "states": 8,
+   "layout": "vertical",
+   "bpp": 24
+  },
+  "MinimizeGlyph23": {
+   "size": [
+    23,
+    184
+   ],
+   "states": 8,
+   "layout": "vertical",
+   "bpp": 24
+  },
+  "HelpGlyph6": {
+   "size": [
+    6,
+    48
+   ],
+   "states": 8,
+   "layout": "vertical",
+   "bpp": 24
+  },
+  "HelpGlyph9": {
+   "size": [
+    9,
+    72
+   ],
+   "states": 8,
+   "layout": "vertical",
+   "bpp": 24
+  },
+  "HelpGlyph": {
+   "size": [
+    13,
+    104
+   ],
+   "states": 8,
+   "layout": "vertical",
+   "bpp": 24
+  },
+  "HelpGlyph19": {
+   "size": [
+    19,
+    152
+   ],
+   "states": 8,
+   "layout": "vertical",
+   "bpp": 32
+  },
+  "HelpGlyph23": {
+   "size": [
+    23,
+    184
+   ],
+   "states": 8,
+   "layout": "vertical",
+   "bpp": 32
+  },
+  "SmallCloseButton": {
+   "size": [
+    13,
+    104
+   ],
+   "states": 8,
+   "layout": "vertical",
+   "bpp": 24
+  },
+  "SmallCloseGlyph": {
+   "size": [
+    7,
+    56
+   ],
+   "states": 8,
+   "layout": "vertical",
+   "bpp": 24
+  },
+  "MDICaptionButton": {
+   "size": [
+    13,
+    52
+   ],
+   "states": 4,
+   "layout": "vertical",
+   "bpp": 24
+  },
+  "MDIGlyphClose": {
+   "size": [
+    10,
+    40
+   ],
+   "states": 4,
+   "layout": "vertical",
+   "bpp": 24
+  },
+  "MDIGlyphRestore": {
+   "size": [
+    10,
+    40
+   ],
+   "states": 4,
+   "layout": "vertical",
+   "bpp": 24
+  },
+  "MDIGlyphMinimize": {
+   "size": [
+    10,
+    40
+   ],
+   "states": 4,
+   "layout": "vertical",
+   "bpp": 24
+  },
+  "StartUserPanel": {
+   "size": [
+    211,
+    63
+   ],
+   "states": 1,
+   "layout": "horizontal",
+   "bpp": 24
+  },
+  "UserTileBackground": {
+   "size": [
+    55,
+    55
+   ],
+   "states": 1,
+   "layout": "vertical",
+   "bpp": 32
+  },
+  "StartPanelMFUBackground": {
+   "size": [
+    224,
+    192
+   ],
+   "states": 1,
+   "layout": "vertical",
+   "bpp": 24
+  },
+  "StartProgramsSeparator": {
+   "size": [
+    172,
+    2
+   ],
+   "states": 1,
+   "layout": "vertical",
+   "bpp": 32
+  },
+  "StartPanelMoreProgBackGround": {
+   "size": [
+    224,
+    28
+   ],
+   "states": 1,
+   "layout": "vertical",
+   "bpp": 24
+  },
+  "StartPanelMoreProgArrow": {
+   "size": [
+    16,
+    24
+   ],
+   "states": 1,
+   "layout": "vertical",
+   "bpp": 32
+  },
+  "StartPanelMoreProgArrowHot": {
+   "size": [
+    16,
+    24
+   ],
+   "states": 1,
+   "layout": "vertical",
+   "bpp": 32
+  },
+  "StartPanelPlacesBackground": {
+   "size": [
+    224,
+    6
+   ],
+   "states": 1,
+   "layout": "vertical",
+   "bpp": 24
+  },
+  "StartPlacesSeparator": {
+   "size": [
+    134,
+    2
+   ],
+   "states": 1,
+   "layout": "vertical",
+   "bpp": 24
+  },
+  "StartPanelLogoffBackground": {
+   "size": [
+    215,
+    39
+   ],
+   "states": 1,
+   "layout": "vertical",
+   "bpp": 24
+  },
+  "StartPanelLogoffButtons": {
+   "size": [
+    72,
+    24
+   ],
+   "states": 1,
+   "layout": "vertical",
+   "bpp": 32
+  },
+  "StartPanelLogoffButtonsHot": {
+   "size": [
+    72,
+    24
+   ],
+   "states": 1,
+   "layout": "vertical",
+   "bpp": 32
+  },
+  "StartButton": {
+   "size": [
+    99,
+    99
+   ],
+   "states": 3,
+   "layout": "vertical",
+   "bpp": 24
+  },
+  "StartGroupNewAppButton": {
+   "size": [
+    9,
+    2
+   ],
+   "states": 1,
+   "layout": "vertical",
+   "bpp": 24
+  },
+  "StartGroupSeperator": {
+   "size": [
+    185,
+    9
+   ],
+   "states": 1,
+   "layout": "vertical",
+   "bpp": 32
+  },
+  "StartGroupBackground": {
+   "size": [
+    184,
+    22
+   ],
+   "states": 1,
+   "layout": "vertical",
+   "bpp": 24
+  },
+  "StartGroupToolbarButton": {
+   "size": [
+    8,
+    6
+   ],
+   "states": 3,
+   "layout": "vertical",
+   "bpp": 24
+  },
+  "TaskBandButtonNoEdge": {
+   "size": [
+    13,
+    168
+   ],
+   "states": 6,
+   "layout": "vertical",
+   "bpp": 24
+  },
+  "TaskBandButtonNoEdgeVertical": {
+   "size": [
+    21,
+    138
+   ],
+   "states": 6,
+   "layout": "vertical",
+   "bpp": 24
+  },
+  "TaskbarGripper": {
+   "size": [
+    6,
+    16
+   ],
+   "states": 1,
+   "layout": "vertical",
+   "bpp": 24
+  },
+  "TaskbarGripperVertical": {
+   "size": [
+    16,
+    6
+   ],
+   "states": 1,
+   "layout": "vertical",
+   "bpp": 24
+  },
+  "TaskbarChevron": {
+   "size": [
+    8,
+    72
+   ],
+   "states": 6,
+   "layout": "vertical",
+   "bpp": 24
+  },
+  "TaskbarChevronVert": {
+   "size": [
+    5,
+    48
+   ],
+   "states": 6,
+   "layout": "vertical",
+   "bpp": 24
+  },
+  "TaskbarBackground": {
+   "size": [
+    50,
+    30
+   ],
+   "states": 1,
+   "layout": "vertical",
+   "bpp": 24
+  },
+  "TaskbarSizingBarBottom": {
+   "size": [
+    15,
+    4
+   ],
+   "states": 1,
+   "layout": "vertical",
+   "bpp": 24
+  },
+  "TaskbarBackgroundVertical": {
+   "size": [
+    30,
+    41
+   ],
+   "states": 1,
+   "layout": "vertical",
+   "bpp": 24
+  },
+  "TaskbarSizingBarLeft": {
+   "size": [
+    4,
+    15
+   ],
+   "states": 1,
+   "layout": "vertical",
+   "bpp": 24
+  },
+  "TaskbarSizingBarTop": {
+   "size": [
+    15,
+    4
+   ],
+   "states": 1,
+   "layout": "vertical",
+   "bpp": 24
+  },
+  "TaskbarSizingBarRight": {
+   "size": [
+    4,
+    15
+   ],
+   "states": 1,
+   "layout": "vertical",
+   "bpp": 24
+  },
+  "TaskBandFlashButton": {
+   "size": [
+    28,
+    28
+   ],
+   "states": 1,
+   "layout": "vertical",
+   "bpp": 24
+  },
+  "TaskBandFlashButtonGroupMenu": {
+   "size": [
+    27,
+    23
+   ],
+   "states": 1,
+   "layout": "vertical",
+   "bpp": 24
+  },
+  "TaskBandButton": {
+   "size": [
+    27,
+    168
+   ],
+   "states": 6,
+   "layout": "vertical",
+   "bpp": 24
+  },
+  "TaskBandButtonVertical": {
+   "size": [
+    28,
+    144
+   ],
+   "states": 6,
+   "layout": "vertical",
+   "bpp": 24
+  },
+  "TaskbandScrollArrows": {
+   "size": [
+    17,
+    272
+   ],
+   "states": 16,
+   "layout": "vertical",
+   "bpp": 24
+  },
+  "TaskBandScrollArrowGlyphs": {
+   "size": [
+    10,
+    160
+   ],
+   "states": 16,
+   "layout": "vertical",
+   "bpp": 24
+  },
+  "TaskBandScrollThumbHorizontal": {
+   "size": [
+    22,
+    60
+   ],
+   "states": 4,
+   "layout": "vertical",
+   "bpp": 24
+  },
+  "TaskBandScrollThumbGripperHorizontal": {
+   "size": [
+    8,
+    32
+   ],
+   "states": 4,
+   "layout": "vertical",
+   "bpp": 24
+  },
+  "TaskBandScrollThumbVertical": {
+   "size": [
+    15,
+    88
+   ],
+   "states": 4,
+   "layout": "vertical",
+   "bpp": 24
+  },
+  "TaskBandScrollThumbGripperVertical": {
+   "size": [
+    8,
+    32
+   ],
+   "states": 4,
+   "layout": "vertical",
+   "bpp": 24
+  },
+  "TaskBandScrollShaftHorizontal": {
+   "size": [
+    17,
+    68
+   ],
+   "states": 4,
+   "layout": "vertical",
+   "bpp": 24
+  },
+  "TaskBandScrollShaftVertical": {
+   "size": [
+    17,
+    68
+   ],
+   "states": 4,
+   "layout": "vertical",
+   "bpp": 24
+  },
+  "TaskBandBackground": {
+   "size": [
+    28,
+    10
+   ],
+   "states": 1,
+   "layout": "vertical",
+   "bpp": 24
+  },
+  "TaskBandHover": {
+   "size": [
+    30,
+    69
+   ],
+   "states": 3,
+   "layout": "vertical",
+   "bpp": 24
+  },
+  "TaskbarTray": {
+   "size": [
+    110,
+    28
+   ],
+   "states": 1,
+   "layout": "vertical",
+   "bpp": 24
+  },
+  "TrayChevronHorizontal": {
+   "size": [
+    19,
+    60
+   ],
+   "states": 3,
+   "layout": "vertical",
+   "bpp": 24
+  },
+  "TrayChevronHorizontalOpen": {
+   "size": [
+    19,
+    60
+   ],
+   "states": 3,
+   "layout": "vertical",
+   "bpp": 24
+  },
+  "TaskbarTrayVertical": {
+   "size": [
+    28,
+    110
+   ],
+   "states": 1,
+   "layout": "vertical",
+   "bpp": 24
+  },
+  "PlaceBarBackground": {
+   "size": [
+    17,
+    17
+   ],
+   "states": 1,
+   "layout": "vertical",
+   "bpp": 24
+  },
+  "PlaceBarButtons": {
+   "size": [
+    24,
+    150
+   ],
+   "states": 6,
+   "layout": "vertical",
+   "bpp": 24
+  },
+  "ExplorerBarHeaderBackground": {
+   "size": [
+    208,
+    25
+   ],
+   "states": 1,
+   "layout": "vertical",
+   "bpp": 24
+  },
+  "ExplorerBarHeaderClose": {
+   "size": [
+    16,
+    48
+   ],
+   "states": 3,
+   "layout": "vertical",
+   "bpp": 24
+  },
+  "ExplorerBarHeaderPin": {
+   "size": [
+    16,
+    96
+   ],
+   "states": 6,
+   "layout": "vertical",
+   "bpp": 24
+  },
+  "IE_PersonalBarMenu": {
+   "size": [
+    19,
+    57
+   ],
+   "states": 3,
+   "layout": "vertical",
+   "bpp": 8
+  },
+  "NormalGroupBackground": {
+   "size": [
+    111,
+    10
+   ],
+   "states": 1,
+   "layout": "vertical",
+   "bpp": 24
+  },
+  "NormalGroupCollapse": {
+   "size": [
+    19,
+    57
+   ],
+   "states": 3,
+   "layout": "vertical",
+   "bpp": 24
+  },
+  "NormalGroupExpand": {
+   "size": [
+    19,
+    57
+   ],
+   "states": 3,
+   "layout": "vertical",
+   "bpp": 24
+  },
+  "NormalGroupHead": {
+   "size": [
+    111,
+    21
+   ],
+   "states": 1,
+   "layout": "vertical",
+   "bpp": 8
+  },
+  "SpecialGroupBackground": {
+   "size": [
+    111,
+    10
+   ],
+   "states": 1,
+   "layout": "vertical",
+   "bpp": 24
+  },
+  "SpecialGroupCollapse": {
+   "size": [
+    19,
+    57
+   ],
+   "states": 3,
+   "layout": "vertical",
+   "bpp": 24
+  },
+  "SpecialGroupExpand": {
+   "size": [
+    19,
+    57
+   ],
+   "states": 3,
+   "layout": "vertical",
+   "bpp": 24
+  },
+  "SpecialGroupHead": {
+   "size": [
+    111,
+    21
+   ],
+   "states": 1,
+   "layout": "vertical",
+   "bpp": 8
+  },
+  "ExplorerBarToolbarBackground": {
+   "size": [
+    20,
+    25
+   ],
+   "states": 1,
+   "layout": "vertical",
+   "bpp": 8
+  },
+  "Gripper": {
+   "size": [
+    6,
+    16
+   ],
+   "states": 1,
+   "layout": "vertical",
+   "bpp": 24
+  },
+  "GripperVert": {
+   "size": [
+    23,
+    7
+   ],
+   "states": 1,
+   "layout": "vertical",
+   "bpp": 24
+  },
+  "ExplorerBarToolbarButtons": {
+   "size": [
+    20,
+    138
+   ],
+   "states": 6,
+   "layout": "vertical",
+   "bpp": 24
+  },
+  "ExplorerBarToolbarButtonsSplit": {
+   "size": [
+    24,
+    138
+   ],
+   "states": 6,
+   "layout": "vertical",
+   "bpp": 24
+  },
+  "ExplorerBarToolbarButtonsSplitDropdown": {
+   "size": [
+    11,
+    138
+   ],
+   "states": 6,
+   "layout": "vertical",
+   "bpp": 24
+  }
+ }
+}

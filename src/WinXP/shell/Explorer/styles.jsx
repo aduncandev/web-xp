@@ -25,11 +25,27 @@ export const ItemIcon = ({ node, src, className }) => (
   </span>
 );
 
-/** Luna task-pane roll-up chevron: white circle, blue double chevron */
+/**
+ * The task pane's roll-up chevron. Luna draws the style's own bitmap
+ * (NormalGroupCollapse/Expand: normal, hot, pressed); the drawn circle is
+ * what Classic shows.
+ */
 export function TaskChevron({ collapsed }) {
   return (
+    <span
+      className={`com__task-chevron com__task-chevron--${
+        collapsed ? 'expand' : 'collapse'
+      }`}
+    >
+      <TaskChevronDrawn collapsed={collapsed} />
+    </span>
+  );
+}
+
+function TaskChevronDrawn({ collapsed }) {
+  return (
     <svg
-      className="com__task-chevron"
+      className="com__task-chevron__drawn"
       width="18"
       height="18"
       viewBox="0 0 18 18"
@@ -65,18 +81,20 @@ export function TaskChevron({ collapsed }) {
 export const taskPaneCss = css`
   .com__content__left {
     width: 200px;
-    background: linear-gradient(to bottom, #7ba2e7 0%, #6375d6 100%);
+    background: linear-gradient(
+      to bottom,
+      var(--xp-explorer-bar-top, #7ba2e7) 0%,
+      var(--xp-explorer-bar-bottom, #6375d6) 100%
+    );
+    image-rendering: pixelated;
     overflow-y: auto;
     padding: 12px 10px;
     flex-shrink: 0;
   }
 
   .com__content__left__card {
-    border-top-left-radius: 4px;
-    border-top-right-radius: 4px;
     width: 100%;
     overflow: hidden;
-    border: 1px solid rgba(255, 255, 255, 0.45);
   }
   .com__content__left__card:not(:last-child) {
     margin-bottom: 12px;
@@ -88,26 +106,58 @@ export const taskPaneCss = css`
     padding-left: 10px;
     padding-right: 4px;
     cursor: pointer;
-    background: linear-gradient(to right, #ffffff 0%, #c6d3f7 100%);
+    /* the style's group head: rounded top corners, a soft gradient */
+    border: 0 solid transparent;
+    border-image: var(--xp-p-explorerbar-normalgrouphead-1, none);
+    background: var(--xp-group-head-bg, none);
   }
   .com__content__left__card__header:hover {
     & .com__content__left__card__header__text {
-      color: #428eff;
+      color: var(--xp-group-head-hot, #428eff);
     }
   }
   .com__content__left__card__header__text {
     font-weight: 700;
     font-size: 11px;
-    color: #215dc6;
+    color: var(--xp-group-head-text, #215dc6);
     flex: 1;
   }
   .com__task-chevron {
     flex-shrink: 0;
     cursor: pointer;
+    width: 19px;
+    height: 19px;
+    background-repeat: no-repeat;
+    background-position: center;
+  }
+  .com__task-chevron--collapse {
+    background-image: var(--xp-i-explorerbar-normalgroupcollapse-1, none);
+  }
+  .com__task-chevron--collapse:hover {
+    background-image: var(--xp-i-explorerbar-normalgroupcollapse-2, none);
+  }
+  .com__task-chevron--collapse:active {
+    background-image: var(--xp-i-explorerbar-normalgroupcollapse-3, none);
+  }
+  .com__task-chevron--expand {
+    background-image: var(--xp-i-explorerbar-normalgroupexpand-1, none);
+  }
+  .com__task-chevron--expand:hover {
+    background-image: var(--xp-i-explorerbar-normalgroupexpand-2, none);
+  }
+  .com__task-chevron--expand:active {
+    background-image: var(--xp-i-explorerbar-normalgroupexpand-3, none);
+  }
+  /* the drawn chevron is for styles without a bitmap */
+  .com__task-chevron__drawn {
+    display: var(--xp-drawn-chevron, none);
   }
   .com__content__left__card__content {
     padding: 8px 10px 10px;
-    background: #d6dff7;
+    border: 0 solid transparent;
+    border-image: var(--xp-p-explorerbar-normalgroupbackground-1, none);
+    background: var(--xp-group-bg, none);
+    color: var(--xp-group-text, #215dc6);
   }
   .com__content__left__card__row {
     display: flex;
@@ -172,8 +222,10 @@ export const Div = styled.div`
     align-items: center;
     line-height: 100%;
     height: 24px;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.7);
+    border: 0 solid transparent;
+    border-image: var(--xp-p-rebar-1, none);
     flex-shrink: 0;
+    image-rendering: pixelated;
   }
   .com__options {
     height: 23px;
@@ -194,29 +246,31 @@ export const Div = styled.div`
     align-items: center;
     font-size: 11px;
     padding: 1px 3px 0;
-    border-bottom: 1px solid #d8d2bd;
+    border: 0 solid transparent;
+    border-image: var(--xp-p-rebar-1, none);
     flex-shrink: 0;
+    image-rendering: pixelated;
   }
+  /* toolbar buttons: the style's six states */
   .com__function_bar__button {
     display: flex;
     height: 32px;
     align-items: center;
     padding: 0 2px;
-    border: 1px solid transparent;
-    border-radius: 3px;
+    border: 0 solid transparent;
+    border-image: var(--xp-p-toolbar-button-1, none);
     &:hover {
-      border: 1px solid #b8c7e8;
-      background-color: #dfe7f5;
+      border-image: var(--xp-p-toolbar-button-2, none);
     }
     &:hover:active {
-      border: 1px solid #98b1de;
-      background-color: #c1d2ee;
+      border-image: var(--xp-p-toolbar-button-3, none);
     }
   }
   .com__function_bar__button--active {
-    border: 1px solid #aca899 !important;
-    background-color: #e3dfd2;
-    box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.15);
+    border-image: var(--xp-p-toolbar-button-5, none) !important;
+  }
+  .com__function_bar__button--active:hover {
+    border-image: var(--xp-p-toolbar-button-6, none) !important;
   }
   .com__function_bar__button--disable {
     filter: grayscale(1);
@@ -313,7 +367,7 @@ export const Div = styled.div`
     left: -1px;
     right: -1px;
     background: #fff;
-    border: 1px solid #7f9db9;
+    border: 1px solid var(--xp-select-border, #7f9db9);
     box-shadow: 2px 2px 3px rgba(0, 0, 0, 0.3);
     z-index: 10;
   }
@@ -328,7 +382,7 @@ export const Div = styled.div`
       margin-right: 4px;
     }
     &:hover {
-      background: #316ac5;
+      background: var(--xp-highlight, #316ac5);
       color: #fff;
     }
   }
@@ -430,7 +484,7 @@ export const Div = styled.div`
   }
   .com__rubberband {
     background: rgba(49, 106, 197, 0.3);
-    border: 1px solid #316ac5;
+    border: 1px solid var(--xp-highlight, #316ac5);
     z-index: 50;
     pointer-events: none;
   }
@@ -518,8 +572,8 @@ export const Div = styled.div`
       cursor: default;
     }
     &.selected {
-      background-color: #316ac5;
-      border: 1px solid #316ac5;
+      background-color: var(--xp-highlight, #316ac5);
+      border: 1px solid var(--xp-highlight, #316ac5);
       .com__view-tile__name,
       .com__view-tile__type {
         color: white;
@@ -568,8 +622,8 @@ export const Div = styled.div`
       cursor: default;
     }
     &.selected {
-      background-color: #316ac5;
-      border: 1px solid #316ac5;
+      background-color: var(--xp-highlight, #316ac5);
+      border: 1px solid var(--xp-highlight, #316ac5);
       color: white;
     }
   }
@@ -607,8 +661,8 @@ export const Div = styled.div`
       cursor: default;
     }
     &.selected {
-      background-color: #316ac5;
-      border: 1px solid #316ac5;
+      background-color: var(--xp-highlight, #316ac5);
+      border: 1px solid var(--xp-highlight, #316ac5);
       color: white;
     }
   }
@@ -656,7 +710,7 @@ export const Div = styled.div`
       cursor: default;
     }
     &.selected {
-      background-color: #316ac5;
+      background-color: var(--xp-highlight, #316ac5);
       color: white;
     }
   }
@@ -676,15 +730,9 @@ export const Div = styled.div`
        columns can stop short without leaving a bite out of the bar, and
        costs no extra column. */
     background-color: #fff;
-    background-image: linear-gradient(
-      to bottom,
-      #fff 0,
-      #f7f7f1 12px,
-      #ebeadb 17px,
-      #d8d8d8 17px
-    );
-    background-size: 100% 18px;
-    background-repeat: no-repeat;
+    background-image: var(--xp-i-header-headeritem-1, none);
+    background-size: auto 18px;
+    background-repeat: repeat-x;
   }
   .com__table {
     /* The width is set inline to the sum of the columns. It has to be a
@@ -700,16 +748,19 @@ export const Div = styled.div`
     text-align: left;
     font-weight: normal;
     padding: 2px 6px;
-    border-bottom: 1px solid #d8d8d8;
-    border-right: 1px solid #d8d8d8;
-    background: linear-gradient(to bottom, #fff 0%, #f7f7f1 70%, #ebeadb 100%);
+    border: 0 solid transparent;
+    border-image: var(--xp-p-header-headeritem-1, none);
+    image-rendering: pixelated;
     position: sticky;
     top: 0;
     z-index: 1;
     white-space: nowrap;
     cursor: default;
     &:hover {
-      background: #fdfaf1;
+      border-image: var(--xp-p-header-headeritem-2, none);
+    }
+    &:active {
+      border-image: var(--xp-p-header-headeritem-3, none);
     }
   }
   .com__th--size {
@@ -740,7 +791,7 @@ export const Div = styled.div`
       background-color: rgba(49, 106, 197, 0.08);
     }
     &.selected {
-      background-color: #316ac5;
+      background-color: var(--xp-highlight, #316ac5);
       color: #fff;
     }
   }
@@ -773,7 +824,7 @@ export const Div = styled.div`
     font-size: 11px;
     line-height: 13px;
     font-family: Tahoma, 'Noto Sans', sans-serif;
-    border: 1px solid #316ac5;
+    border: 1px solid var(--xp-highlight, #316ac5);
     padding: 1px 3px;
     outline: none;
     min-width: 100%;
@@ -819,17 +870,19 @@ export const Div = styled.div`
     display: flex;
     align-items: stretch;
     font-size: 11px;
-    border-top: 1px solid #d8d2bd;
-    background: linear-gradient(to right, #edede5 0%, #ede8cd 100%);
+    border: 0 solid transparent;
+    border-image: var(--xp-p-status-1, none);
+    background: var(--xp-face, #ece9d8);
     flex-shrink: 0;
     color: #000;
+    image-rendering: pixelated;
   }
   .com__status_bar__section {
     display: flex;
     align-items: center;
     padding: 0 8px;
-    border-right: 1px solid rgba(0, 0, 0, 0.15);
-    box-shadow: 1px 0 0 rgba(255, 255, 255, 0.7);
+    border: 0 solid transparent;
+    border-image: var(--xp-p-status-pane-1, none);
   }
   .com__status_bar__main {
     flex: 1;
@@ -844,5 +897,3 @@ export const Div = styled.div`
     }
   }
 `;
-
-

@@ -58,7 +58,7 @@ export const Body = styled.div`
   .fd-places {
     width: 88px;
     background: #dcdcd4;
-    border: 1px solid #7f9db9;
+    border: 1px solid var(--xp-select-border, #7f9db9);
     border-right: none;
     display: flex;
     flex-direction: column;
@@ -101,7 +101,7 @@ export const Body = styled.div`
   .fd-list {
     flex: 1;
     background: #fff;
-    border: 1px solid #7f9db9;
+    border: 1px solid var(--xp-select-border, #7f9db9);
     overflow: auto;
     display: flex;
     flex-direction: column;
@@ -131,7 +131,7 @@ export const Body = styled.div`
       background: rgba(49, 106, 197, 0.1);
     }
     &.selected {
-      background: #316ac5;
+      background: var(--xp-highlight, #316ac5);
       color: #fff;
     }
   }
@@ -156,7 +156,7 @@ export const Body = styled.div`
     flex: 1;
     box-sizing: border-box;
     height: 21px;
-    border: 1px solid #7f9db9;
+    border: 1px solid var(--xp-select-border, #7f9db9);
     padding: 0 4px;
     font-family: Tahoma, 'Noto Sans', sans-serif;
     font-size: 11px;

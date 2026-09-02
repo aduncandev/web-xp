@@ -1,5 +1,6 @@
 import { useRef, useState } from 'react';
 import { CELL_W, ICON_HIT_H, DRAG_THRESHOLD } from './helpers';
+import { toLogicalX, toLogicalY } from '../screen';
 
 /**
  * Dragging desktop icons, XP style: the originals hold their cells while
@@ -23,8 +24,8 @@ export function useIconDrag({
   const cancelledRef = useRef(false);
 
   const startDrag = (primaryId, paths, collapse, rename, e) => {
-    const startX = e.clientX;
-    const startY = e.clientY;
+    const startX = toLogicalX(e.clientX);
+    const startY = toLogicalY(e.clientY);
     // The icon under the cursor is the anchor: it claims its target cell first
     const ordered = [primaryId, ...paths.filter(p => p !== primaryId)];
     let moved = false;
@@ -45,8 +46,10 @@ export function useIconDrag({
         onCancel();
         return;
       }
-      curDx = ev.clientX - startX;
-      curDy = ev.clientY - startY;
+      const lx = toLogicalX(ev.clientX);
+      const ly = toLogicalY(ev.clientY);
+      curDx = lx - startX;
+      curDy = ly - startY;
       if (!moved) {
         if (
           Math.abs(curDx) < DRAG_THRESHOLD &&
@@ -57,10 +60,10 @@ export function useIconDrag({
       }
       const hit = targets.find(
         t =>
-          ev.clientX >= t.p.x &&
-          ev.clientX <= t.p.x + CELL_W &&
-          ev.clientY >= t.p.y &&
-          ev.clientY <= t.p.y + ICON_HIT_H,
+          lx >= t.p.x &&
+          lx <= t.p.x + CELL_W &&
+          ly >= t.p.y &&
+          ly <= t.p.y + ICON_HIT_H,
       );
       const nextTarget = hit ? hit.id : null;
       if (nextTarget !== curTarget) {

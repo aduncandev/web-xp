@@ -2,6 +2,12 @@
   height: 100%;
 }
 
+/* the screen is smaller than the window: black around the stage */
+html[data-xp-letterbox='1'],
+html[data-xp-letterbox='1'] body {
+  background: #000;
+}
+
 /*
  * Luna check boxes and radio buttons, applied globally so portalled dialogs
  * get them too. The four sprites are genuine 13x13 crops from real XP
@@ -29,24 +35,62 @@ input[type='radio'] {
   flex-shrink: 0;
 }
 
+/* Luna's own 13px states: unchecked and checked, each normal, hot, pressed, disabled */
 input[type='checkbox'] {
-  background-image: url('./assets/xp/checkbox.png');
+  background-image: var(--xp-i-button-checkbox-1, url('./assets/xp/checkbox.png'));
+}
+input[type='checkbox']:hover:not(:disabled) {
+  background-image: var(--xp-i-button-checkbox-2, url('./assets/xp/checkbox.png'));
+}
+input[type='checkbox']:active:not(:disabled) {
+  background-image: var(--xp-i-button-checkbox-3, url('./assets/xp/checkbox.png'));
+}
+input[type='checkbox']:disabled {
+  background-image: var(--xp-i-button-checkbox-4, url('./assets/xp/checkbox.png'));
 }
 input[type='checkbox']:checked {
-  background-image: url('./assets/xp/checkbox-checked.png');
+  background-image: var(--xp-i-button-checkbox-5, url('./assets/xp/checkbox-checked.png'));
+}
+input[type='checkbox']:checked:hover:not(:disabled) {
+  background-image: var(--xp-i-button-checkbox-6, url('./assets/xp/checkbox-checked.png'));
+}
+input[type='checkbox']:checked:active:not(:disabled) {
+  background-image: var(--xp-i-button-checkbox-7, url('./assets/xp/checkbox-checked.png'));
+}
+input[type='checkbox']:checked:disabled {
+  background-image: var(--xp-i-button-checkbox-8, url('./assets/xp/checkbox-checked.png'));
 }
 input[type='radio'] {
-  background-image: url('./assets/xp/radio.png');
+  background-image: var(--xp-i-button-radiobutton-1, url('./assets/xp/radio.png'));
+}
+input[type='radio']:hover:not(:disabled) {
+  background-image: var(--xp-i-button-radiobutton-2, url('./assets/xp/radio.png'));
+}
+input[type='radio']:active:not(:disabled) {
+  background-image: var(--xp-i-button-radiobutton-3, url('./assets/xp/radio.png'));
+}
+input[type='radio']:disabled {
+  background-image: var(--xp-i-button-radiobutton-4, url('./assets/xp/radio.png'));
 }
 input[type='radio']:checked {
-  background-image: url('./assets/xp/radio-checked.png');
+  background-image: var(--xp-i-button-radiobutton-5, url('./assets/xp/radio-checked.png'));
+}
+input[type='radio']:checked:hover:not(:disabled) {
+  background-image: var(--xp-i-button-radiobutton-6, url('./assets/xp/radio-checked.png'));
+}
+input[type='radio']:checked:active:not(:disabled) {
+  background-image: var(--xp-i-button-radiobutton-7, url('./assets/xp/radio-checked.png'));
+}
+input[type='radio']:checked:disabled {
+  background-image: var(--xp-i-button-radiobutton-8, url('./assets/xp/radio-checked.png'));
 }
 
 /* XP greys the whole control out; the label beside it is dimmed by its own
    rule wherever a dialog marks a row disabled. */
+/* the style has its own disabled faces; the filter was for the cropped ones */
 input[type='checkbox']:disabled,
 input[type='radio']:disabled {
-  filter: grayscale(1) contrast(0.45) brightness(1.35);
+  filter: none;
 }
 
 @font-face {
@@ -55,4 +99,33 @@ input[type='radio']:disabled {
   font-weight: normal;
   font-style: normal;
   font-display: block;
+}
+
+/* Appearance > Effects. Menus and tooltips fade by default; "Scroll effect"
+   slides them in; off leaves them static. Shadows under menus can go, and
+   keyboard cues stay hidden until asked for. */
+html[data-xp-menu-fade='none'] .xp-menu,
+html[data-xp-menu-fade='none'] .xp-submenu {
+  animation: none !important;
+}
+html[data-xp-menu-fade='scroll'] .xp-menu,
+html[data-xp-menu-fade='scroll'] .xp-submenu {
+  animation: xp-menu-scroll 120ms ease-out !important;
+}
+@keyframes xp-menu-scroll {
+  from {
+    clip-path: inset(0 0 100% 0);
+  }
+  to {
+    clip-path: inset(0);
+  }
+}
+html[data-xp-menu-shadow='0'] .xp-menu,
+html[data-xp-menu-shadow='0'] .xp-submenu {
+  box-shadow: none !important;
+}
+html:not([data-xp-underlines='1']) .xp-startmenu u,
+html:not([data-xp-underlines='1']) .xp-menu u,
+html:not([data-xp-underlines='1']) .xp-submenu u {
+  text-decoration: none;
 }

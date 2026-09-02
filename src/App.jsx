@@ -21,6 +21,13 @@ import {
   setLoggedOnUsers,
   subscribeUsers,
 } from './context/users';
+import {
+  enterScreen,
+  leaveScreen,
+  stageMounted,
+  STAGE_ID,
+  PORTAL_ID,
+} from './WinXP/screen';
 
 // The machine's power/session flow, matched to real XP:
 //   boot ─ black splash (BootScreen)
@@ -442,6 +449,16 @@ function AppLogic() {
     }
   };
 
+  // The desktop draws at the chosen resolution; the other screens at the
+  // browser's own size
+  useEffect(() => {
+    if (screen === SCREEN.DESKTOP) enterScreen();
+    else leaveScreen();
+  }, [screen]);
+  useEffect(() => {
+    stageMounted();
+  }, []);
+
   // The desktop is visible under the logon surface while it fades away.
   const desktopVisible =
     screen === SCREEN.DESKTOP || (screen === SCREEN.LOGON && exiting);
@@ -449,26 +466,42 @@ function AppLogic() {
   return (
     <div>
       <Black />
-      {screen !== SCREEN.BSOD &&
-        sessions.map(name => (
-          <div
-            key={name}
-            style={{
-              display: desktopVisible && activeUser === name ? 'block' : 'none',
-              position: 'relative',
-            }}
-          >
-            <WinXP
-              userName={name}
-              active={activeUser === name}
-              onLogoff={handleLogoff}
-              onSwitchUser={handleSwitchUser}
-              onShutdown={handleShutdown}
-              onRestart={handleRestart}
-              onOpenAppsChange={handleOpenAppsChange}
-            />
-          </div>
-        ))}
+      {/* The screen: the desktop at its resolution, scaled to fit and
+          centred; portals mount inside so their fixed positions are stage
+          positions */}
+      <div
+        id={STAGE_ID}
+        style={{
+          position: 'absolute',
+          left: 0,
+          top: 0,
+          transformOrigin: '0 0',
+          overflow: 'hidden',
+        }}
+      >
+        {screen !== SCREEN.BSOD &&
+          sessions.map(name => (
+            <div
+              key={name}
+              style={{
+                display: desktopVisible && activeUser === name ? 'block' : 'none',
+                position: 'absolute',
+                inset: 0,
+              }}
+            >
+              <WinXP
+                userName={name}
+                active={activeUser === name}
+                onLogoff={handleLogoff}
+                onSwitchUser={handleSwitchUser}
+                onShutdown={handleShutdown}
+                onRestart={handleRestart}
+                onOpenAppsChange={handleOpenAppsChange}
+              />
+            </div>
+          ))}
+        <div id={PORTAL_ID} />
+      </div>
       {renderOverlay()}
       {vfs.recovery && <RecoveryScreen recovery={vfs.recovery} />}
     </div>

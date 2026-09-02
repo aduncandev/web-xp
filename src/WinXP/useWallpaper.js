@@ -6,7 +6,7 @@ import wallpaper from 'assets/windowsIcons/wallpaper.jpeg';
 const styleFor = (url, position) => {
   const base = {
     backgroundImage: `url(${url})`,
-    backgroundColor: '#3A6EA5',
+    backgroundColor: 'var(--xp-desktop, #3a6ea5)',
     backgroundAttachment: 'scroll',
   };
   if (position === 'tile')

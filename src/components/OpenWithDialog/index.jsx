@@ -149,7 +149,7 @@ const Body = styled.div`
   padding: 10px 12px 12px;
   font-family: Tahoma, 'Noto Sans', sans-serif;
   font-size: 11px;
-  background: #ece9d8;
+  background: var(--xp-face, #ece9d8);
   user-select: none;
 
   .ow__head {
@@ -164,7 +164,7 @@ const Body = styled.div`
     height: 150px;
     overflow-y: auto;
     background: #fff;
-    border: 1px solid #7f9db9;
+    border: 1px solid var(--xp-select-border, #7f9db9);
     margin-bottom: 8px;
   }
   .ow__item {
@@ -179,7 +179,7 @@ const Body = styled.div`
     }
   }
   .ow__item--sel {
-    background: #316ac5;
+    background: var(--xp-highlight, #316ac5);
     color: #fff;
   }
   .ow__always {

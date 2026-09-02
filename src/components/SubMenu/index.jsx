@@ -20,7 +20,7 @@ function SubMenu({ className, data, style, onClick, onItemContextMenu }) {
   }
   useEffect(() => () => clearTimeout(openTimer.current), []);
   return (
-    <div style={{ ...style }} className={className}>
+    <div style={{ ...style }} className={`${className} xp-submenu`}>
       {data.map((item, index) => (
         <SubMenuItem
           onClick={onClick}
@@ -105,14 +105,15 @@ const StyledSubMenu = styled(SubMenu)`
   z-index: 1;
   left: ${({ left }) => left || '100%'};
   bottom: ${({ bottom }) => bottom || '-1px'};
-  background-color: white;
+  background-color: var(--xp-menu, #fff);
   padding-left: 1px;
-  box-shadow: inset 0 0 0 1px #72ade9, 2px 3px 3px rgb(0, 0, 0, 0.5);
+  box-shadow: inset 0 0 0 1px var(--xp-submenu-border, #72ade9),
+    2px 3px 3px rgb(0, 0, 0, 0.5);
   animation: ${menuFade} ${MENU_FADE_MS}ms;
   &-separator {
     padding: 0 5px;
     height: 2px;
-    box-shadow: inset 3px 0 #4081ff;
+    box-shadow: inset 3px 0 var(--xp-submenu-rule, #4081ff);
     background: linear-gradient(
       to right,
       rgba(0, 0, 0, 0) 0%,
@@ -125,23 +126,23 @@ const StyledSubMenu = styled(SubMenu)`
     display: flex;
     align-items: center;
     padding: 0 10px;
-    box-shadow: inset 3px 0 #4081ff;
+    box-shadow: inset 3px 0 var(--xp-submenu-rule, #4081ff);
     position: relative;
     padding-right: 22px;
-    color: black;
+    color: var(--xp-menu-text, #000);
   }
   &-item.hover {
-    background-color: #316ac5;
-    color: white;
+    background-color: var(--xp-menu-highlight, #316ac5);
+    color: var(--xp-highlight-text, #fff);
   }
   &-item.disabled,
   &-item.disabled:hover {
     background-color: transparent;
-    color: #aca899;
+    color: var(--xp-gray-text, #aca899);
   }
   &-item:hover {
-    background-color: #316ac5;
-    color: white;
+    background-color: var(--xp-menu-highlight, #316ac5);
+    color: var(--xp-highlight-text, #fff);
     &-arrow:before {
       border-left-color: #fff;
     }
@@ -156,7 +157,7 @@ const StyledSubMenu = styled(SubMenu)`
     height: 16px;
   }
   &-text {
-    font-size: 11px;
+    font-size: var(--xp-font-ui, 11px);
     white-space: nowrap;
   }
   &-arrow {

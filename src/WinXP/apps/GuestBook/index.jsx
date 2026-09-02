@@ -351,7 +351,7 @@ const Div = styled.div`
   height: 100%;
   display: flex;
   flex-direction: column;
-  background: #ece9d8;
+  background: var(--xp-face, #ece9d8);
   font-family: Tahoma, 'Noto Sans', sans-serif;
   font-size: 11px;
 
@@ -376,7 +376,7 @@ const Div = styled.div`
     min-height: 0;
     overflow-y: auto;
     background: #fff;
-    border: 1px solid #7f9db9;
+    border: 1px solid var(--xp-select-border, #7f9db9);
     padding: 6px 8px;
   }
 
@@ -448,7 +448,7 @@ const Div = styled.div`
     margin: 6px 0 2px 16px;
     padding: 5px 8px;
     background: #f4f6fb;
-    border-left: 3px solid #7f9db9;
+    border-left: 3px solid var(--xp-select-border, #7f9db9);
     p {
       margin: 2px 0 0;
       line-height: 1.5;
@@ -463,7 +463,7 @@ const Div = styled.div`
 
   .gb__form {
     flex-shrink: 0;
-    border: 1px solid #aca899;
+    border: 1px solid var(--xp-face-shadow, #aca899);
     background: #f6f5ee;
     padding: 6px 8px 8px;
   }
@@ -491,14 +491,14 @@ const Div = styled.div`
   input[type='text'],
   .gb__row input,
   textarea {
-    border: 1px solid #7f9db9;
+    border: 1px solid var(--xp-select-border, #7f9db9);
     padding: 2px 3px;
     font-family: Tahoma, 'Noto Sans', sans-serif;
     font-size: 11px;
     background: #fff;
     &:focus {
       outline: none;
-      border-color: #316ac5;
+      border-color: var(--xp-highlight, #316ac5);
     }
   }
 
@@ -558,8 +558,8 @@ const Div = styled.div`
     align-items: center;
     padding: 0 6px;
     border: 1px solid #dfdfd4;
-    border-top-color: #aca899;
-    border-left-color: #aca899;
+    border-top-color: var(--xp-face-shadow, #aca899);
+    border-left-color: var(--xp-face-shadow, #aca899);
     color: #333;
     &.grow {
       flex: 1;

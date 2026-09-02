@@ -19,12 +19,13 @@ import {
   TILE_WINDOWS_VERTICALLY,
 } from './constants/actions';
 import { FOCUSING, POWER_STATE, TASKBAR_HEIGHT } from './constants';
+import { screenSize } from './screen';
 
 // Desktop work area for window-arrangement actions; dispatchers may pass
 // their own { width, height } payload
 const getWorkArea = payload => ({
-  width: (payload && payload.width) || window.innerWidth,
-  height: (payload && payload.height) || window.innerHeight - TASKBAR_HEIGHT,
+  width: (payload && payload.width) || screenSize().width,
+  height: (payload && payload.height) || screenSize().height - TASKBAR_HEIGHT,
 });
 
 const getArrangeTargets = state =>

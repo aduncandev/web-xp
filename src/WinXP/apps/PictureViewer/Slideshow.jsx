@@ -3,6 +3,7 @@ import { createPortal } from 'react-dom';
 import styled from 'styled-components';
 
 import { getArt } from '../../../xpArt';
+import { portalRoot } from '../../screen';
 
 const ICONS = {
   play: getArt('pfv-ss-play', null),
@@ -121,7 +122,7 @@ export default function Slideshow({ paths, startIndex, resolveUrl, onClose }) {
         {button('close', 'Close Window', onClose)}
       </div>
     </Screen>,
-    document.body,
+    portalRoot(),
   );
 }
 

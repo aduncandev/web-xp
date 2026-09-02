@@ -1,0 +1,803 @@
+/*
+ * Windows Classic style: the frame, caption buttons, taskbar, menus and
+ * controls as GDI drew them, over whichever scheme's system colours the
+ * theme tokens carry. Applies while the document root has
+ * data-xp-style="classic"; the Luna look is what components draw by default.
+ */
+
+/* --- window frame: a raised 3D edge, the caption inside it --- */
+html[data-xp-style='classic'] .xp-window {
+  border-radius: 0;
+  box-shadow: inset 1px 1px var(--xp-face), inset -1px -1px var(--xp-face-dk-shadow),
+    inset 2px 2px var(--xp-face-light), inset -2px -2px var(--xp-face-shadow);
+}
+html[data-xp-style='classic'] .xp-window .header__bg {
+  left: 4px;
+  right: 4px;
+  top: 4px;
+  height: var(--xp-caption-h, 18px);
+  border-radius: 0;
+  border-image: none;
+}
+html[data-xp-style='classic'] .xp-window .frame__left,
+html[data-xp-style='classic'] .xp-window .frame__right,
+html[data-xp-style='classic'] .xp-window .frame__bottom {
+  display: none;
+}
+html[data-xp-style='classic'] .xp-window .header__bg:before,
+html[data-xp-style='classic'] .xp-window .header__bg:after {
+  display: none;
+}
+html[data-xp-style='classic'] .app__header {
+  top: 4px;
+}
+html[data-xp-style='classic'] .app__header__title {
+  padding-left: 2px;
+}
+
+/* --- caption buttons: 16x14 raised, the glyphs are XP's own pixels ---
+   Minimize and Maximize touch; Close sits 2px apart. A glyph is a mask over
+   the button-text colour, so every scheme recolours it; a pressed button
+   shifts it 1px, a disabled one etches it (shadow over a light copy). */
+html[data-xp-style='classic'] .header__buttons {
+  opacity: 1;
+  height: 14px;
+  margin-top: 2px;
+  margin-right: 2px;
+  gap: 0;
+}
+html[data-xp-style='classic'] .header__button {
+  width: 16px;
+  height: 14px;
+  margin: 0;
+  border: none;
+  border-radius: 0;
+  border-image: none;
+  background: var(--xp-face);
+  box-shadow: inset -1px -1px var(--xp-face-dk-shadow), inset 1px 1px var(--xp-face-light),
+    inset -2px -2px var(--xp-face-shadow);
+}
+html[data-xp-style='classic'] .header__button--maximize + .header__button--close,
+html[data-xp-style='classic'] .header__button--maximized + .header__button--close {
+  margin-left: 2px;
+}
+html[data-xp-style='classic'] .header__button::before,
+html[data-xp-style='classic'] .header__button::after,
+html[data-xp-style='classic'] .xpdlg-close::before,
+html[data-xp-style='classic'] .xpdlg-close::after {
+  content: '';
+  display: block;
+  position: absolute;
+  inset: 0;
+  background: var(--xp-button-text, #000);
+  -webkit-mask: var(--glyph) var(--glyph-pos) no-repeat;
+  mask: var(--glyph) var(--glyph-pos) no-repeat;
+  image-rendering: pixelated;
+  pointer-events: none;
+}
+html[data-xp-style='classic'] .header__button::before,
+html[data-xp-style='classic'] .xpdlg-close::before {
+  display: none;
+}
+html[data-xp-style='classic'] .header__button--minimize {
+  --glyph: url('../../assets/xp/classic/glyph-minimize.png');
+  --glyph-pos: 4px 9px;
+}
+html[data-xp-style='classic'] .header__button--maximize {
+  --glyph: url('../../assets/xp/classic/glyph-maximize.png');
+  --glyph-pos: 3px 2px;
+}
+html[data-xp-style='classic'] .header__button--maximized {
+  --glyph: url('../../assets/xp/classic/glyph-restore.png');
+  --glyph-pos: 3px 2px;
+}
+html[data-xp-style='classic'] .header__button--close,
+html[data-xp-style='classic'] .xpdlg-close {
+  --glyph: url('../../assets/xp/classic/glyph-close.png');
+  --glyph-pos: 4px 3px;
+}
+html[data-xp-style='classic'] .header__button--help,
+html[data-xp-style='classic'] .xpdlg-help {
+  --glyph: url('../../assets/xp/classic/glyph-help.png');
+  --glyph-pos: 5px 3px;
+}
+html[data-xp-style='classic'] .header__button--help + .header__button--close,
+html[data-xp-style='classic'] .xpdlg-help + .xpdlg-close {
+  margin-left: 2px;
+}
+html[data-xp-style='classic'] .header__button:hover {
+  filter: none;
+}
+html[data-xp-style='classic'] .header__button:hover:active,
+html[data-xp-style='classic'] .xpdlg-close:hover:active {
+  filter: none;
+  box-shadow: inset 1px 1px var(--xp-face-dk-shadow), inset -1px -1px var(--xp-face-light),
+    inset 2px 2px var(--xp-face-shadow);
+}
+html[data-xp-style='classic'] .header__button:hover:active::after,
+html[data-xp-style='classic'] .xpdlg-close:hover:active::after {
+  transform: translate(1px, 1px);
+}
+html[data-xp-style='classic'] .header__button--disable::after {
+  background: var(--xp-face-shadow);
+}
+html[data-xp-style='classic'] .header__button--disable::before {
+  display: block;
+  background: var(--xp-face-light);
+  transform: translate(1px, 1px);
+}
+html[data-xp-style='classic'] .header__button--disable:hover:active {
+  box-shadow: inset 1px 1px var(--xp-face-light), inset -1px -1px var(--xp-face-dk-shadow),
+    inset -2px -2px var(--xp-face-shadow);
+}
+html[data-xp-style='classic'] .header__button--disable:hover:active::after {
+  transform: none;
+}
+
+/* --- dialogs share the frame --- */
+html[data-xp-style='classic'] .xpdlg {
+  border-radius: 0;
+  box-shadow: inset 1px 1px var(--xp-face), inset -1px -1px var(--xp-face-dk-shadow),
+    inset 2px 2px var(--xp-face-light), inset -2px -2px var(--xp-face-shadow);
+}
+html[data-xp-style='classic'] .xpdlg .xpdlg-header-bg {
+  left: 4px;
+  right: 4px;
+  top: 4px;
+  height: var(--xp-caption-h, 18px);
+  border-radius: 0;
+  border-image: none;
+}
+html[data-xp-style='classic'] .xpdlg .xpdlg-frame {
+  display: none;
+}
+html[data-xp-style='classic'] .xpdlg .xpdlg-header-bg:before,
+html[data-xp-style='classic'] .xpdlg .xpdlg-header-bg:after {
+  display: none;
+}
+html[data-xp-style='classic'] .xpdlg .xpdlg-close {
+  width: 16px;
+  height: 14px;
+  margin: 2px 2px 0 0;
+  border: none;
+  border-radius: 0;
+  border-image: none;
+  background: var(--xp-face);
+  box-shadow: inset -1px -1px var(--xp-face-dk-shadow), inset 1px 1px var(--xp-face-light),
+    inset -2px -2px var(--xp-face-shadow);
+}
+
+/* --- taskbar: a flat face with a light top edge, raised buttons --- */
+html[data-xp-style='classic'] .xp-taskbar .footer__items.right {
+  border-left: none;
+  box-shadow: inset 1px 1px var(--xp-face-shadow), inset -1px -1px var(--xp-face-light);
+  margin: 3px 2px 2px 8px;
+  padding: 0 6px;
+}
+html[data-xp-style='classic'] .xp-taskbar .footer__window {
+  border-radius: 0;
+  height: 22px;
+  max-width: 160px;
+  margin: 4px 0 2px;
+  box-shadow: inset -1px -1px var(--xp-face-dk-shadow), inset 1px 1px var(--xp-face-light),
+    inset -2px -2px var(--xp-face-shadow);
+}
+html[data-xp-style='classic'] .xp-taskbar .footer__window.cover:before {
+  display: none;
+}
+html[data-xp-style='classic'] .xp-taskbar .footer__window.cover:hover,
+html[data-xp-style='classic'] .xp-taskbar .footer__window.focus:hover {
+  box-shadow: inset 1px 1px var(--xp-face-light), inset -1px -1px var(--xp-face-dk-shadow),
+    inset -2px -2px var(--xp-face-shadow);
+}
+html[data-xp-style='classic'] .xp-taskbar .footer__window.focus,
+html[data-xp-style='classic'] .xp-taskbar .footer__window.focus:hover,
+html[data-xp-style='classic'] .xp-taskbar .footer__window.cover:hover:active,
+html[data-xp-style='classic'] .xp-taskbar .footer__window.focus:hover:active {
+  font-weight: 700;
+  background-color: var(--xp-face-light);
+  background-image: repeating-conic-gradient(var(--xp-face-light) 0 25%, var(--xp-face) 0 50%);
+  background-size: 2px 2px;
+  box-shadow: inset 1px 1px var(--xp-face-dk-shadow), inset -1px -1px var(--xp-face-light),
+    inset 2px 2px var(--xp-face-shadow);
+}
+html[data-xp-style='classic'] .xp-taskbar .footer__grip {
+  background-image: none;
+  width: 3px;
+  box-shadow: inset 1px 1px var(--xp-face-light), inset -1px -1px var(--xp-face-shadow);
+}
+html[data-xp-style='classic'] .xp-taskbar,
+html[data-xp-style='classic'] .xp-taskbar .footer__items.right,
+html[data-xp-style='classic'] .xp-taskbar .footer__window,
+html[data-xp-style='classic'] .xp-taskbar .footer__start {
+  border-image: none;
+}
+
+/* --- Start menu --- */
+html[data-xp-style='classic'] .xp-startmenu {
+  position: relative;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: 4px 4px 3px rgba(0, 0, 0, 0.35);
+  padding: 0 0 2px;
+}
+/* the right and bottom edges ride above the panes and the footer */
+html[data-xp-style='classic'] .xp-startmenu::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  box-shadow: inset -1px -1px var(--xp-face-dk-shadow), inset -2px -2px var(--xp-face-shadow);
+}
+html[data-xp-style='classic'] .footer__start__menu {
+  bottom: calc(100% - 6px);
+}
+html[data-xp-style='classic'] .xp-startmenu header,
+html[data-xp-style='classic'] .xp-startmenu header:before {
+  border-radius: 0;
+}
+html[data-xp-style='classic'] .xp-startmenu header:before {
+  display: none;
+}
+
+/* --- menus: a raised face --- */
+html[data-xp-style='classic'] .xp-menu {
+  border: 1px solid;
+  border-color: var(--xp-face) var(--xp-face-dk-shadow) var(--xp-face-dk-shadow) var(--xp-face);
+  box-shadow: inset -1px -1px var(--xp-face-shadow), inset 1px 1px var(--xp-face-light);
+  animation: none;
+}
+html[data-xp-style='classic'] .xp-submenu {
+  border: 1px solid;
+  border-color: var(--xp-face) var(--xp-face-dk-shadow) var(--xp-face-dk-shadow) var(--xp-face);
+  box-shadow: inset -1px -1px var(--xp-face-shadow), inset 1px 1px var(--xp-face-light) !important;
+  animation: none;
+}
+
+/* --- push buttons --- */
+html[data-xp-style='classic'] .xp-button {
+  border-image: none;
+  border: 1px solid;
+  border-color: var(--xp-face-light) var(--xp-face-dk-shadow) var(--xp-face-dk-shadow) var(--xp-face-light);
+  border-radius: 0;
+  background: var(--xp-face);
+  box-shadow: inset -1px -1px var(--xp-face-shadow);
+  color: var(--xp-window-text);
+}
+html[data-xp-style='classic'] .xp-button:hover:not(:disabled) {
+  box-shadow: inset -1px -1px var(--xp-face-shadow);
+}
+html[data-xp-style='classic'] .xp-button:focus:not(:disabled) {
+  outline: 1px dotted #000;
+  outline-offset: -4px;
+  border-color: #000;
+  box-shadow: inset 1px 1px var(--xp-face-light), inset -1px -1px var(--xp-face-dk-shadow),
+    inset -2px -2px var(--xp-face-shadow);
+}
+html[data-xp-style='classic'] .xp-button:active:not(:disabled) {
+  background: var(--xp-face);
+  border-color: var(--xp-face-dk-shadow) var(--xp-face-light) var(--xp-face-light) var(--xp-face-dk-shadow);
+  box-shadow: inset 1px 1px var(--xp-face-shadow);
+}
+html[data-xp-style='classic'] .xp-button:disabled {
+  background: var(--xp-face);
+  border-color: var(--xp-face-light) var(--xp-face-dk-shadow) var(--xp-face-dk-shadow) var(--xp-face-light);
+  color: var(--xp-gray-text);
+  text-shadow: 1px 1px var(--xp-face-light);
+  box-shadow: inset -1px -1px var(--xp-face-shadow);
+}
+
+/* --- drop-down lists: a sunken field with a raised arrow button --- */
+html[data-xp-style='classic'] .xp-select {
+  border: 1px solid;
+  border-color: var(--xp-face-shadow) var(--xp-face-light) var(--xp-face-light) var(--xp-face-shadow);
+  box-shadow: inset 1px 1px var(--xp-face-dk-shadow), inset -1px -1px var(--xp-face);
+}
+html[data-xp-style='classic'] .xp-select .xs-button {
+  position: relative;
+  border-image: none;
+  background-image: none;
+  background: var(--xp-face);
+  border: 1px solid;
+  border-color: var(--xp-face-light) var(--xp-face-dk-shadow) var(--xp-face-dk-shadow) var(--xp-face-light);
+  box-shadow: inset -1px -1px var(--xp-face-shadow);
+  box-sizing: border-box;
+  width: 16px;
+  height: 17px;
+  margin: 1px 1px 1px 0;
+}
+html[data-xp-style='classic'] .xp-select .xs-button::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: var(--xp-button-text, #000);
+  -webkit-mask: url('../../assets/xp/classic/glyph-combo-arrow.png') 3px 6px no-repeat;
+  mask: url('../../assets/xp/classic/glyph-combo-arrow.png') 3px 6px no-repeat;
+  image-rendering: pixelated;
+}
+html[data-xp-style='classic'] .xp-select .xs-button:active::after {
+  transform: translate(1px, 1px);
+}
+
+/* --- check boxes and radio buttons: sunken white wells --- */
+html[data-xp-style='classic'] input[type='checkbox'],
+html[data-xp-style='classic'] input[type='radio'] {
+  background-image: none !important;
+  background-color: var(--xp-window);
+  border: 1px solid;
+  border-color: var(--xp-face-shadow) var(--xp-face-light) var(--xp-face-light) var(--xp-face-shadow);
+  box-shadow: inset 1px 1px var(--xp-face-dk-shadow), inset -1px -1px var(--xp-face);
+  box-sizing: border-box;
+  position: relative;
+}
+html[data-xp-style='classic'] input[type='radio'] {
+  border-radius: 50%;
+}
+html[data-xp-style='classic'] input[type='checkbox']:checked:after {
+  content: '';
+  position: absolute;
+  left: 3px;
+  top: 0;
+  width: 3px;
+  height: 7px;
+  border: solid #000;
+  border-width: 0 2px 2px 0;
+  transform: rotate(45deg);
+}
+html[data-xp-style='classic'] input[type='radio']:checked:after {
+  content: '';
+  position: absolute;
+  left: 3px;
+  top: 3px;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: #000;
+}
+html[data-xp-style='classic'] input[type='checkbox']:disabled,
+html[data-xp-style='classic'] input[type='radio']:disabled {
+  filter: none;
+  background-color: var(--xp-face);
+}
+
+/* --- scrollbars: a dithered track, raised thumb and arrow buttons --- */
+html[data-xp-style='classic'] ::-webkit-scrollbar {
+  width: 16px;
+  height: 16px;
+}
+html[data-xp-style='classic'] ::-webkit-scrollbar-track,
+html[data-xp-style='classic'] ::-webkit-scrollbar-thumb,
+html[data-xp-style='classic'] ::-webkit-scrollbar-button {
+  display: block;
+  border-image: none;
+  background-image: none;
+}
+html[data-xp-style='classic'] ::-webkit-scrollbar-track:vertical,
+html[data-xp-style='classic'] ::-webkit-scrollbar-track:horizontal {
+  background: repeating-conic-gradient(var(--xp-face-light) 0 25%, var(--xp-face) 0 50%) 0 0 / 2px 2px;
+}
+html[data-xp-style='classic'] ::-webkit-scrollbar-thumb:vertical,
+html[data-xp-style='classic'] ::-webkit-scrollbar-thumb:horizontal {
+  background: var(--xp-face);
+  box-shadow: inset 1px 1px var(--xp-face-light), inset -1px -1px var(--xp-face-dk-shadow),
+    inset -2px -2px var(--xp-face-shadow);
+}
+html[data-xp-style='classic'] ::-webkit-scrollbar-button {
+  width: 16px;
+  height: 16px;
+  background-color: var(--xp-face);
+  background-repeat: no-repeat;
+  background-position: center;
+  box-shadow: inset 1px 1px var(--xp-face-light), inset -1px -1px var(--xp-face-dk-shadow),
+    inset -2px -2px var(--xp-face-shadow);
+}
+html[data-xp-style='classic'] ::-webkit-scrollbar-button:vertical:decrement {
+  background-image: url('../../assets/xp/classic/glyph-scroll-up.png');
+}
+html[data-xp-style='classic'] ::-webkit-scrollbar-button:vertical:increment {
+  background-image: url('../../assets/xp/classic/glyph-scroll-down.png');
+}
+html[data-xp-style='classic'] ::-webkit-scrollbar-button:horizontal:decrement {
+  background-image: url('../../assets/xp/classic/glyph-scroll-left.png');
+}
+html[data-xp-style='classic'] ::-webkit-scrollbar-button:horizontal:increment {
+  background-image: url('../../assets/xp/classic/glyph-scroll-right.png');
+}
+html[data-xp-style='classic'] ::-webkit-scrollbar-button:vertical:start:increment,
+html[data-xp-style='classic'] ::-webkit-scrollbar-button:vertical:end:decrement,
+html[data-xp-style='classic'] ::-webkit-scrollbar-button:horizontal:start:increment,
+html[data-xp-style='classic'] ::-webkit-scrollbar-button:horizontal:end:decrement {
+  display: none;
+}
+
+/* --- tooltips keep a square black outline; nothing to change --- */
+
+/* --- the classic Start button: raised, the flag and a bold "start" --- */
+html[data-xp-style='classic'] .xp-taskbar .footer__start {
+  align-items: center;
+  gap: 3px;
+  height: 22px;
+  margin: 4px 6px 0 2px;
+  padding: 0 5px 0 3px;
+  font: 700 var(--xp-font-ui, 11px) Tahoma, 'Noto Sans', sans-serif;
+  color: var(--xp-window-text);
+  text-shadow: none;
+  background: var(--xp-face);
+  box-shadow: inset 1px 1px var(--xp-face-light), inset -1px -1px var(--xp-face-dk-shadow),
+    inset -2px -2px var(--xp-face-shadow);
+  cursor: default;
+}
+html[data-xp-style='classic'] .xp-taskbar .footer__start.active {
+  background-image: repeating-conic-gradient(var(--xp-face-light) 0 25%, var(--xp-face) 0 50%);
+  background-size: 2px 2px;
+  box-shadow: inset 1px 1px var(--xp-face-dk-shadow), inset -1px -1px var(--xp-face-light),
+    inset 2px 2px var(--xp-face-shadow);
+}
+/* the flag, cropped out of the XP logo bitmap (flag at 96..213 x 0..103 of 246x146) */
+html[data-xp-style='classic'] .xp-taskbar .footer__start__flag {
+  width: 20px;
+  height: 16px;
+}
+html[data-xp-style='classic'] .xp-taskbar .footer__start__label {
+  text-transform: capitalize;
+  font: 700 var(--xp-font-ui, 11px) Tahoma, 'Noto Sans', sans-serif;
+  text-shadow: none;
+  font-style: normal;
+}
+
+/* --- the Start menu in Classic: no picture, the name in bold italic over
+   the caption gradient, etched separators, the right column on the face --- */
+/* the caption band sits one face row down and, on the left, behind the
+   panes' own raised edge (face, white); its gradient starts at x=5 */
+html[data-xp-style='classic'] .xp-startmenu header {
+  box-sizing: border-box;
+  height: 43px;
+  margin: 0;
+  padding: 3px 3px 0 5px;
+  background-image: var(--xp-start-header, none), none;
+  background-clip: content-box, border-box;
+  background-origin: content-box, border-box;
+  background-color: var(--xp-face);
+  box-shadow: inset 1px 1px var(--xp-face), inset 2px 2px var(--xp-face-light),
+    inset 3px 3px var(--xp-face), inset 4px 3px var(--xp-face-light),
+    inset -1px 0 var(--xp-face-dk-shadow), inset -2px 0 var(--xp-face-shadow);
+}
+html[data-xp-style='classic'] .xp-startmenu .header__img,
+html[data-xp-style='classic'] .xp-startmenu .header__tile {
+  display: none;
+}
+html[data-xp-style='classic'] .xp-startmenu .header__text {
+  font-style: italic;
+  font-weight: 700;
+  font-size: 18px;
+  font-family: 'Franklin Gothic Medium', 'Franklin Gothic', 'Trebuchet MS', Tahoma, sans-serif;
+  text-shadow: 1px 1px 1px rgba(0, 0, 0, 0.6);
+}
+html[data-xp-style='classic'] .xp-startmenu footer {
+  box-sizing: border-box;
+  height: 35px;
+  margin-left: 2px;
+  width: calc(100% - 2px);
+  padding: 3px 0 0 0;
+  align-items: flex-start;
+  border-top: 1px solid var(--xp-face-shadow);
+  box-shadow: inset 0 1px var(--xp-face-light), inset 1px 0 var(--xp-face),
+    inset 2px 0 var(--xp-face-light);
+}
+html[data-xp-style='classic'] .xp-startmenu .orange-hr {
+  display: none;
+}
+html[data-xp-style='classic'] .xp-startmenu .menu {
+  border-top: none;
+  box-shadow: none;
+  margin: 0;
+}
+html[data-xp-style='classic'] .xp-startmenu .menu__right {
+  border-left: 1px solid var(--xp-face-shadow);
+  box-shadow: inset 1px 0 var(--xp-face-light);
+}
+html[data-xp-style='classic'] .xp-startmenu .menu__separator,
+html[data-xp-style='classic'] .xp-startmenu .menu__right .menu__separator {
+  height: 0;
+  margin: 3px 2px;
+  padding: 0;
+  background: none;
+  border-top: 1px solid var(--xp-face-shadow);
+  border-bottom: 1px solid var(--xp-face-light);
+}
+
+/* --- menu bars: the open title is a sunken button, not a highlight --- */
+html[data-xp-style='classic'] .drop-down__label--active,
+html[data-xp-style='classic'] .drop-down__label--active:hover,
+html[data-xp-style='classic'] .drop-downs--open .drop-down__label:hover {
+  background-color: var(--xp-face);
+  color: var(--xp-window-text);
+  box-shadow: inset 1px 1px var(--xp-face-shadow), inset -1px -1px var(--xp-face-light);
+}
+
+/* --- Explorer's task pane: white bar, face-coloured group heads, black
+   text, bare double-chevron glyphs --- */
+html[data-xp-style='classic'] .com__content__left {
+  background: var(--xp-window);
+}
+html[data-xp-style='classic'] .com__content__left__card {
+  border: 1px solid var(--xp-face);
+}
+html[data-xp-style='classic'] .com__content__left__card__header {
+  height: 21px;
+  padding-left: 11px;
+  padding-right: 6px;
+  border-image: none;
+  background: var(--xp-face);
+}
+html[data-xp-style='classic'] .com__content__left__card__header__text,
+html[data-xp-style='classic'] .com__content__left__card__header:hover .com__content__left__card__header__text {
+  color: var(--xp-button-text);
+}
+html[data-xp-style='classic'] .com__task-chevron {
+  width: 7px;
+  height: 8px;
+  margin-right: 5px;
+  background: var(--xp-button-text, #000);
+  -webkit-mask: var(--glyph) center no-repeat;
+  mask: var(--glyph) center no-repeat;
+  image-rendering: pixelated;
+}
+html[data-xp-style='classic'] .com__task-chevron--collapse {
+  --glyph: url('../../assets/xp/classic/glyph-chevron-up.png');
+}
+html[data-xp-style='classic'] .com__task-chevron--expand {
+  --glyph: url('../../assets/xp/classic/glyph-chevron-down.png');
+}
+html[data-xp-style='classic'] .com__task-chevron__drawn {
+  display: none;
+}
+html[data-xp-style='classic'] .com__content__left__card__content {
+  border-image: none;
+  background: var(--xp-window);
+  color: var(--xp-window-text);
+}
+html[data-xp-style='classic'] .com__content__left__card__text.link,
+html[data-xp-style='classic'] .com__content__left__card__text.link.inert:hover {
+  color: var(--xp-window-text);
+}
+html[data-xp-style='classic'] .com__content__left__card__text.link:hover {
+  color: var(--xp-window-text);
+}
+
+/* --- Start menu: both panes and the footer on the face, black text, the
+   name left in the caption band, All Programs as a plain row with XP's
+   arrow, no keyboard cues --- */
+html[data-xp-style='classic'] .xp-startmenu header {
+  justify-content: flex-start;
+}
+html[data-xp-style='classic'] .xp-startmenu .menu {
+  margin-left: 2px;
+}
+html[data-xp-style='classic'] .xp-startmenu .menu__left {
+  width: 193px;
+  padding-top: 4px;
+  padding-left: 11px;
+  background: var(--xp-face);
+  border-image: none;
+  box-shadow: inset 1px 0 var(--xp-face), inset 2px 0 var(--xp-face-light);
+}
+html[data-xp-style='classic'] .xp-startmenu .menu__right {
+  width: 187px;
+  padding-top: 3px;
+  padding-bottom: 11px;
+  padding-left: 8px;
+  background: var(--xp-face);
+  border-image: none;
+  border-left: none;
+  box-shadow: inset 1px 0 var(--xp-face-shadow), inset 2px 0 var(--xp-face-light);
+  color: var(--xp-window-text);
+}
+html[data-xp-style='classic'] .xp-startmenu .menu__left .menu__item--allprograms {
+  margin-bottom: 4px;
+}
+html[data-xp-style='classic'] .xp-startmenu .header__text {
+  margin-left: 2px;
+}
+html[data-xp-style='classic'] .xp-startmenu .footer__item {
+  margin-right: 8px;
+}
+html[data-xp-style='classic'] .xp-startmenu .menu__item,
+html[data-xp-style='classic'] .xp-startmenu .menu__right .menu__item {
+  color: var(--xp-window-text);
+}
+html[data-xp-style='classic'] .xp-startmenu .menu__item__subtext {
+  color: var(--xp-window-text);
+}
+html[data-xp-style='classic'] .xp-startmenu .menu__item:hover,
+html[data-xp-style='classic'] .xp-startmenu .menu__right .menu__item:hover {
+  background-color: var(--xp-highlight);
+  color: var(--xp-highlight-text);
+}
+html[data-xp-style='classic'] .xp-startmenu .menu__item:hover .menu__item__subtext {
+  color: var(--xp-highlight-text);
+}
+html[data-xp-style='classic'] .xp-startmenu .menu__left .menu__item--allprograms {
+  justify-content: flex-start;
+  padding-left: 40px;
+}
+html[data-xp-style='classic'] .xp-startmenu .menu__item--allprograms .menu__item__text {
+  font-weight: 400;
+}
+html[data-xp-style='classic'] .xp-startmenu .menu__moreprog-arrow,
+html[data-xp-style='classic'] .xp-startmenu .menu__item:hover .menu__moreprog-arrow {
+  width: 4px;
+  height: 7px;
+  margin-left: 14px;
+  background: var(--xp-window-text, #000);
+  -webkit-mask: url('../../assets/xp/classic/glyph-menu-arrow.png') center no-repeat;
+  mask: url('../../assets/xp/classic/glyph-menu-arrow.png') center no-repeat;
+}
+html[data-xp-style='classic'] .xp-startmenu .menu__item:hover .menu__moreprog-arrow {
+  background: var(--xp-highlight-text, #fff);
+}
+html[data-xp-style='classic'] .xp-startmenu .menu__arrow {
+  border-left-color: var(--xp-window-text);
+}
+html[data-xp-style='classic'] .xp-startmenu footer {
+  background: var(--xp-face);
+  border-image: none;
+  color: var(--xp-window-text);
+}
+html[data-xp-style='classic'] .xp-startmenu .footer__item:hover {
+  background-color: var(--xp-highlight);
+  color: var(--xp-highlight-text);
+}
+/* explorer.exe's own 16-colour strip (undock, key, power), the hot one
+   yellow-edged */
+html[data-xp-style='classic'] .xp-startmenu .footer__item__img {
+  background-image: url('../../assets/xp/classic/logoff-classic.png');
+}
+html[data-xp-style='classic'] .xp-startmenu .footer__item:hover .footer__item__img {
+  background-image: url('../../assets/xp/classic/logoff-classic-hot.png');
+}
+html[data-xp-style='classic'] .xp-startmenu u {
+  text-decoration: none;
+}
+
+/* --- tab controls: raised tabs on the face, 18px, the selected one two
+   pixels taller and wider, joining a raised page --- */
+html[data-xp-style='classic'] .dp__tab,
+html[data-xp-style='classic'] .sp__tab,
+html[data-xp-style='classic'] .tm__tab,
+html[data-xp-style='classic'] .csm__tab,
+html[data-xp-style='classic'] .fo__tab,
+html[data-xp-style='classic'] .rb__tab,
+html[data-xp-style='classic'] .tp__tab,
+html[data-xp-style='classic'] .pr-tab {
+  box-sizing: border-box;
+  height: 18px;
+  line-height: 17px;
+  margin-top: 2px;
+  margin-right: 2px;
+  padding: 0 6px;
+  border: 1px solid;
+  border-color: var(--xp-face-light) var(--xp-face-dk-shadow) transparent var(--xp-face-light);
+  border-bottom: none;
+  border-radius: 2px 2px 0 0;
+  border-image: none;
+  background: var(--xp-face);
+  box-shadow: inset -1px 0 var(--xp-face-shadow);
+  color: var(--xp-window-text);
+  top: 0;
+}
+html[data-xp-style='classic'] .dp__tab:hover,
+html[data-xp-style='classic'] .sp__tab:hover,
+html[data-xp-style='classic'] .tm__tab:hover,
+html[data-xp-style='classic'] .csm__tab:hover,
+html[data-xp-style='classic'] .fo__tab:hover,
+html[data-xp-style='classic'] .rb__tab:hover,
+html[data-xp-style='classic'] .tp__tab:hover,
+html[data-xp-style='classic'] .pr-tab:hover {
+  border-image: none;
+  background: var(--xp-face);
+}
+html[data-xp-style='classic'] .dp__tab--active,
+html[data-xp-style='classic'] .sp__tab--active,
+html[data-xp-style='classic'] .tm__tab--active,
+html[data-xp-style='classic'] .csm__tab--active,
+html[data-xp-style='classic'] .fo__tab--active,
+html[data-xp-style='classic'] .rb__tab--active,
+html[data-xp-style='classic'] .tp__tab--active,
+html[data-xp-style='classic'] .pr-tab.active,
+html[data-xp-style='classic'] .dp__tab--active:hover,
+html[data-xp-style='classic'] .sp__tab--active:hover,
+html[data-xp-style='classic'] .tm__tab--active:hover,
+html[data-xp-style='classic'] .csm__tab--active:hover,
+html[data-xp-style='classic'] .fo__tab--active:hover,
+html[data-xp-style='classic'] .rb__tab--active:hover,
+html[data-xp-style='classic'] .tp__tab--active:hover,
+html[data-xp-style='classic'] .pr-tab.active:hover {
+  position: relative;
+  z-index: 2;
+  height: 20px;
+  line-height: 19px;
+  margin: 0 0 -1px 0;
+  padding: 0 8px;
+  border-image: none;
+  background: var(--xp-face);
+}
+html[data-xp-style='classic'] .dp__page,
+html[data-xp-style='classic'] .sp__page,
+html[data-xp-style='classic'] .tm__page,
+html[data-xp-style='classic'] .csm__page,
+html[data-xp-style='classic'] .fo__page,
+html[data-xp-style='classic'] .rb__page,
+html[data-xp-style='classic'] .tp__page,
+html[data-xp-style='classic'] .pr-page {
+  border: 1px solid;
+  border-color: var(--xp-face-light) var(--xp-face-dk-shadow) var(--xp-face-dk-shadow) var(--xp-face-light);
+  border-radius: 0;
+  border-image: none;
+  background: var(--xp-face);
+  box-shadow: inset -1px -1px var(--xp-face-shadow);
+}
+
+/* --- Explorer chrome: face-coloured bands parted by etched lines, flat
+   toolbar buttons that rise under the pointer, a sunken address field --- */
+html[data-xp-style='classic'] .com__toolbar,
+html[data-xp-style='classic'] .com__function_bar,
+html[data-xp-style='classic'] .com__address_bar,
+html[data-xp-style='classic'] .com__status_bar {
+  background: var(--xp-face);
+  border-image: none;
+  box-shadow: none;
+}
+html[data-xp-style='classic'] .com__function_bar,
+html[data-xp-style='classic'] .com__address_bar {
+  border-top: 1px solid var(--xp-face-shadow);
+  box-shadow: inset 0 1px var(--xp-face-light);
+}
+html[data-xp-style='classic'] .com__options,
+html[data-xp-style='classic'] .com__windows-logo {
+  border-color: var(--xp-face);
+}
+html[data-xp-style='classic'] .com__function_bar__button {
+  border-image: none;
+  border: 1px solid transparent;
+}
+html[data-xp-style='classic'] .com__function_bar__button:hover {
+  border-image: none;
+  border-color: var(--xp-face-light) var(--xp-face-shadow) var(--xp-face-shadow) var(--xp-face-light);
+}
+html[data-xp-style='classic'] .com__function_bar__button:hover:active,
+html[data-xp-style='classic'] .com__function_bar__button--active,
+html[data-xp-style='classic'] .com__function_bar__button--active:hover {
+  border-image: none !important;
+  border-color: var(--xp-face-shadow) var(--xp-face-light) var(--xp-face-light) var(--xp-face-shadow);
+}
+html[data-xp-style='classic'] .com__function_bar__button--active {
+  background-image: repeating-conic-gradient(var(--xp-face-light) 0 25%, var(--xp-face) 0 50%);
+  background-size: 2px 2px;
+}
+html[data-xp-style='classic'] .com__function_bar__separate {
+  width: 2px;
+  background: none;
+  border-left: 1px solid var(--xp-face-shadow);
+  border-right: 1px solid var(--xp-face-light);
+}
+html[data-xp-style='classic'] .com__address_bar__title {
+  color: var(--xp-window-text);
+}
+html[data-xp-style='classic'] .com__address_bar__content {
+  border: 1px solid;
+  border-color: var(--xp-face-shadow) var(--xp-face-light) var(--xp-face-light) var(--xp-face-shadow);
+  box-shadow: inset 1px 1px var(--xp-face-dk-shadow), inset -1px -1px var(--xp-face);
+  background: var(--xp-window);
+}
+html[data-xp-style='classic'] .com__address_bar__dropdown-list {
+  border-color: var(--xp-window-text);
+  box-shadow: none;
+}
+html[data-xp-style='classic'] .com__content {
+  border-color: var(--xp-face-shadow);
+}
+html[data-xp-style='classic'] .com__status_bar__section {
+  border: 1px solid;
+  border-color: var(--xp-face-shadow) var(--xp-face-light) var(--xp-face-light) var(--xp-face-shadow);
+}

@@ -881,7 +881,7 @@ const Screen = styled.div`
       height: 20px;
       background: #fff;
       color: #000;
-      border: 1px solid #7f9db9;
+      border: 1px solid var(--xp-select-border, #7f9db9);
       border-radius: 0;
       padding: 2px 4px;
       font-size: 11px;

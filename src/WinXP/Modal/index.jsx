@@ -11,6 +11,7 @@ import offIcon from 'assets/windowsIcons/310(32x32).png';
 import restartIcon from 'assets/windowsIcons/restart.ico';
 import lockIcon from 'assets/windowsIcons/546(32x32).png';
 import switcherIcon from 'assets/windowsIcons/switchuser.png';
+import { portalRoot } from '../screen';
 
 // Real msgina.dll orb bitmaps win when dropped into src/assets/xp/
 const standbyOrb = getArt('power-standby', offIcon);
@@ -25,7 +26,7 @@ function Modal(props) {
     <StyledContainer>
       <Menu {...props} />
     </StyledContainer>,
-    document.body,
+    portalRoot(),
   );
 }
 

@@ -61,7 +61,7 @@ export default function AboutWindows({ onClose }) {
 }
 
 const Body = styled.div`
-  background: #ece9d8;
+  background: var(--xp-face, #ece9d8);
   font-family: Tahoma, 'Noto Sans', sans-serif;
   font-size: 11px;
   color: #000;
@@ -89,7 +89,7 @@ const Body = styled.div`
   .aw__rule {
     height: 2px;
     margin: 8px 0 10px;
-    border-top: 1px solid #aca899;
+    border-top: 1px solid var(--xp-face-shadow, #aca899);
     border-bottom: 1px solid #ffffff;
   }
   .aw__mem {

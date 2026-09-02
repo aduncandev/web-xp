@@ -332,7 +332,7 @@ const Body = styled.div`
     margin: 6px 0 2px;
   }
   .tp__preview {
-    border: 1px solid #7f9db9;
+    border: 1px solid var(--xp-select-border, #7f9db9);
     box-shadow: inset 1px 1px 1px rgba(0, 0, 0, 0.15);
     background: #fff;
     padding: 2px;
@@ -385,7 +385,7 @@ const Body = styled.div`
   }
 
   .tp__sm-preview {
-    border: 1px solid #7f9db9;
+    border: 1px solid var(--xp-select-border, #7f9db9);
     box-shadow: inset 1px 1px 1px rgba(0, 0, 0, 0.15);
     background: #5a7edc;
     padding: 12px 16px;

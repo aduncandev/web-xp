@@ -48,7 +48,7 @@ const Panel = styled.div`
   height: 100%;
   box-sizing: border-box;
   padding: 14px 16px;
-  background: #ece9d8;
+  background: var(--xp-face, #ece9d8);
   color: #000;
   font-family: Tahoma, sans-serif;
   font-size: 11px;
@@ -76,7 +76,7 @@ const Panel = styled.div`
     height: 23px;
     font-family: Tahoma, sans-serif;
     font-size: 11px;
-    background: #ece9d8;
+    background: var(--xp-face, #ece9d8);
     border: 1px solid #003c74;
     border-radius: 3px;
     box-shadow: inset -1px -1px #a8a89c, inset 1px 1px #fff;

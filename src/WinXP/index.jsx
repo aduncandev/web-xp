@@ -40,7 +40,6 @@ import Windows from './Windows';
 import Icons from './Icons';
 
 import bliss from 'assets/windowsIcons/wallpaper.jpeg';
-import { useVolume } from '../context/VolumeContext';
 import { SessionActiveContext } from './sessionAudio';
 import { useVFS } from '../context/VFSContext';
 import { useDialog } from '../context/DialogContext';
@@ -51,6 +50,8 @@ import useExtraction from '../components/ExtractionWizard/useExtraction';
 import ScreenSaverHost from '../components/ScreenSaver';
 import { createShellOpen } from './shell/open';
 import { useWallpaper } from './useWallpaper';
+import { useAppearance } from './theme/useAppearance';
+import { applyTheme } from './theme/tokens';
 import { useScreenSaver } from './useScreenSaver';
 import { useStartMenuData } from './useStartMenuData';
 import { useHostDrop } from './useHostDrop';
@@ -64,6 +65,7 @@ import {
   getCloseInterceptor,
 } from './shellBus';
 import { lunaScrollbars } from '../components/lunaScrollbars';
+import { toLogicalX, toLogicalY } from './screen';
 
 // The reducer action each taskbar arrangement maps to
 const ARRANGE_ACTIONS = {
@@ -84,7 +86,16 @@ function WinXP({
 }) {
   const [state, dispatch] = useReducer(reducer, initState);
   const ref = useRef(null);
-  const mouse = useMouse(ref);
+  // useMouse reports screen pixels; the desktop lays out in logical ones
+  const rawMouse = useMouse(ref);
+  const mouse = useMemo(
+    () => ({
+      ...rawMouse,
+      docX: Math.round(toLogicalX(rawMouse.docX)),
+      docY: Math.round(toLogicalY(rawMouse.docY)),
+    }),
+    [rawMouse],
+  );
 
   // Right-clicks on the bare desktop land on this container (the icon layer
   // is pointer-events: none), so relay them to Icons for its context menu.
@@ -92,18 +103,29 @@ function WinXP({
   const [desktopContextMenuEvent, setDesktopContextMenuEvent] = useState(null);
   const desktopMenuSeq = useRef(0);
 
-  const { applyVolume } = useVolume();
   const vfs = useVFS();
   // This session's own desktop dressing and Start menu, read from its
   // user's profile rather than whoever happens to be on screen
   const screenSaver = useScreenSaver(vfs, userName);
   const wallpaper = useWallpaper(vfs, userName);
+  // The theme goes on the document root, where portals can see it, from
+  // whichever session is on screen
+  const appearance = useAppearance(vfs, userName);
+  useEffect(() => {
+    if (active) applyTheme(appearance);
+  }, [active, appearance]);
   const { allProgramsData, recentDocumentsData } = useStartMenuData(
     vfs,
     userName,
   );
   const dlg = useDialog();
   const [runOpen, setRunOpen] = useState(false);
+  // Task Manager's New Task opens the Run box
+  useEffect(() => {
+    const open = () => setRunOpen(true);
+    window.addEventListener('xp-run', open);
+    return () => window.removeEventListener('xp-run', open);
+  }, []);
   // Self-reference so shortcut resolution can recurse with a stable identity
   const shellOpenRef = useRef(null);
   // Extract All..., wherever it is started from
@@ -112,21 +134,26 @@ function WinXP({
 
   // Fast user switching keeps this session mounted while another user is on
   // screen. Silence its <audio>/<video> while it is not the active session
-  // (the console session owns the speakers in XP), and restore on return.
-  // Web Audio apps can't be reached this way — they read SessionActiveContext.
+  // (the console session owns the speakers in XP), and put each element's
+  // own mute back on return; its level belongs to whoever plays it.
+  // Web Audio apps can't be reached this way, they read SessionActiveContext.
   useEffect(() => {
     const root = ref.current;
     if (!root) return;
     root.querySelectorAll('audio, video').forEach(el => {
       if (active) {
+        if (el.dataset.forceMute !== '1') return;
         delete el.dataset.forceMute;
-        applyVolume(el);
+        el.muted = el.dataset.wasMuted === '1';
+        delete el.dataset.wasMuted;
       } else {
+        if (el.dataset.forceMute === '1') return;
+        el.dataset.wasMuted = el.muted ? '1' : '0';
         el.dataset.forceMute = '1';
         el.muted = true;
       }
     });
-  }, [active, applyVolume]);
+  }, [active]);
 
   const getFocusedAppId = useCallback(() => {
     if (state.focusing !== FOCUSING.WINDOW) return -1;
@@ -348,7 +375,11 @@ function WinXP({
       case 'My Music':
         shellOpen(SPECIAL_FOLDERS.MY_MUSIC);
         break;
+      // XP opens Add or Remove Programs at its last page; the Control
+      // Panel stands in until that applet exists
       case 'Control Panel':
+      // falls through
+      case 'Set Program Access and Defaults':
         shellOpen(EXE_PATHS.CONTROL);
         break;
       case 'Run...':
@@ -492,7 +523,7 @@ function WinXP({
 // Luna-style desktop rubber band (replaces the old dashed marquee)
 const SelectionBox = styled.div`
   position: absolute;
-  border: 1px solid #316ac5;
+  border: 1px solid var(--xp-highlight, #316ac5);
   background-color: rgba(49, 106, 197, 0.3);
   pointer-events: none;
 `;
@@ -509,8 +540,9 @@ const animation = {
 // flickers against the host arrow instead of replacing it.
 const Container = styled.div`
   font-family: Tahoma, 'Noto Sans', sans-serif;
-  height: 100vh;
-  width: 100vw;
+  /* the stage is the screen */
+  height: 100%;
+  width: 100%;
   overflow: hidden;
   position: relative;
   background: url(${bliss}) no-repeat center center fixed;

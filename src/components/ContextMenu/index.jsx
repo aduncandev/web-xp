@@ -2,6 +2,13 @@ import React, { useRef, useEffect, useState, useCallback } from 'react';
 import { createPortal } from 'react-dom';
 import styled from 'styled-components';
 import { menuFade, MENU_FADE_MS, SUBMENU_SHOW_DELAY_MS } from '../menuFade';
+import {
+  portalRoot,
+  screenSize,
+  toLogical,
+  toLogicalX,
+  toLogicalY,
+} from '../../WinXP/screen';
 
 // Caption glyphs (Restore/Minimize/Maximize/Close) come from the real
 // Marlett font Windows renders system menus with; skip them entirely when
@@ -36,10 +43,13 @@ export default function ContextMenu({ x, y, items, onAction, onClose }) {
     const el = menuRef.current;
     if (!el) return;
     const rect = el.getBoundingClientRect();
-    let ax = x;
-    let ay = y;
-    if (x + rect.width > window.innerWidth) ax = x - rect.width;
-    if (y + rect.height > window.innerHeight) ay = y - rect.height;
+    const w = toLogical(rect.width);
+    const h = toLogical(rect.height);
+    const screen = screenSize();
+    let ax = toLogicalX(x);
+    let ay = toLogicalY(y);
+    if (ax + w > screen.width) ax -= w;
+    if (ay + h > screen.height) ay -= h;
     if (ax < 0) ax = 0;
     if (ay < 0) ay = 0;
     setPos({ x: ax, y: ay });
@@ -128,7 +138,7 @@ export default function ContextMenu({ x, y, items, onAction, onClose }) {
         );
       })}
     </MenuWrap>,
-    document.body,
+    portalRoot(),
   );
 }
 
@@ -145,7 +155,7 @@ function SubMenuItemWrap({ item, onAction, onClose }) {
     // Flip the submenu to the left when it would overflow the viewport
     if (wrapRef.current) {
       const rect = wrapRef.current.getBoundingClientRect();
-      setFlipped(rect.right + 160 > window.innerWidth);
+      setFlipped(toLogicalX(rect.right) + 160 > screenSize().width);
     }
     timerRef.current = setTimeout(() => setOpen(true), SUBMENU_SHOW_DELAY_MS);
   };
@@ -243,27 +253,27 @@ function SubMenuItemWrap({ item, onAction, onClose }) {
 
 // --- Styled components ---
 
-const MenuWrap = styled.div`
+const MenuWrap = styled.div.attrs({ className: 'xp-menu' })`
   position: fixed;
   z-index: 99999;
-  background: #fff;
-  border: 1px solid #aca899;
+  background: var(--xp-menu, #fff);
+  border: 1px solid var(--xp-menu-border, #aca899);
   box-shadow: 2px 2px 4px rgba(0, 0, 0, 0.35);
   padding: 2px 0;
   min-width: 120px;
   font-family: Tahoma, 'Noto Sans', sans-serif;
-  font-size: 11px;
+  font-size: var(--xp-font-ui, 11px);
   user-select: none;
   animation: ${menuFade} ${MENU_FADE_MS}ms;
 `;
 
-const SubMenuContainer = styled.div`
+const SubMenuContainer = styled.div.attrs({ className: 'xp-menu' })`
   position: absolute;
   ${({ $flipped }) =>
     $flipped ? 'right: calc(100% - 4px);' : 'left: calc(100% - 4px);'}
   top: -3px;
-  background: #fff;
-  border: 1px solid #aca899;
+  background: var(--xp-menu, #fff);
+  border: 1px solid var(--xp-menu-border, #aca899);
   box-shadow: 2px 2px 4px rgba(0, 0, 0, 0.35);
   padding: 2px 0;
   min-width: 120px;
@@ -277,13 +287,17 @@ const ItemDiv = styled.div`
   height: ${({ $tall }) => ($tall ? 22 : 18)}px;
   padding: 0 20px 0 0;
   cursor: ${({ $disabled }) => ($disabled ? 'default' : 'pointer')};
-  color: ${({ $disabled }) => ($disabled ? '#aca899' : '#000')};
+  color: ${({ $disabled }) =>
+    $disabled ? 'var(--xp-gray-text, #aca899)' : 'var(--xp-menu-text, #000)'};
   font-weight: ${({ $bold }) => ($bold ? '700' : 'normal')};
 
   &:hover {
     background-color: ${({ $disabled }) =>
-      $disabled ? 'transparent' : '#316ac5'};
-    color: ${({ $disabled }) => ($disabled ? '#aca899' : '#fff')};
+      $disabled ? 'transparent' : 'var(--xp-menu-highlight, #316ac5)'};
+    color: ${({ $disabled }) =>
+      $disabled
+        ? 'var(--xp-gray-text, #aca899)'
+        : 'var(--xp-highlight-text, #fff)'};
   }
 
   .cm-icon {
@@ -327,6 +341,6 @@ const ItemDiv = styled.div`
 
 const Separator = styled.div`
   height: 1px;
-  background: #aca899;
+  background: var(--xp-menu-border, #aca899);
   margin: 3px 2px;
 `;

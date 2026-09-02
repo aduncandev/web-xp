@@ -1,6 +1,7 @@
 // The Image menu and the page's resize handles: operations on the whole
 // picture. Each settles whatever was in progress first, as Paint did.
 import { cloneCanvas } from './helpers';
+import { toLogical } from '../../screen';
 
 export function resizeCanvasTo(paint, w, h) {
   w = Math.max(1, Math.round(w));
@@ -31,8 +32,10 @@ export function startCanvasResize(paint, e, dir) {
   let nw = w;
   let nh = h;
   const move = ev => {
-    if (dir !== 'b') nw = Math.max(1, Math.round(w + (ev.clientX - sx) / z));
-    if (dir !== 'r') nh = Math.max(1, Math.round(h + (ev.clientY - sy) / z));
+    if (dir !== 'b')
+      nw = Math.max(1, Math.round(w + toLogical(ev.clientX - sx) / z));
+    if (dir !== 'r')
+      nh = Math.max(1, Math.round(h + toLogical(ev.clientY - sy) / z));
     paint.setResizeGhost({ w: nw, h: nh });
     paint.setStatusSize(`${nw}x${nh}`);
   };

@@ -4,7 +4,7 @@ import styled from 'styled-components';
 import volumeThumb from 'assets/xp/VolumeThumb.png';
 
 // The taskbar tray volume popup, matched to refkit volume-1.png (81x136):
-// #ECE9D8 raised panel, "Volume" label, a vertical Luna slider (2px groove,
+// var(--xp-face, #ece9d8) raised panel, "Volume" label, a vertical Luna slider (2px groove,
 // the plain green-capped thumb — cropped from the reference shot, stored
 // pre-rotated for the rotated-input trick below), and the Mute checkbox.
 const SliderWrapper = styled.div`
@@ -14,7 +14,7 @@ const SliderWrapper = styled.div`
   width: 81px;
   height: 136px;
   box-sizing: border-box;
-  background: #ece9d8;
+  background: var(--xp-face, #ece9d8);
   border: 1px solid;
   border-color: #ffffff #716f64 #716f64 #ffffff;
   box-shadow: 1px 1px 2px rgba(0, 0, 0, 0.35);
@@ -98,7 +98,7 @@ const MuteContainer = styled.label`
     width: 13px;
     height: 13px;
     background: #fff;
-    border: 1px solid #7f9db9;
+    border: 1px solid var(--xp-select-border, #7f9db9);
     position: relative;
 
     &:checked::after {
@@ -113,7 +113,13 @@ const MuteContainer = styled.label`
   }
 `;
 
-function VolumeSlider({ volume, onVolumeChange, isMuted, onMuteChange }) {
+function VolumeSlider({
+  volume,
+  onVolumeChange,
+  isMuted,
+  onMuteChange,
+  onCommit,
+}) {
   const handleSliderChange = e => {
     onVolumeChange(Number(e.target.value));
     // Dragging the slider unmutes, like the real thing
@@ -132,6 +138,10 @@ function VolumeSlider({ volume, onVolumeChange, isMuted, onMuteChange }) {
           max="100"
           value={volume}
           onChange={handleSliderChange}
+          // letting go of the thumb (or clicking where it sits) sounds the
+          // new level, like the real tray
+          onPointerUp={onCommit}
+          onKeyUp={onCommit}
         />
       </SliderBox>
       <MuteContainer>

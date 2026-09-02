@@ -50,7 +50,7 @@ export const START_MENU_DEFAULTS = {
   },
   taskbar: {
     showClock: true, // Notification area: "Show the clock"
-    showQuickLaunch: true, // the Quick Launch toolbar next to Start
+    showQuickLaunch: false, // the Quick Launch toolbar next to Start; off, as XP ships
     // Three Quick Launch slots — the sentinel is the Show Desktop button;
     // any slot can be reassigned to a program (our one deliberate
     // departure from stock XP).

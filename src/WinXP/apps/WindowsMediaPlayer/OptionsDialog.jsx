@@ -27,7 +27,7 @@ const Body = styled.div`
     border: 1px solid #919b9c;
     border-bottom: none;
     border-radius: 3px 3px 0 0;
-    background: linear-gradient(to bottom, #fff 0, #ece9d8 100%);
+    background: linear-gradient(to bottom, #fff 0, var(--xp-face, #ece9d8) 100%);
     cursor: default;
   }
   .wmp-opt__tab--on {

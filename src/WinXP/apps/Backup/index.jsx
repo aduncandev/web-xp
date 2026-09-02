@@ -143,7 +143,7 @@ const Body = styled.div`
   height: 100%;
   display: flex;
   flex-direction: column;
-  background: #ece9d8;
+  background: var(--xp-face, #ece9d8);
   font-family: Tahoma, 'Noto Sans', sans-serif;
   font-size: 11px;
   color: #000;
@@ -182,7 +182,7 @@ const Body = styled.div`
     text-align: left;
     font: inherit;
     background: #fff;
-    border: 1px solid #7f9db9;
+    border: 1px solid var(--xp-select-border, #7f9db9);
     border-radius: 2px;
     padding: 10px 12px;
     cursor: pointer;

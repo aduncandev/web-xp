@@ -5,6 +5,7 @@ import MinesweeperComponent from './Minesweeper';
 import VoltorbFlipComponent from './VoltorbFlip';
 import PinballComponent from './Pinball';
 import MarioVsLuigiComponent from './MarioVsLuigi';
+import { screenSize } from '../screen';
 
 // Device compatibility: which programs refuse a phone or a small screen, and
 // what they show instead. Checked at render and again at launch by resolveLaunchLayout.
@@ -20,7 +21,8 @@ export const isMobileUA = () => {
 
 const isScreenTooSmall = (minW, minH) => {
   if (typeof window === 'undefined') return false;
-  return window.innerWidth < minW || window.innerHeight < minH;
+  const { width, height } = screenSize();
+  return width < minW || height < minH;
 };
 
 export const checkMinesweeperBlock = () => isMobileUA();

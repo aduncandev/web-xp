@@ -16,20 +16,18 @@ import music from 'assets/windowsIcons/550(32x32).png';
 import computer from 'assets/windowsIcons/676(32x32).png';
 import controlPanel from 'assets/windowsIcons/300(32x32).png';
 import printer from 'assets/windowsIcons/549(32x32).png';
+import setAccess from 'assets/xp/DefaultPrograms(SP1Version).png';
 import help from 'assets/windowsIcons/747(32x32).png';
 import search from 'assets/windowsIcons/299(32x32).png';
 import run from 'assets/windowsIcons/743(32x32).png';
-import lock from 'assets/windowsIcons/546(32x32).png';
 import user from 'assets/userIcons/skillz.bmp';
 import { getUser, getAvatar } from '../../context/users';
-import shut from 'assets/windowsIcons/310(32x32).png';
-import allProgramsIcon from 'assets/windowsIcons/all-programs.ico';
 import storeBag from 'assets/store/bag.gif';
 import empty from 'assets/empty.png';
 
 import { useVFS } from '../../context/VFSContext';
 import { EXE_PATHS } from '../../context/vfsConstants';
-import { PROGRAMS, MFU_EXCLUDED, getProgramByPath } from '../apps';
+import { MFU_EXCLUDED, getProgramByPath } from '../apps';
 import {
   getStartMenuConfig,
   togglePinned,
@@ -204,13 +202,15 @@ function FooterMenu({
     items.run === 'link';
 
   return (
-    <div className={className}>
+    <div className={`${className} xp-startmenu`}>
       <header>
-        <img
-          className="header__img"
-          src={getAvatar(getUser(userName)?.avatarKey) || user}
-          alt="avatar"
-        />
+        <span className="header__tile">
+          <img
+            className="header__img"
+            src={getAvatar(getUser(userName)?.avatarKey) || user}
+            alt="avatar"
+          />
+        </span>
         <span className="header__text">{userName}</span>
       </header>
       <section className="menu" onMouseOver={onMouseOver}>
@@ -277,7 +277,7 @@ function FooterMenu({
             style={
               hovering === 'All Programs'
                 ? {
-                    backgroundColor: '#2f71cd',
+                    backgroundColor: 'var(--xp-start-hover, #2f71cd)',
                     color: '#FFF',
                   }
                 : {}
@@ -286,14 +286,7 @@ function FooterMenu({
             text={
               <div style={{ display: 'flex', alignItems: 'center' }}>
                 All Programs
-                <img
-                  src={allProgramsIcon}
-                  alt=""
-                  style={{
-                    marginLeft: '5px',
-                    height: '18px',
-                  }}
-                />
+                <span className="menu__moreprog-arrow" />
               </div>
             }
             icon={empty}
@@ -309,7 +302,7 @@ function FooterMenu({
               style={
                 hovering === 'My Recent Documents'
                   ? {
-                      backgroundColor: '#2f71cd',
+                      backgroundColor: 'var(--xp-start-hover, #2f71cd)',
                       color: '#FFF',
                     }
                   : {}
@@ -325,7 +318,9 @@ function FooterMenu({
               <div
                 style={{
                   borderLeftColor:
-                    hovering === 'My Recent Documents' ? '#FFF' : '#00136b',
+                    hovering === 'My Recent Documents'
+                      ? 'var(--xp-highlight-text, #fff)'
+                      : 'var(--xp-start-right-text, #00136b)',
                 }}
                 className="menu__arrow"
               />
@@ -350,6 +345,14 @@ function FooterMenu({
           {hasMiddleRight && <div className="menu__separator" />}
           {items.controlPanel === 'link' && (
             <Item text="Control Panel" icon={controlPanel} onClick={onClick} />
+          )}
+          {(items.setProgramAccess || 'link') === 'link' && (
+            <Item
+              className="menu__item--tall"
+              text="Set Program Access and Defaults"
+              icon={setAccess}
+              onClick={onClick}
+            />
           )}
           {items.printers === 'link' && (
             <Item onClick={onClick} text="Printers and Faxes" icon={printer} />
@@ -379,7 +382,7 @@ function FooterMenu({
       </section>
       <footer>
         <div className="footer__item" onClick={() => onClick('Log Off')}>
-          <img className="footer__item__img" src={lock} alt="" />
+          <span className="footer__item__img footer__item__img--logoff" />
           <span>
             <u>L</u>og Off
           </span>
@@ -388,7 +391,7 @@ function FooterMenu({
           className="footer__item"
           onClick={() => onClick('Turn Off Computer')}
         >
-          <img className="footer__item__img" src={shut} alt="" />
+          <span className="footer__item__img footer__item__img--turnoff" />
           <span>
             T<u>u</u>rn Off Computer
           </span>
@@ -454,12 +457,13 @@ function Item({
   );
 }
 export default styled(FooterMenu)`
-  font-size: 11px;
+  font-size: var(--xp-font-ui, 11px);
+  image-rendering: pixelated;
   line-height: 14px;
   display: flex;
   flex-direction: column;
   align-items: center;
-  background-color: #4282d6;
+  background-color: var(--xp-start-body, transparent);
   border-top-left-radius: 5px;
   border-top-right-radius: 5px;
   box-shadow: 2px 4px 2px rgba(0, 0, 0, 0.5);
@@ -471,55 +475,50 @@ export default styled(FooterMenu)`
     align-items: center;
     color: #fff;
     height: 65px;
-    padding: 0 5px 0 7px;
+    padding: 0 5px 0 6px;
     width: 100%;
     border-top-left-radius: 5px;
     border-top-right-radius: 5px;
-    background: linear-gradient(
-      to bottom,
-      #1868ce 0%,
-      #0e60cb 12%,
-      #0e60cb 20%,
-      #1164cf 32%,
-      #1667cf 33%,
-      #1b6cd3 47%,
-      #1e70d9 54%,
-      #2476dc 60%,
-      #297ae0 65%,
-      #3482e3 77%,
-      #3786e5 79%,
-      #428ee9 90%,
-      #4791eb 100%
+    /* the style's user pane bitmap; the gradient is the fallback */
+    border: 0 solid transparent;
+    border-image: var(--xp-p-startpanel-userpane-1, none);
+    background: var(
+      --xp-start-header,
+      linear-gradient(
+        to bottom,
+        #1868ce 0%,
+        #0e60cb 12%,
+        #0e60cb 20%,
+        #1164cf 32%,
+        #1667cf 33%,
+        #1b6cd3 47%,
+        #1e70d9 54%,
+        #2476dc 60%,
+        #297ae0 65%,
+        #3482e3 77%,
+        #3786e5 79%,
+        #428ee9 90%,
+        #4791eb 100%
+      )
     );
     overflow: hidden;
   }
-  header:before {
-    content: '';
-    display: block;
-    position: absolute;
-    top: 1px;
-    left: 0;
-    width: 100%;
-    height: 3px;
-    background: linear-gradient(
-      to right,
-      transparent 0,
-      rgb(255, 255, 255, 0.3) 1%,
-      rgb(255, 255, 255, 0.5) 2%,
-      rgb(255, 255, 255, 0.5) 95%,
-      rgb(255, 255, 255, 0.3) 98%,
-      rgb(255, 255, 255, 0.2) 99%,
-      transparent 100%
-    );
-    box-shadow: inset 0 -1px 1px #0e60cb;
+  /* the picture in the style's tile: 48px inside its frame */
+  .header__tile {
+    box-sizing: border-box;
+    width: 52px;
+    height: 52px;
+    padding: 2px;
+    margin-right: 8px;
+    flex-shrink: 0;
+    border: 0 solid transparent;
+    border-image: var(--xp-p-startpanel-userpicture-1, none);
+    image-rendering: pixelated;
   }
   .header__img {
-    box-sizing: content-box; /* 48px picture inside the 2px frame, like ref */
+    display: block;
     width: 48px;
     height: 48px;
-    margin-right: 10px;
-    border-radius: 3px;
-    border: 2px solid #ccd6eb;
   }
   .header__text {
     font-size: 19px;
@@ -527,7 +526,7 @@ export default styled(FooterMenu)`
     line-height: normal;
     font-family: 'Franklin Gothic Medium', 'Franklin Gothic', 'Segoe UI', Tahoma,
       sans-serif;
-    text-shadow: 1px 2px 2px rgba(0, 0, 0, 0.5);
+    text-shadow: 2px 2px var(--xp-start-user-shadow, rgba(0, 0, 0, 0.5));
   }
   footer {
     display: flex;
@@ -535,25 +534,30 @@ export default styled(FooterMenu)`
     align-items: center;
     justify-content: flex-end;
     color: #fff;
-    height: 41px;
+    height: 40px;
     width: 100%;
-    background: linear-gradient(
-      to bottom,
-      #4282d6 0%,
-      #3b85e0 3%,
-      #418ae3 5%,
-      #418ae3 17%,
-      #3c87e2 21%,
-      #3786e4 26%,
-      #3482e3 29%,
-      #2e7ee1 39%,
-      #2374df 49%,
-      #2072db 57%,
-      #196edb 62%,
-      #176bd8 72%,
-      #1468d5 75%,
-      #1165d2 83%,
-      #0f61cb 88%
+    border: 0 solid transparent;
+    border-image: var(--xp-p-startpanel-logoff-1, none);
+    background: var(
+      --xp-start-footer,
+      linear-gradient(
+        to bottom,
+        #4282d6 0%,
+        #3b85e0 3%,
+        #418ae3 5%,
+        #418ae3 17%,
+        #3c87e2 21%,
+        #3786e4 26%,
+        #3482e3 29%,
+        #2e7ee1 39%,
+        #2374df 49%,
+        #2072db 57%,
+        #196edb 62%,
+        #176bd8 72%,
+        #1468d5 75%,
+        #1165d2 83%,
+        #0f61cb 88%
+      )
     );
   }
 
@@ -569,18 +573,28 @@ export default styled(FooterMenu)`
       transform: translate(1px, 1px);
     }
   }
+  /* the key and the power orb, cut from the style's three-orb strip */
   .footer__item__img {
-    border-radius: 3px;
     margin-right: 2px;
-    width: 22px;
-    height: 22px;
+    width: 24px;
+    height: 24px;
+    background: var(--xp-i-startpanel-logoffbuttons-1, none) no-repeat;
+  }
+  .footer__item__img--logoff {
+    background-position: -24px 0;
+  }
+  .footer__item__img--turnoff {
+    background-position: -48px 0;
+  }
+  .footer__item:hover .footer__item__img {
+    background-image: var(--xp-i-startpanel-logoffbuttons-hot-1, none);
   }
   .menu {
     display: flex;
-    margin: 0 2px;
+    margin: 0;
     position: relative;
-    border-top: 1px solid #385de7;
-    box-shadow: 0 1px #385de7;
+    border-top: 1px solid var(--xp-start-rule, #385de7);
+    box-shadow: 0 1px var(--xp-start-rule, #385de7);
   }
   .orange-hr {
     position: absolute;
@@ -598,15 +612,27 @@ export default styled(FooterMenu)`
     border: 0;
   }
   .menu__right {
-    background-color: #cbe3ff;
-    border-left: solid #3a3aff5e 1px;
-    padding: 6px 5px 5px;
-    width: 190px;
-    color: #00136b;
+    box-sizing: content-box;
+    background-color: var(--xp-start-right, transparent);
+    border: 0 solid transparent;
+    border-left: solid var(--xp-start-right-border, transparent) 1px;
+    border-image: var(--xp-p-startpanel-placeslist-1, none);
+    image-rendering: pixelated;
+    box-sizing: border-box;
+    padding: 6px 8px 5px 6px;
+    width: 192px;
+    color: var(--xp-start-right-text, #00136b);
+  }
+  .menu__right .menu__item:hover {
+    background-color: var(--xp-start-places-hover, #2f71cd);
   }
   .menu__left {
-    background-color: #fff;
-    padding: 6px 5px 0;
+    background-color: var(--xp-window, #fff);
+    border: 0 solid transparent;
+    border-image: var(--xp-p-startpanel-proglist-1, none);
+    image-rendering: pixelated;
+    box-sizing: border-box;
+    padding: 8px 5px 0 9px;
     width: 190px;
     display: flex;
     flex-direction: column;
@@ -622,43 +648,45 @@ export default styled(FooterMenu)`
   }
 
   .menu__separator {
-    height: 7.5px;
-    background: linear-gradient(
-      to right,
-      rgba(0, 0, 0, 0) 0%,
-      rgba(0, 0, 0, 0.1) 50%,
-      rgba(0, 0, 0, 0) 100%
-    );
-    border-top: 3px solid transparent;
-    border-bottom: 3px solid transparent;
-    background-clip: content-box;
+    height: 2px;
+    margin: 2px 0 3px;
+    background: var(--xp-i-startpanel-proglistseparator-1, none) center
+      no-repeat;
   }
   .menu__right .menu__separator {
-    background: linear-gradient(
-      to right,
-      rgba(0, 0, 0, 0) 0%,
-      #87b3e2b5 50%,
-      rgba(0, 0, 0, 0) 100%
-    );
-    background-clip: content-box;
+    background-image: var(--xp-i-startpanel-placeslistseparator-1, none);
   }
   .menu__item {
+    box-sizing: border-box;
     padding: 1px;
     display: flex;
     align-items: center;
     margin-bottom: 4px;
   }
   .menu__left .menu__item {
-    height: 34px;
+    height: 36px;
   }
   .menu__right .menu__item {
     height: 26px;
     margin-bottom: 4px;
     line-height: 13px;
   }
+  /* a row whose caption wraps stands 36px, like Set Program Access and Defaults */
+  .menu__right .menu__item--tall {
+    height: 32px;
+  }
+  .menu__item {
+    color: var(--xp-start-prog-text, #000);
+  }
+  .menu__right .menu__item {
+    color: var(--xp-start-right-text, #00136b);
+  }
+  .menu__item:hover,
+  .menu__right .menu__item:hover {
+    color: var(--xp-highlight-text, #fff);
+  }
   .menu__item:hover {
-    color: white;
-    background-color: #2f71cd;
+    background-color: var(--xp-start-hover, #2f71cd);
   }
   .menu__item:hover .menu__item__subtext {
     color: white;
@@ -671,12 +699,12 @@ export default styled(FooterMenu)`
     position: relative;
   }
   .menu__right .menu__item__img {
-    margin-right: 3px;
+    margin-right: 5px;
     width: 22px;
     height: 22px;
   }
   .menu__left .menu__item__img {
-    margin-right: 3px;
+    margin-right: 5px;
     width: 30px;
     height: 30px;
   }
@@ -701,6 +729,17 @@ export default styled(FooterMenu)`
   }
   .menu__left .menu__item--allprograms {
     height: 24px;
+    margin-bottom: 7px;
+  }
+  .menu__moreprog-arrow {
+    width: 16px;
+    height: 20px;
+    margin-left: 6px;
+    background: var(--xp-i-startpanel-moreprogramsarrow-1, none) center
+      no-repeat;
+  }
+  .menu__item:hover .menu__moreprog-arrow {
+    background-image: var(--xp-i-startpanel-moreprogramsarrow-hot-1, none);
   }
   .menu__item:hover .menu__arrow {
     border-left-color: #fff;
@@ -708,7 +747,7 @@ export default styled(FooterMenu)`
   .menu__arrow {
     border: 3.5px solid transparent;
     border-right: 0;
-    border-left-color: #00136b;
+    border-left-color: var(--xp-start-right-text, #00136b);
     position: absolute;
     left: 146px;
   }

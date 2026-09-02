@@ -9,7 +9,7 @@ import { useDialog } from '../../../context/DialogContext';
  *
  * Geometry, colors and strings are taken from the reference capture
  * refkit/shots/realxp/calculator-standard.png (260x260 window, 34px button
- * cells with 5px/6px gaps, #FF0000 / #0000FF key text, #7F9DB9 display
+ * cells with 5px/6px gaps, #FF0000 / #0000FF key text, var(--xp-select-border, #7f9db9) display
  * border, double-sunken memory indicator box).
  *
  * Semantics are the real calc.exe immediate-execution model: no operator
@@ -457,7 +457,7 @@ const CalcBtn = styled(XPButton)`
 const Root = styled.div`
   position: absolute;
   inset: 0;
-  background: #ece9d8;
+  background: var(--xp-face, #ece9d8);
   font-family: Tahoma, 'Noto Sans', sans-serif;
   font-size: 11px;
   overflow: hidden;
@@ -473,7 +473,7 @@ const Root = styled.div`
     height: 23px;
     line-height: 21px;
     background: #fff;
-    border: 1px solid #7f9db9;
+    border: 1px solid var(--xp-select-border, #7f9db9);
     text-align: right;
     padding: 0 4px 0 2px;
     white-space: nowrap;
@@ -494,9 +494,9 @@ const Root = styled.div`
     height: 26px;
     margin: 1px 16px 0 0;
     flex-shrink: 0;
-    background: #ece9d8;
+    background: var(--xp-face, #ece9d8);
     border: 1px solid;
-    border-color: #aca899 #ffffff #ffffff #aca899;
+    border-color: var(--xp-face-shadow, #aca899) #ffffff #ffffff var(--xp-face-shadow, #aca899);
     box-shadow: inset 1px 1px 0 #716f64, inset -1px -1px 0 #f1efe2;
     color: #ff0000;
     text-align: center;

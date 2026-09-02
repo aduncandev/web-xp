@@ -2,14 +2,17 @@ const File = [
   {
     type: 'item',
     text: 'New',
+    hotkey: 'Ctrl+N',
   },
   {
     type: 'item',
     text: 'Open...',
+    hotkey: 'Ctrl+O',
   },
   {
     type: 'item',
     text: 'Save',
+    hotkey: 'Ctrl+S',
   },
   {
     type: 'item',
@@ -27,6 +30,7 @@ const File = [
     type: 'item',
     disable: true,
     text: 'Print...',
+    hotkey: 'Ctrl+P',
   },
   {
     type: 'separator',
@@ -41,7 +45,8 @@ const Edit = [
   {
     type: 'item',
     disable: true,
-    text: 'Undo...',
+    text: 'Undo',
+    hotkey: 'Ctrl+Z',
   },
   {
     type: 'separator',
@@ -50,21 +55,25 @@ const Edit = [
     type: 'item',
     disable: true,
     text: 'Cut',
+    hotkey: 'Ctrl+X',
   },
   {
     type: 'item',
     disable: true,
     text: 'Copy',
+    hotkey: 'Ctrl+C',
   },
   {
     type: 'item',
     disable: true,
     text: 'Paste',
+    hotkey: 'Ctrl+V',
   },
   {
     type: 'item',
     disable: true,
     text: 'Delete',
+    hotkey: 'Del',
   },
   {
     type: 'separator',
@@ -73,21 +82,25 @@ const Edit = [
     type: 'item',
     disable: true,
     text: 'Find...',
+    hotkey: 'Ctrl+F',
   },
   {
     type: 'item',
     disable: true,
     text: 'Find Next',
+    hotkey: 'F3',
   },
   {
     type: 'item',
     disable: true,
     text: 'Replace...',
+    hotkey: 'Ctrl+H',
   },
   {
     type: 'item',
     disable: true,
     text: 'Go To...',
+    hotkey: 'Ctrl+G',
   },
   {
     type: 'separator',
@@ -95,10 +108,12 @@ const Edit = [
   {
     type: 'item',
     text: 'Select All',
+    hotkey: 'Ctrl+A',
   },
   {
     type: 'item',
     text: 'Time/Date',
+    hotkey: 'F5',
   },
 ];
 

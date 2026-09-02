@@ -1,76 +1,104 @@
 import { css } from 'styled-components';
 
-import { getArt } from '../xpArt';
-
-// Luna scrollbar chrome (bitmaps cropped from real XP screenshots), shared
-// by the desktop container and portaled dialogs — portals render outside
-// the WinXP container, so its scoped scrollbar styles don't reach them.
-// Missing bitmaps degrade to 'none'.
-const sbUrl = name => {
-  const url = getArt(name, null);
-  return url ? `url(${url})` : 'none';
-};
+// Luna scrollbar chrome from the style's own bitmaps (theme tokens), shared
+// by the desktop container and portaled dialogs. Arrow buttons run up, down,
+// left, right with normal, hot, pressed and disabled states; the thumb has
+// four states and a gripper; the shaft is the track.
+const part = (name, n) => `var(--xp-p-${name}-${n}, none)`;
+const edges = (name, n) => `var(--xp-pn-${name}-${n}, none)`;
+const image = (name, n) => `var(--xp-i-${name}-${n}, none)`;
+const glyph = (name, n) => `var(--xp-g-${name}-${n}, none)`;
+// A border-image paints over the background, so the arrow's face is the
+// plain 17x17 state image under the glyph instead of a nine-slice
+const arrow = (dir, base) => `
+  & ::-webkit-scrollbar-button:${dir} {
+    background-image: ${glyph('scrollbar-arrowbtn', base)}, ${image(
+  'scrollbar-arrowbtn',
+  base,
+)};
+  }
+  & ::-webkit-scrollbar-button:${dir}:hover {
+    background-image: ${glyph('scrollbar-arrowbtn', base + 1)}, ${image(
+  'scrollbar-arrowbtn',
+  base + 1,
+)};
+  }
+  & ::-webkit-scrollbar-button:${dir}:active {
+    background-image: ${glyph('scrollbar-arrowbtn', base + 2)}, ${image(
+  'scrollbar-arrowbtn',
+  base + 2,
+)};
+  }
+`;
+// The thumb's rounded ends are the nine-slice edges; its middle is the
+// exporter's -mid slice stretched under the gripper
+const thumb = (axis, state) => `
+    border-image: ${edges(`scrollbar-thumbbtn${axis}`, state)};
+    background-image: var(--xp-i-scrollbar-gripper${axis}-${state}, none), ${image(
+  `scrollbar-thumbbtn${axis}-mid`,
+  state,
+)};
+`;
 
 export const lunaScrollbars = css`
   & ::-webkit-scrollbar {
     width: 17px;
     height: 17px;
   }
+  & ::-webkit-scrollbar-track,
+  & ::-webkit-scrollbar-thumb,
+  & ::-webkit-scrollbar-button {
+    border: 0 solid transparent;
+    image-rendering: pixelated;
+  }
+  & ::-webkit-scrollbar-thumb {
+    background-repeat: no-repeat, no-repeat;
+    background-position: center, center;
+    background-size: auto, 100% 100%;
+  }
   & ::-webkit-scrollbar-track:vertical {
-    background: ${sbUrl('scroll-track-v')} repeat-y;
+    border-image: ${part('scrollbar-lowertrackvert', 1)};
   }
   & ::-webkit-scrollbar-track:horizontal {
-    background: ${sbUrl('scroll-track-h')} repeat-x;
+    border-image: ${part('scrollbar-lowertrackhorz', 1)};
   }
   & ::-webkit-scrollbar-thumb:vertical {
-    background-image: ${sbUrl('scroll-thumb-v-grip')},
-      ${sbUrl('scroll-thumb-v-top')}, ${sbUrl('scroll-thumb-v-bottom')},
-      ${sbUrl('scroll-thumb-v-mid')};
-    background-repeat: no-repeat, no-repeat, no-repeat, repeat-y;
-    background-position: center, left top, left bottom, left top;
+    ${thumb('vert', 1)}
+  }
+  & ::-webkit-scrollbar-thumb:vertical:hover {
+    ${thumb('vert', 2)}
+  }
+  & ::-webkit-scrollbar-thumb:vertical:active {
+    ${thumb('vert', 3)}
   }
   & ::-webkit-scrollbar-thumb:horizontal {
-    background-image: ${sbUrl('scroll-thumb-h-grip')},
-      ${sbUrl('scroll-thumb-h-left')}, ${sbUrl('scroll-thumb-h-right')},
-      ${sbUrl('scroll-thumb-h-mid')};
-    background-repeat: no-repeat, no-repeat, no-repeat, repeat-x;
-    background-position: center, left top, right top, left top;
+    ${thumb('horz', 1)}
   }
+  & ::-webkit-scrollbar-thumb:horizontal:hover {
+    ${thumb('horz', 2)}
+  }
+  & ::-webkit-scrollbar-thumb:horizontal:active {
+    ${thumb('horz', 3)}
+  }
+  /* Chromium draws no buttons unless they are given display: block */
   & ::-webkit-scrollbar-button {
+    display: block;
     width: 17px;
     height: 17px;
-    background-repeat: no-repeat;
+    background-repeat: no-repeat, no-repeat;
+    background-position: center, center;
   }
-  & ::-webkit-scrollbar-button:vertical:decrement {
-    background-image: ${sbUrl('scroll-up')};
-  }
-  & ::-webkit-scrollbar-button:vertical:increment {
-    background-image: ${sbUrl('scroll-down')};
-  }
-  & ::-webkit-scrollbar-button:horizontal:decrement {
-    background-image: ${sbUrl('scroll-left')};
-  }
-  & ::-webkit-scrollbar-button:horizontal:increment {
-    background-image: ${sbUrl('scroll-right')};
-  }
+  ${arrow('vertical:decrement', 1)}
+  ${arrow('vertical:increment', 5)}
+  ${arrow('horizontal:decrement', 9)}
+  ${arrow('horizontal:increment', 13)}
   & ::-webkit-scrollbar-button:vertical:start:increment,
   & ::-webkit-scrollbar-button:vertical:end:decrement,
   & ::-webkit-scrollbar-button:horizontal:start:increment,
   & ::-webkit-scrollbar-button:horizontal:end:decrement {
     display: none;
   }
-  /* Hover lightens the whole piece, pressing tints it blue, as Luna did */
-  & ::-webkit-scrollbar-thumb:hover,
-  & ::-webkit-scrollbar-button:hover {
-    box-shadow: inset 0 0 0 17px rgba(255, 255, 255, 0.3);
-  }
-  & ::-webkit-scrollbar-thumb:active,
-  & ::-webkit-scrollbar-button:active {
-    box-shadow: inset 0 0 0 17px rgba(40, 73, 135, 0.2);
-  }
   & ::-webkit-scrollbar-corner {
-    background: #ece9d8;
+    background: var(--xp-face, #ece9d8);
   }
 `;
-
-export default lunaScrollbars;

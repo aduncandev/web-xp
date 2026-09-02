@@ -1,0 +1,76 @@
+/*
+ * Luna rules that reach across components: every property sheet draws its
+ * tab strip the same way, so the style's tab bitmaps (Tab.TabItem: normal,
+ * hot, selected; Tab.Pane for the page below) are applied here to all of
+ * them at once. Applies while the document root has data-xp-style="luna".
+ */
+html[data-xp-style='luna'] .dp__tab,
+html[data-xp-style='luna'] .sp__tab,
+html[data-xp-style='luna'] .tm__tab,
+html[data-xp-style='luna'] .csm__tab,
+html[data-xp-style='luna'] .fo__tab,
+html[data-xp-style='luna'] .rb__tab,
+html[data-xp-style='luna'] .tp__tab,
+html[data-xp-style='luna'] .pr-tab {
+  box-sizing: border-box;
+  height: 18px;
+  line-height: 18px;
+  margin-top: 2px;
+  margin-right: 0;
+  padding: 0 8px;
+  border: 0 solid transparent;
+  border-radius: 0;
+  border-image: var(--xp-p-tab-tabitem-1, none);
+  background: none;
+  image-rendering: pixelated;
+  top: 0;
+}
+html[data-xp-style='luna'] .dp__tab:hover,
+html[data-xp-style='luna'] .sp__tab:hover,
+html[data-xp-style='luna'] .tm__tab:hover,
+html[data-xp-style='luna'] .csm__tab:hover,
+html[data-xp-style='luna'] .fo__tab:hover,
+html[data-xp-style='luna'] .rb__tab:hover,
+html[data-xp-style='luna'] .tp__tab:hover,
+html[data-xp-style='luna'] .pr-tab:hover {
+  border-image: var(--xp-p-tab-tabitem-2, none);
+}
+/* the selected tab stands two pixels taller and joins the page */
+html[data-xp-style='luna'] .dp__tab--active,
+html[data-xp-style='luna'] .sp__tab--active,
+html[data-xp-style='luna'] .tm__tab--active,
+html[data-xp-style='luna'] .csm__tab--active,
+html[data-xp-style='luna'] .fo__tab--active,
+html[data-xp-style='luna'] .rb__tab--active,
+html[data-xp-style='luna'] .tp__tab--active,
+html[data-xp-style='luna'] .pr-tab.active,
+html[data-xp-style='luna'] .dp__tab--active:hover,
+html[data-xp-style='luna'] .sp__tab--active:hover,
+html[data-xp-style='luna'] .tm__tab--active:hover,
+html[data-xp-style='luna'] .csm__tab--active:hover,
+html[data-xp-style='luna'] .fo__tab--active:hover,
+html[data-xp-style='luna'] .rb__tab--active:hover,
+html[data-xp-style='luna'] .tp__tab--active:hover,
+html[data-xp-style='luna'] .pr-tab.active:hover {
+  position: relative;
+  z-index: 2;
+  height: 21px;
+  line-height: 20px;
+  margin-top: 0;
+  margin-bottom: -1px;
+  padding: 0 10px;
+  border-image: var(--xp-p-tab-tabitem-3, none);
+  background: none;
+}
+html[data-xp-style='luna'] .dp__page,
+html[data-xp-style='luna'] .sp__page,
+html[data-xp-style='luna'] .tm__page,
+html[data-xp-style='luna'] .csm__page,
+html[data-xp-style='luna'] .fo__page,
+html[data-xp-style='luna'] .rb__page,
+html[data-xp-style='luna'] .tp__page,
+html[data-xp-style='luna'] .pr-page {
+  border: 0 solid transparent;
+  border-image: var(--xp-p-tab-pane-1, none);
+  image-rendering: pixelated;
+}

@@ -295,11 +295,11 @@ const Pane = styled.div`
     }
     &:hover .ft-label__text {
       text-decoration: underline;
-      color: #316ac5;
+      color: var(--xp-highlight, #316ac5);
     }
     &.active {
       .ft-label__text {
-        background: #316ac5;
+        background: var(--xp-highlight, #316ac5);
         color: #fff;
       }
     }

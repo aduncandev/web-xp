@@ -12,6 +12,7 @@ import { ColumnDivider, useColumns } from '../../../components/ListView';
 import XPButton from '../../../components/XPButton';
 import { useDialog } from '../../../context/DialogContext';
 import * as shellBus from '../../shellBus';
+import { POWER_ACTION } from '../../constants';
 import * as usersMod from '../../../context/users';
 import { GroupBox, LedMeter, HistoryGraph } from './PerfGraphs';
 import {
@@ -267,6 +268,22 @@ export default function TaskManager({ onClose, onSetHeader, isFocus }) {
       case 'Exit Task Manager':
         onClose();
         break;
+      // the shell owns the Run box; it listens for this
+      case 'New Task (Run...)':
+        window.dispatchEvent(new CustomEvent('xp-run'));
+        break;
+      case 'Bring To Front':
+        switchTo();
+        break;
+      case 'Turn Off':
+        shellBus.requestPower(POWER_ACTION.TURN_OFF);
+        break;
+      case 'Restart':
+        shellBus.requestPower(POWER_ACTION.RESTART);
+        break;
+      case 'Switch User':
+        shellBus.requestPower(POWER_ACTION.SWITCH_USER);
+        break;
       case 'Refresh Now':
         step();
         break;
@@ -280,13 +297,36 @@ export default function TaskManager({ onClose, onSetHeader, isFocus }) {
         setSpeed(name);
         break;
       default:
+        if (name === `Log Off ${currentUser}`)
+          shellBus.requestPower(POWER_ACTION.LOG_OFF);
         break;
     }
   };
 
+  // XP's bar: File, Options, View, Windows (Applications tab only), Shut
+  // Down, Help; View's tail and the Windows menu follow the current tab
+  const hasTask = selectedWinId != null;
+  const viewTail =
+    tab === 'applications'
+      ? [
+          { type: 'separator' },
+          { type: 'item', text: 'Large Icons', disable: true },
+          { type: 'item', text: 'Small Icons', disable: true },
+          { type: 'item', text: 'Details', symbol: 'circle' },
+        ]
+      : tab === 'performance'
+      ? [
+          { type: 'separator' },
+          { type: 'item', text: 'CPU History', disable: true },
+          { type: 'item', text: 'Show Kernel Times', disable: true },
+        ]
+      : [
+          { type: 'separator' },
+          { type: 'item', text: 'Select Columns...', disable: true },
+        ];
   const menuData = {
     File: [
-      { type: 'item', text: 'New Task (Run...)', disable: true },
+      { type: 'item', text: 'New Task (Run...)' },
       { type: 'separator' },
       { type: 'item', text: 'Exit Task Manager' },
     ],
@@ -296,8 +336,8 @@ export default function TaskManager({ onClose, onSetHeader, isFocus }) {
         text: 'Always On Top',
         symbol: alwaysOnTop ? 'check' : undefined,
       },
-      { type: 'separator' },
-      { type: 'item', text: 'Shut Down', disable: true },
+      { type: 'item', text: 'Minimize On Use', symbol: 'check' },
+      { type: 'item', text: 'Hide When Minimized' },
     ],
     View: [
       { type: 'item', text: 'Refresh Now' },
@@ -311,6 +351,27 @@ export default function TaskManager({ onClose, onSetHeader, isFocus }) {
           symbol: speed === s ? 'circle' : undefined,
         })),
       },
+      ...viewTail,
+    ],
+    ...(tab === 'applications'
+      ? {
+          Windows: [
+            { type: 'item', text: 'Tile Horizontally', disable: true },
+            { type: 'item', text: 'Tile Vertically', disable: true },
+            { type: 'item', text: 'Minimize', disable: true },
+            { type: 'item', text: 'Maximize', disable: true },
+            { type: 'item', text: 'Cascade', disable: true },
+            { type: 'item', text: 'Bring To Front', disable: !hasTask },
+          ],
+        }
+      : {}),
+    'Shut Down': [
+      { type: 'item', text: 'Stand By', disable: true },
+      { type: 'item', text: 'Hibernate', disable: true },
+      { type: 'item', text: 'Turn Off' },
+      { type: 'item', text: 'Restart' },
+      { type: 'item', text: `Log Off ${currentUser}` },
+      { type: 'item', text: 'Switch User' },
     ],
     Help: [{ type: 'item', text: 'About Task Manager', disable: true }],
   };
@@ -657,14 +718,14 @@ const Container = styled.div`
   inset: 0;
   display: flex;
   flex-direction: column;
-  background: #ece9d8;
+  background: var(--xp-face, #ece9d8);
   font-family: Tahoma, 'Noto Sans', sans-serif;
   font-size: 11px;
   user-select: none;
 
   .tm__menus {
     height: 20px;
-    background: #ece9d8;
+    background: var(--xp-face, #ece9d8);
     border-bottom: 1px solid #d8d2bd;
     padding-left: 2px;
   }
@@ -711,7 +772,7 @@ const Container = styled.div`
     flex: 1;
     display: flex;
     flex-direction: column;
-    border: 1px solid #7f9db9;
+    border: 1px solid var(--xp-select-border, #7f9db9);
     background: #fff;
     min-height: 0;
   }
@@ -743,7 +804,7 @@ const Container = styled.div`
       #f7f7f1 70%,
       #f1efe2 100%
     );
-    border-bottom: 1px solid #aca899;
+    border-bottom: 1px solid var(--xp-face-shadow, #aca899);
   }
   .lv__hcell {
     position: relative;
@@ -766,7 +827,7 @@ const Container = styled.div`
     cursor: default;
   }
   .lv__row--sel {
-    background: #316ac5;
+    background: var(--xp-highlight, #316ac5);
     color: #fff;
   }
   .lv__cell {
@@ -863,7 +924,8 @@ const Container = styled.div`
   }
   .tm__status-pane {
     border: 1px solid;
-    border-color: #aca899 #fff #fff #aca899;
+    border-color: var(--xp-face-shadow, #aca899) #fff #fff
+      var(--xp-face-shadow, #aca899);
     padding: 1px 8px;
     white-space: nowrap;
   }

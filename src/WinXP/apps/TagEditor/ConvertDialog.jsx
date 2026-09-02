@@ -34,7 +34,7 @@ const Body = styled.div`
     min-width: 0;
     height: 19px;
     padding: 0 3px;
-    border: 1px solid #7f9db9;
+    border: 1px solid var(--xp-select-border, #7f9db9);
     font-family: inherit;
     font-size: 11px;
   }
@@ -50,7 +50,7 @@ const Body = styled.div`
   .cv__list {
     height: 150px;
     overflow: auto;
-    border: 1px solid #7f9db9;
+    border: 1px solid var(--xp-select-border, #7f9db9);
     background: #fff;
   }
   .cv__item {

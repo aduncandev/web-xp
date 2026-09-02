@@ -461,7 +461,7 @@ const Div = styled.div`
   height: 100%;
   display: flex;
   flex-direction: column;
-  background: #ece9d8;
+  background: var(--xp-face, #ece9d8);
   font-family: Tahoma, 'Noto Sans', sans-serif;
   font-size: 11px;
 
@@ -487,7 +487,7 @@ const Div = styled.div`
     }
     input {
       width: 100%;
-      border: 1px solid #7f9db9;
+      border: 1px solid var(--xp-select-border, #7f9db9);
       padding: 3px;
       font-family: Tahoma, 'Noto Sans', sans-serif;
       font-size: 11px;
@@ -506,7 +506,7 @@ const Div = styled.div`
     align-items: center;
     gap: 3px;
     padding: 4px;
-    border-bottom: 1px solid #aca899;
+    border-bottom: 1px solid var(--xp-face-shadow, #aca899);
     button.active {
       font-weight: bold;
     }
@@ -544,7 +544,7 @@ const Div = styled.div`
     overflow-y: auto;
     background: #fff;
     margin: 3px;
-    border: 1px solid #7f9db9;
+    border: 1px solid var(--xp-select-border, #7f9db9);
     padding: 4px 8px;
   }
 
@@ -678,7 +678,7 @@ const Div = styled.div`
     margin: 0 0 5px 12px;
     padding: 4px 7px;
     background: #f4f6fb;
-    border-left: 3px solid #7f9db9;
+    border-left: 3px solid var(--xp-select-border, #7f9db9);
     line-height: 1.45;
     overflow-wrap: anywhere;
   }
@@ -687,7 +687,7 @@ const Div = styled.div`
     width: 100%;
     height: 48px;
     resize: none;
-    border: 1px solid #7f9db9;
+    border: 1px solid var(--xp-select-border, #7f9db9);
     font-family: Tahoma, 'Noto Sans', sans-serif;
     font-size: 11px;
     padding: 3px;
@@ -712,8 +712,8 @@ const Div = styled.div`
     align-items: center;
     padding: 0 6px;
     border: 1px solid #dfdfd4;
-    border-top-color: #aca899;
-    border-left-color: #aca899;
+    border-top-color: var(--xp-face-shadow, #aca899);
+    border-left-color: var(--xp-face-shadow, #aca899);
     color: #333;
     &.grow {
       flex: 1;

@@ -4,6 +4,7 @@ import styled from 'styled-components';
 
 import { useVolume } from '../../../context/VolumeContext';
 import splashArt from 'assets/xp/PinballSplash.png';
+import { portalRoot } from '../../screen';
 
 // The real game paints its SPLASH_BITMAP over the screen while it loads and
 // only tears it down once the table is ready.
@@ -89,7 +90,7 @@ function PinBall({ isFocus }) {
           <Splash onClick={() => setSplash(false)}>
             <img src={splashArt} alt="3D Pinball" />
           </Splash>,
-          document.body,
+          portalRoot(),
         )}
       {!isFocus && <Overlay />}
     </AppContainer>

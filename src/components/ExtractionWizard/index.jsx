@@ -63,7 +63,7 @@ const Body = styled.div`
     min-width: 0;
     height: 19px;
     padding: 0 3px;
-    border: 1px solid #7f9db9;
+    border: 1px solid var(--xp-select-border, #7f9db9);
     font-family: inherit;
     font-size: 11px;
   }
@@ -71,7 +71,7 @@ const Body = styled.div`
     height: 14px;
     margin-top: 6px;
     padding: 1px;
-    border: 1px solid #7f9db9;
+    border: 1px solid var(--xp-select-border, #7f9db9);
     background: #fff;
   }
   .zw__progress span {
@@ -107,7 +107,7 @@ const Body = styled.div`
     gap: 6px;
     padding: 10px 12px;
     border-top: 1px solid #d5d2ca;
-    background: #ece9d8;
+    background: var(--xp-face, #ece9d8);
   }
   .zw__error {
     color: #a00;
