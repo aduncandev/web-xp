@@ -289,6 +289,51 @@ A field in `START_MENU_DEFAULTS` (`startMenuConfig.js`), which
 `TaskbarProperties` or `CustomizeStartMenu`. Uninstalling a program must
 forget it everywhere; `scrubProgramRefs` is where that happens.
 
+## DELTASCEND
+
+The climbing game under `src/WinXP/apps/ClimbRace/` is a canvas game, not
+a React tree, and it is the app most likely to keep growing. It runs on a
+fixed 1/30 s step: `engine.js` owns the frame loop and the keyboard, and
+everything else is a module of plain functions that take the game state as
+their first argument.
+
+| File | Holds |
+| --- | --- |
+| `state.js` | `createState`: every field the game has, grouped and commented. Add a field here first. |
+| `constants.js` | the view size, the 40px tile, the step, easings, `cellKey` |
+| `levels.js` | the three level records (church, generated, endless); `levelgen.js` plans a generated wall from a seed, `rooms/` is the church's room dump |
+| `run.js` | loading a level, the timer and switch, and `tick`, the step that dispatches by `phase` and `mode` |
+| `walker.js`, `kris.js` | Kris on foot, Kris on the wall (the climb state machine) |
+| `hazards.js` | brittle cells, bells, coins, water streams, glow, particles |
+| `endless.js` | THE FLOOD, grown ahead of the camera |
+| `menu.js`, `dialog.js`, `cup.js` | the screens, the text box, the cup on the church floor |
+| `secret.js`, `park.js`, `secretDraw.js` | the rooms behind the codes |
+| `draw.js`, `board.js`, `backdrop.js`, `assets.js` | rendering: sprites and pixel fonts, the timer board, the painted walls, the tinted sprite copies |
+| `sprites.js`, `sounds.js`, `fonts.js`, `dialogue.js` | the asset tables and the two widgets (the dark box, the code entry) |
+
+The rules of the house:
+
+- A field lives in `state.js`, with a comment saying what it is. Modules
+  never keep game state in module-level variables; only caches of drawn
+  assets live outside `game`.
+- A function that reads or writes state takes `game` first. Functions on
+  data alone (level builders, `cellKey`) do not.
+- `tick` in `run.js` is the one place that decides what runs each step; a
+  new phase or mode gets its branch there and its step function in the
+  module that owns it.
+- To add a hazard: its per-step behaviour in `hazards.js`, its drawing in
+  the same file, its level data in the level record (`levels.js` for the
+  church and endless, `levelgen.js` for generated walls).
+- To add a level kind: a builder in `levels.js` returning the same fields
+  as the others, a menu entry in `menu.js`, and only then branches on
+  `L.kind` where the new kind really differs.
+
+`tests/deltascend.spec.js` drives the engine frame by frame with the clock
+and `Math.random` pinned and hashes the canvas at the end of each scenario.
+The hashes are the game's behaviour. A refactor must leave them alone; a
+deliberate change to the game updates them, and the scenarios are the
+place to add coverage for a new feature.
+
 ## Tests
 
 ```bash
