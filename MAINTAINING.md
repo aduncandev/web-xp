@@ -334,6 +334,93 @@ The hashes are the game's behaviour. A refactor must leave them alone; a
 deliberate change to the game updates them, and the scenarios are the
 place to add coverage for a new feature.
 
+## Windows Media Player
+
+`src/WinXP/apps/WindowsMediaPlayer/index.jsx` coordinates; the work is in
+hooks and parts, and `tests/wmp.spec.js` pins the library search, playback,
+the visualization buttons and playlists.
+
+| File | Holds |
+| --- | --- |
+| `useLibrary.js` | the library's paths, Deleted Items and Tools > Options, all in the hive |
+| `useTrackInfo.js` | tags, the user's tag edits, durations, playable URLs, session tracks (opened, dropped, URLs) |
+| `usePlaylists.js` | saved `.m3u` playlists and the new/rename/delete dialogs |
+| `usePlayback.js` | the media element, the audio graph, play/stop/step/nudge, carrying playback across tracks |
+| `useVisualization.js`, `useAlbumArt.js` | the canvas loop and the current track's picture |
+| `useTrackMenus.js`, `menuActions.js` | the right-click menus and the menu bar's verbs |
+| `PlayerFrame.jsx`, `Transport.jsx`, `NowPlaying.jsx` | the skin, the deck, the screen and playlist pane |
+| `skinImages.js` | the skin's bitmaps grouped by control |
+| `views.jsx`, `chrome.js`, `panes.js`, `library.js`, `playlists.js`, `visualizations.js` | as before: the other tasks, the styled frame, the list styles, the library model, playlist files, the visualizations |
+
+Anything that starts playback goes through `playTrack` or `playList` in
+`index.jsx`; anything that changes what the player knows about a file goes
+through `useTrackInfo`.
+
+## Paint
+
+`src/WinXP/apps/Paint/index.jsx` holds the tool and view state and wires the
+parts below; `tests/paint.spec.js` pins drawing, undo and redo, the fill
+tool, Attributes and Save As.
+
+| File | Holds |
+| --- | --- |
+| `useDocument.js` | the two canvases (picture and preview overlay), the page size, the undo and redo stacks of pixel snapshots |
+| `useSelection.js` | the floating selection: lift, drag, commit, cut, copy, paste, Select All, the transparent-select filter |
+| `useTextTool.js` | the text box while it is being typed into, committed by drawing it onto the page |
+| `useFiles.js` | the current path, the dirty flag, Open and Save through the filesystem, "Save changes?" on close, Set As Background |
+| `tools.js` | one entry per tool in `TOOL_DOWN`; a mouse-down looks the tool up and drags with `startDrag` |
+| `imageOps.js` | the Image menu and the page's resize handles: Attributes, Flip/Rotate, Stretch/Skew, Invert, Clear |
+| `shortcuts.js` | the keyboard table |
+| `menus.js` | the menu bar, built from the current state so the disabled rows are right |
+| `ToolOptions.jsx`, `ColorBox.jsx`, `PaintCanvas.jsx` | the box under the tools, the palette, the page with its marquee, text box and handles |
+| `constants.js`, `helpers.js`, `raster.js`, `dialogs.jsx`, `styles.jsx` | as before: the tool list and palette, canvas helpers, flood fill and BMP encoding, the three sub-dialogs, the styled frame |
+
+Every tool and operation receives the same `paint` bag, which `index.jsx`
+refills each render: `doc`, `live` (a ref mirroring the current state, so
+handlers attached to `window` never see stale values), `selection`, `text`,
+the in-progress refs, and the setters. Anything that changes the picture
+calls `paint.doc.pushUndo()` first and `paint.setDirty(true)` after; the
+Image menu verbs call `paint.settle()` before they start, which commits
+pending text and a floating selection and drops a half-drawn curve or
+polygon, as Paint does.
+
+To add a tool: add it to `TOOLS` in `constants.js` (the glyph is the next
+16px cell of `assets/paint/tools.png`), add an entry to `TOOL_DOWN` in
+`tools.js`, and add its option panel to `ToolOptions.jsx` if it has one.
+
+## XP Shop
+
+`src/WinXP/apps/Store/index.jsx` holds the parts together and renders the
+screen the navigation stack names; `tests/store.spec.js` pins the splash,
+downloading and deleting a free title, the category cards, the search
+keyboard, a refused paid title and the sound switches.
+
+| File | Holds |
+| --- | --- |
+| `useShopAccount.js` | eggs, the points balance, purchased titles, read news and the tallies, all in the profile hive |
+| `useShopAudio.js` | the hover blip and the cues, the loading whirl, the two-part music, the two switches in localStorage |
+| `useShopNav.js` | the stack of screens with their bits (shelf, title, list mode, page), Back, jump-to-title |
+| `useScaledStage.js` | the 608x456 page scaled to the window |
+| `catalogView.js` | the catalog with live install state, price labels, what Start/Play/Open does |
+| `screens/` | one component per screen, keyed by name in `screens/index.js` |
+| `parts.jsx` | the page title and rules, footer buttons, points badge, Back footer, paged list and pager |
+| `WgArrows.jsx` | the welcome shelf's drifting arrows |
+| `styles/` | the channel's stylesheet split by page (`chrome`, `welcome`, `mainMenu`, `lists`, `titlePage`, `pages`, `keyboard`), concatenated in that order by `styles/index.js`; `tokens.js` has the palette and keyframes |
+| `constants.js`, `art.jsx`, `catalog.js`, `sfx.js`, `Keyboard.jsx`, `MarioDownload.jsx` | the shelves, the preserved artwork, the catalog and install/uninstall, the sounds, the search keyboard, the download animation |
+
+Every screen receives the same `shop` bag: `cur` (the top of the stack),
+`nav`, `apps` and `byId`, `account`, `audio`, `ui` (page memory that
+outlives a page, like the welcome shelf's group), `vfs`, `userName`,
+`onClose` and `onShellOpen`. Anything that changes the shopper's state goes
+through `account`; anything that moves between pages goes through `nav`.
+The user is captured at mount, so a window that survives a fast user switch
+keeps trading its own user's eggs.
+
+To add a screen: write `screens/Thing.jsx` taking `{ shop }`, add it to
+`SCREENS`, and `nav.go('thing', { ...bits })` to it. To add a title, edit
+`catalog.js` only; the invariants spec checks it against the program
+registry.
+
 ## Tests
 
 ```bash
