@@ -25,6 +25,7 @@ from PIL import Image
 
 RT_BITMAP = 2
 MID_SLICES = {'ScrollThumbVertical', 'ScrollThumbHorizontal'}
+DIALOG_FRAMES = {'frameLeft': (1, 3, 4), 'frameRight': (0, 1, 3)}  # checked below against captures
 SCHEMES = {
     'blue': ('NORMALBLUE_INI', 'BLUE'),
     'olive': ('NORMALHOMESTEAD_INI', 'HOMESTEAD'),
@@ -154,6 +155,15 @@ def export_scheme(res, scheme, ini_name, out):
                         box = (0, i * h // count, w, (i + 1) * h // count)
                     state = im.crop(box)
                     state.save(os.path.join(out, f'{base}-{i + 1}.png'))
+                    if base in DIALOG_FRAMES:
+                        # XP draws dialogs with a 3px fixed frame: the sizable
+                        # frame's bitmap with its outermost and middle columns
+                        # dropped (verified against captures)
+                        keep = DIALOG_FRAMES[base]
+                        dlg = Image.new('RGBA', (len(keep), state.height))
+                        for k, c in enumerate(keep):
+                            dlg.paste(state.crop((c, 0, c + 1, state.height)), (k, 0))
+                        dlg.save(os.path.join(out, f'{base}-dlg-{i + 1}.png'))
                     if base in MID_SLICES:
                         # the stretchable middle of a nine-sliced bitmap on its
                         # own, for chrome CSS cannot nine-slice (scrollbar thumbs)

@@ -129,3 +129,13 @@ html:not([data-xp-underlines='1']) .xp-menu u,
 html:not([data-xp-underlines='1']) .xp-submenu u {
   text-decoration: none;
 }
+
+/* The chrome draws its bitmaps pixel for pixel (image-rendering: pixelated
+   on the elements that carry border-images), and that value inherits. Icons
+   are pictures, not chrome: they scale smoothly wherever they sit. Pixel-art
+   images opt back in with their own rule. */
+img,
+.com__function_bar__icon,
+.footer__item__img {
+  image-rendering: auto;
+}

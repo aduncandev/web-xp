@@ -54,8 +54,11 @@ const box = (x, y, w, h) => ({
   ...(w != null ? { width: w } : {}),
   ...(h != null ? { height: h } : {}),
 });
-const rootAt = (x, y, w, h) => box(x - 4, y - 29, w, h);
-const at = (x, y, w, h) => box(x - 9, y - 54, w, h);
+// The sheet's coordinates were taken with the dialog's origin one pixel
+// right and four down of its true corner; the fixed 3px frame and the 29px
+// caption come off after that correction.
+const rootAt = (x, y, w, h) => box(x + 1 - 3, y + 4 - 29, w, h);
+const at = (x, y, w, h) => box(x - 8, y - 52, w, h);
 // The picture formats a browser can paint as a background
 const IMAGE_EXTS = WALLPAPER_EXTENSIONS;
 const DEFAULT_WALLPAPER = {
@@ -343,7 +346,7 @@ export default function DisplayProperties({ onClose, onSetHeader }) {
 
   return (
     <Root>
-      <div className="dp__tabs" style={rootAt(10, 35, 384, 21)}>
+      <div className="dp__tabs" style={rootAt(10, 32, 384, 21)}>
         {TABS.map(t => (
           <div
             key={t}
@@ -354,7 +357,7 @@ export default function DisplayProperties({ onClose, onSetHeader }) {
           </div>
         ))}
       </div>
-      <div className="dp__page" style={rootAt(8, 53, 384, 357)}>
+      <div className="dp__page" style={rootAt(8, 52, 386, 360)}>
         {tab === 'Desktop' && (
           <>
             <div className="dp__abs" style={at(112, 72)}>
@@ -1096,6 +1099,22 @@ const MonitorReal = styled.div`
  * an inactive window, the active window and a message box. Positions are
  * XP's, measured inside the sunken frame.
  */
+// the sample's window rectangles, measured off XP at 1024x768 for each style
+const SAMPLE_RECTS = {
+  luna: {
+    inactive: { left: 7, top: 7, width: 314, height: 100 },
+    active: { left: 98, top: 36, width: 240, height: 128 },
+    themes: { left: 29, top: 15, width: 204, height: 146 },
+    msg: { left: 97, top: 86, width: 150, height: 72 },
+  },
+  classic: {
+    inactive: { left: 16, top: 4, width: 305, height: 139 },
+    active: { left: 20, top: 27, width: 323, height: 121 },
+    themes: { left: 29, top: 15, width: 204, height: 146 },
+    msg: { left: 28, top: 106, width: 207, height: 57 },
+  },
+};
+
 function MiniDesktop({
   appearance,
   variant = 'appearance',
@@ -1107,6 +1126,7 @@ function MiniDesktop({
     ? { backgroundImage: `url(${wallpaperUrl})`, backgroundSize: 'cover' }
     : { backgroundColor: color || DESKTOP_COLOR };
   const themes = variant === 'themes';
+  const rects = SAMPLE_RECTS[style === 'classic' ? 'classic' : 'luna'];
   return (
     <Mini style={{ ...vars, ...ground }} data-xp-style={style}>
       {!themes && (
@@ -1114,17 +1134,13 @@ function MiniDesktop({
           className="mw--inactive"
           title="Inactive Window"
           inactive
-          style={{ left: 7, top: 7, width: 314, height: 100 }}
+          style={rects.inactive}
         />
       )}
       <MiniWindow
         className="mw--active"
         title="Active Window"
-        style={
-          themes
-            ? { left: 29, top: 15, width: 204, height: 146 }
-            : { left: 98, top: 36, width: 240, height: 128 }
-        }
+        style={themes ? rects.themes : rects.active}
       >
         <div className="mw__menu">
           <span>Normal</span>
@@ -1145,7 +1161,7 @@ function MiniDesktop({
           className="mw--msg"
           title="Message Box"
           closeOnly
-          style={{ left: 97, top: 86, width: 150, height: 72 }}
+          style={rects.msg}
         >
           <div className="mw__body">
             <div className="mw__msgtext">Message Text</div>
@@ -1245,7 +1261,7 @@ const Root = styled.div`
     box-sizing: border-box;
     border: 0 solid transparent;
     border-image: var(--xp-p-tab-pane-1, none);
-    background: #fdfdfa;
+    background: var(--xp-tab-page, #fdfdfa);
     image-rendering: pixelated;
     overflow: visible;
   }
@@ -1360,7 +1376,7 @@ const Root = styled.div`
     image-rendering: pixelated;
   }
   .dp__legend {
-    background: #fdfdfa;
+    background: var(--xp-tab-page, #fdfdfa);
     padding: 0 2px;
     color: var(--xp-group-box-text, #0046d5);
     white-space: nowrap;
@@ -1471,17 +1487,17 @@ const Root = styled.div`
     width: 11px;
     height: 21px;
     margin-top: -9px;
-    border: 0 solid transparent;
+    border: 0;
     border-radius: 0;
-    border-image: var(--xp-p-trackbar-thumb-1, none);
-    background: var(--xp-thumb-fallback, url(${sliderThumb}) no-repeat center);
+    background: var(--xp-i-trackbar-thumbbottom-1, url(${sliderThumb}))
+      no-repeat center;
     image-rendering: pixelated;
   }
   .dp__slider:hover::-webkit-slider-thumb {
-    border-image: var(--xp-p-trackbar-thumb-2, none);
+    background-image: var(--xp-i-trackbar-thumbbottom-2, url(${sliderThumb}));
   }
   .dp__slider:active::-webkit-slider-thumb {
-    border-image: var(--xp-p-trackbar-thumb-3, none);
+    background-image: var(--xp-i-trackbar-thumbbottom-3, url(${sliderThumb}));
   }
   .dp__slider::-moz-range-track {
     height: 2px;
@@ -1817,21 +1833,32 @@ const Mini = styled.div`
     height: 32px;
   }
 
-  /* Windows Classic in the sample, whatever the desktop is wearing now */
+  /* Windows Classic in the sample, whatever the desktop is wearing now.
+     Sizeable windows wear a 4px frame (face, light, face, face / dark,
+     shadow, face, face); the message box a 3px dialog frame. */
   &[data-xp-style='classic'] {
     .mw {
-      padding: 21px 3px 3px;
+      padding: 22px 4px 4px;
+      background: var(--xp-face);
       box-shadow: inset 1px 1px var(--xp-face),
         inset -1px -1px var(--xp-face-dk-shadow),
         inset 2px 2px var(--xp-face-light),
         inset -2px -2px var(--xp-face-shadow);
     }
+    .mw--msg {
+      padding: 21px 3px 3px;
+    }
     .mw__cap {
+      left: 4px;
+      right: 4px;
+      top: 4px;
+      height: 18px;
+      border-image: none;
+    }
+    .mw--msg .mw__cap {
       left: 3px;
       right: 3px;
       top: 3px;
-      height: 18px;
-      border-image: none;
     }
     .mw__fl,
     .mw__fr,
@@ -1839,17 +1866,26 @@ const Mini = styled.div`
       display: none;
     }
     .mw__title {
-      left: 5px;
-      top: 3px;
+      left: 6px;
+      top: 4px;
+      right: 60px;
       height: 18px;
       line-height: 18px;
       font: 700 11px Tahoma, 'Noto Sans', sans-serif;
       text-shadow: none;
     }
+    .mw--msg .mw__title {
+      left: 5px;
+      top: 3px;
+    }
     .mw__btns {
+      top: 6px;
+      right: 6px;
+      gap: 0;
+    }
+    .mw--msg .mw__btns {
       top: 5px;
       right: 5px;
-      gap: 0;
     }
     .mw__cb {
       width: 16px;
@@ -1862,6 +1898,9 @@ const Mini = styled.div`
     }
     .mw__cb--close {
       margin-left: 2px;
+    }
+    .mw--msg .mw__cb--close {
+      margin-left: 0;
     }
     .mw__cb::after {
       background: var(--xp-button-text, #000);
@@ -1882,15 +1921,19 @@ const Mini = styled.div`
     }
     .mw__menu {
       display: flex;
+      gap: 12px;
+      padding: 0 5px;
+      height: 19px;
+      line-height: 19px;
+      background: var(--xp-face);
     }
-    .mw__msgtext {
-      display: block;
-    }
-    .mw__btn {
-      top: 20px;
-      left: 60%;
+    .mw__menu--selected {
+      padding: 0;
+      background: none;
+      color: var(--xp-menu-text, #000);
     }
     .mw__client {
+      padding: 1px;
       border: 1px solid;
       border-color: var(--xp-face-shadow) var(--xp-face-light)
         var(--xp-face-light) var(--xp-face-shadow);
@@ -1898,16 +1941,13 @@ const Mini = styled.div`
         inset -1px -1px var(--xp-face);
     }
     .mw__client .mw__text {
+      padding: 2px 1px;
       font-weight: 700;
     }
     .mw__scroll {
       width: 16px;
       border-image: none;
-      background: repeating-conic-gradient(
-          var(--xp-face-light) 0 25%,
-          var(--xp-face) 0 50%
-        )
-        0 0 / 2px 2px;
+      background: var(--xp-face);
     }
     .mw__scroll__up,
     .mw__scroll__down {
@@ -1923,8 +1963,8 @@ const Mini = styled.div`
       position: absolute;
       inset: 0;
       background: var(--xp-button-text, #000);
-      -webkit-mask: var(--glyph) center no-repeat;
-      mask: var(--glyph) center no-repeat;
+      -webkit-mask: var(--glyph) 4px 6px no-repeat;
+      mask: var(--glyph) 4px 6px no-repeat;
     }
     .mw__scroll__up {
       --glyph: url(${classicScrollUp});
@@ -1933,20 +1973,26 @@ const Mini = styled.div`
       --glyph: url(${classicScrollDown});
     }
     .mw__scroll__thumb {
+      display: none;
+    }
+    .mw__msgtext {
+      display: block;
+      left: 4px;
+      top: 3px;
+    }
+    .mw__btn {
+      left: 64px;
+      top: 12px;
+      width: 72px;
+      height: 24px;
+      margin-left: 0;
+      border: 0;
       border-image: none;
       background: var(--xp-face);
       box-shadow: inset 1px 1px var(--xp-face-light),
         inset -1px -1px var(--xp-face-dk-shadow),
         inset -2px -2px var(--xp-face-shadow);
-    }
-    .mw__btn {
-      border-image: none;
-      border: 1px solid;
-      border-color: var(--xp-face-light) var(--xp-face-dk-shadow)
-        var(--xp-face-dk-shadow) var(--xp-face-light);
-      background: var(--xp-face);
-      box-shadow: inset -1px -1px var(--xp-face-shadow);
-      line-height: 21px;
+      line-height: 24px;
     }
   }
 `;

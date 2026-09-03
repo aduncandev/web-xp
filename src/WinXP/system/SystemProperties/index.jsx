@@ -599,7 +599,7 @@ const Root = styled.div`
     min-height: 0;
   }
   .sp__group-title {
-    color: #003399;
+    color: var(--xp-group-box-text, #003399);
     margin-bottom: 4px;
   }
   .sp__grouptext {
@@ -727,4 +727,3 @@ const Root = styled.div`
     padding-top: 8px;
   }
 `;
-

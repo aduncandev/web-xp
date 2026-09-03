@@ -1,6 +1,7 @@
 // Explorer's presentational layer: the window-wide styled-components
 // blob plus the small stateless visual pieces that hang off it.
 import React from 'react';
+import dropdownIcon from 'assets/windowsIcons/dropdown.png';
 import styled, { css } from 'styled-components';
 
 import { getArt } from '../../../xpArt';
@@ -356,6 +357,7 @@ export const Div = styled.div`
       right: 1px;
       position: absolute;
       cursor: pointer;
+      background: url(${dropdownIcon}) center no-repeat;
       &:hover {
         filter: brightness(1.1);
       }
@@ -729,10 +731,11 @@ export const Div = styled.div`
     /* The header bar runs the width of the view. Painting it here means the
        columns can stop short without leaving a bite out of the bar, and
        costs no extra column. */
-    background-color: #fff;
-    background-image: var(--xp-i-header-headeritem-1, none);
-    background-size: auto 18px;
+    background-color: var(--xp-window, #fff);
+    background-image: var(--xp-i-header-1, none);
+    background-size: 1px 20px;
     background-repeat: repeat-x;
+    image-rendering: pixelated;
   }
   .com__table {
     /* The width is set inline to the sum of the columns. It has to be a
@@ -745,9 +748,12 @@ export const Div = styled.div`
     font-size: 11px;
   }
   .com__th {
+    box-sizing: border-box;
+    height: 20px;
     text-align: left;
     font-weight: normal;
-    padding: 2px 6px;
+    padding: 0 6px;
+    line-height: 20px;
     border: 0 solid transparent;
     border-image: var(--xp-p-header-headeritem-1, none);
     image-rendering: pixelated;
@@ -765,6 +771,22 @@ export const Div = styled.div`
   }
   .com__th--size {
     text-align: right;
+  }
+  /* the sort arrow sits ten pixels past the label, centred on its x-height */
+  .com__sort {
+    display: inline-block;
+    width: 9px;
+    height: 5px;
+    margin-left: 10px;
+    vertical-align: 1px;
+    background: var(--xp-gray-text, #aca899);
+    clip-path: polygon(50% 0, 100% 100%, 0 100%);
+  }
+  .com__sort--desc {
+    clip-path: polygon(0 0, 100% 0, 50% 100%);
+  }
+  .com__td--sorted {
+    background: #f7f7f7;
   }
   .com__td {
     padding: 1px 6px;

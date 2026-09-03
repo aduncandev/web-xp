@@ -16,7 +16,7 @@ import music from 'assets/windowsIcons/550(32x32).png';
 import computer from 'assets/windowsIcons/676(32x32).png';
 import controlPanel from 'assets/windowsIcons/300(32x32).png';
 import printer from 'assets/windowsIcons/549(32x32).png';
-import setAccess from 'assets/xp/DefaultPrograms(SP1Version).png';
+import setAccess from 'assets/xp/SetProgramAccess(32x32).png';
 import help from 'assets/windowsIcons/747(32x32).png';
 import search from 'assets/windowsIcons/299(32x32).png';
 import run from 'assets/windowsIcons/743(32x32).png';
@@ -475,7 +475,7 @@ export default styled(FooterMenu)`
     align-items: center;
     color: #fff;
     height: 65px;
-    padding: 0 5px 0 6px;
+    padding: 0 5px 0 1px;
     width: 100%;
     border-top-left-radius: 5px;
     border-top-right-radius: 5px;
@@ -506,10 +506,11 @@ export default styled(FooterMenu)`
   /* the picture in the style's tile: 48px inside its frame */
   .header__tile {
     box-sizing: border-box;
-    width: 52px;
-    height: 52px;
-    padding: 2px;
-    margin-right: 8px;
+    width: 62px;
+    height: 62px;
+    padding: 8px 6px 6px 8px;
+    margin: 1px 3px 0 0;
+    align-self: flex-start;
     flex-shrink: 0;
     border: 0 solid transparent;
     border-image: var(--xp-p-startpanel-userpicture-1, none);
@@ -593,8 +594,6 @@ export default styled(FooterMenu)`
     display: flex;
     margin: 0;
     position: relative;
-    border-top: 1px solid var(--xp-start-rule, #385de7);
-    box-shadow: 0 1px var(--xp-start-rule, #385de7);
   }
   .orange-hr {
     position: absolute;

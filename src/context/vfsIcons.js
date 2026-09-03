@@ -42,7 +42,7 @@ import mvlIcon from 'assets/windowsIcons/mariovsluigi.png';
 import climbRaceIcon from 'assets/windowsIcons/climbrace.gif';
 
 // --- Start Menu icons (16x16) ---
-import accessIcon from 'assets/windowsIcons/227(16x16).png';
+import accessIcon from 'assets/xp/SetProgramAccess(16x16).png';
 import catalogIcon from 'assets/windowsIcons/392(16x16).png';
 import updateIcon from 'assets/windowsIcons/322(16x16).png';
 import menuIcon from 'assets/windowsIcons/358(16x16).png';

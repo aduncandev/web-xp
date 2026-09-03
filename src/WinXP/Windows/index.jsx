@@ -323,6 +323,18 @@ const Window = memo(function({
 
 const StyledWindow = styled(Window)`
   display: ${({ show }) => (show ? 'flex' : 'none')};
+  /* property sheets wear the fixed 3px dialog frame instead of the sizing one */
+  ${({ header }) =>
+    header.dialogFrame
+      ? `--xp-frame-w: var(--xp-dlg-frame-w, 3px);
+         --xp-caption-total: var(--xp-dlg-caption-total, 29px);
+         --xp-p-window-frameleft-1: var(--xp-p-window-frameleft-dlg-1, none);
+         --xp-p-window-frameleft-2: var(--xp-p-window-frameleft-dlg-2, none);
+         --xp-p-window-frameright-1: var(--xp-p-window-frameright-dlg-1, none);
+         --xp-p-window-frameright-2: var(--xp-p-window-frameright-dlg-2, none);
+         --xp-p-window-framebottom-1: var(--xp-p-window-framebottom-dlg-1, none);
+         --xp-p-window-framebottom-2: var(--xp-p-window-framebottom-dlg-2, none);`
+      : ''}
   position: absolute;
   image-rendering: pixelated;
   box-sizing: border-box;
@@ -421,8 +433,10 @@ const StyledWindow = styled(Window)`
     white-space: nowrap;
     text-overflow: ellipsis;
   }
+  /* the client area is opaque even where a program paints nothing */
   .app__content {
     flex: 1;
+    background-color: var(--xp-face, #ece9d8);
     position: relative;
     min-height: 0;
   }

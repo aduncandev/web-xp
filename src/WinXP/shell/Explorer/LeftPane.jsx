@@ -1,9 +1,5 @@
 import React from 'react';
-import {
-  EXE_PATHS,
-  SPECIAL_FOLDERS,
-  computerIcon,
-} from '../../../context/vfsConstants';
+import { EXE_PATHS, SPECIAL_FOLDERS } from '../../../context/vfsConstants';
 import {
   formatSize,
   getParentPath,
@@ -16,14 +12,22 @@ import { TaskCard, taskRow } from './TaskPane';
 import { placeName } from './contextMenus';
 
 import zipTaskIcon from 'assets/windowsIcons/zipfldr(16x16).png';
-import desktopIconSvg from 'assets/windowsIcons/desktop.svg';
 import search from 'assets/windowsIcons/299(32x32).png';
-import viewInfo from 'assets/windowsIcons/view-info.ico';
+import viewInfo from 'assets/windowsIcons/shell32-1007(16x16).png';
 import remove from 'assets/windowsIcons/302(16x16).png';
-import control from 'assets/windowsIcons/300(16x16).png';
 import network from 'assets/windowsIcons/693(16x16).png';
 import documentIcon from 'assets/windowsIcons/308(16x16).png';
 import folderSmall from 'assets/windowsIcons/318(16x16).png';
+import newFolderIcon from 'assets/windowsIcons/new-folder(16x16).png';
+import publishIcon from 'assets/windowsIcons/publish(16x16).png';
+import shareIcon from 'assets/windowsIcons/shell32-267(16x16).png';
+import desktopTaskIcon from 'assets/windowsIcons/shell32-35(16x16).png';
+import sharedDocsIcon from 'assets/windowsIcons/shell32-4(16x16).png';
+import computerTaskIcon from 'assets/windowsIcons/shell32-16(16x16).png';
+import networkPlacesIcon from 'assets/windowsIcons/shell32-18(16x16).png';
+import controlPanelIcon from 'assets/windowsIcons/shell32-22(16x16).png';
+import myDocsIcon from 'assets/windowsIcons/shell32-235(16x16).png';
+import addRemoveIcon from 'assets/windowsIcons/appwiz-1500(16x16).png';
 
 const text = (content, bold) => (
   <div className={`com__content__left__card__text${bold ? ' bold' : ''}`}>
@@ -131,9 +135,9 @@ function FileTasks({
   if (selectedPaths.length === 0) {
     return (
       <>
-        {taskRow(folderSmall, 'Make a new folder', () => createNew('folder'))}
-        {taskRow(network, 'Publish this folder to the Web')}
-        {taskRow(network, 'Share this folder')}
+        {taskRow(newFolderIcon, 'Make a new folder', () => createNew('folder'))}
+        {taskRow(publishIcon, 'Publish this folder to the Web')}
+        {taskRow(shareIcon, 'Share this folder')}
       </>
     );
   }
@@ -184,29 +188,31 @@ function OtherPlaces({
   if (inRecycleBin) {
     return (
       <>
-        {taskRow(
-          getArt('Desktop16', getArt('Desktop', desktopIconSvg)),
-          'Desktop',
-          () => navigateTo(SPECIAL_FOLDERS.DESKTOP),
+        {taskRow(desktopTaskIcon, 'Desktop', () =>
+          navigateTo(SPECIAL_FOLDERS.DESKTOP),
         )}
-        {taskRow(getArt('MyDocuments16', documentIcon), 'My Documents', () =>
+        {taskRow(myDocsIcon, 'My Documents', () =>
           navigateTo(SPECIAL_FOLDERS.MY_DOCUMENTS),
         )}
-        {taskRow(computerIcon, 'My Computer', () => navigateTo(MY_COMPUTER))}
-        {taskRow(network, 'My Network Places')}
+        {taskRow(computerTaskIcon, 'My Computer', () =>
+          navigateTo(MY_COMPUTER),
+        )}
+        {taskRow(networkPlacesIcon, 'My Network Places')}
       </>
     );
   }
   if (!inFolder) {
     return (
       <>
-        {taskRow(network, 'My Network Places')}
-        {taskRow(documentIcon, 'My Documents', () =>
+        {taskRow(networkPlacesIcon, 'My Network Places')}
+        {taskRow(myDocsIcon, 'My Documents', () =>
           navigateTo(SPECIAL_FOLDERS.MY_DOCUMENTS),
         )}
         {vfs.exists(shared) &&
-          taskRow(documentIcon, 'Shared Documents', () => navigateTo(shared))}
-        {taskRow(control, CONTROL_PANEL, () => navigateTo(CONTROL_PANEL))}
+          taskRow(sharedDocsIcon, 'Shared Documents', () => navigateTo(shared))}
+        {taskRow(controlPanelIcon, CONTROL_PANEL, () =>
+          navigateTo(CONTROL_PANEL),
+        )}
       </>
     );
   }
@@ -238,19 +244,14 @@ function OtherPlaces({
             'parent',
           )
         : taskRow(
-            computerIcon,
+            computerTaskIcon,
             MY_COMPUTER,
             () => navigateTo(MY_COMPUTER),
             'parent',
           )}
       {currentPath !== myDocs &&
         parentPath !== myDocs &&
-        taskRow(
-          documentIcon,
-          'My Documents',
-          () => navigateTo(myDocs),
-          'mydocs',
-        )}
+        taskRow(myDocsIcon, 'My Documents', () => navigateTo(myDocs), 'mydocs')}
       {sharedSpecial && vfs.exists(sharedSpecial[0])
         ? taskRow(
             vfs.getNode(sharedSpecial[0]).icon || documentIcon,
@@ -262,19 +263,19 @@ function OtherPlaces({
           currentPath !== shared &&
           parentPath !== shared &&
           taskRow(
-            getArt('SharedFolder', documentIcon),
+            sharedDocsIcon,
             'Shared Documents',
             () => navigateTo(shared),
             'shared',
           )}
       {parentNode &&
         taskRow(
-          computerIcon,
+          computerTaskIcon,
           MY_COMPUTER,
           () => navigateTo(MY_COMPUTER),
           'mycomputer',
         )}
-      {taskRow(network, 'My Network Places', undefined, 'network')}
+      {taskRow(networkPlacesIcon, 'My Network Places', undefined, 'network')}
     </>
   );
 }
@@ -313,9 +314,7 @@ function DetailsPanel({
         {n.modifiedAt &&
           n.type !== 'drive' &&
           n.type !== 'special' &&
-          text(
-            `Date Modified: ${new Date(n.modifiedAt).toLocaleDateString()}`,
-          )}
+          text(`Date Modified: ${new Date(n.modifiedAt).toLocaleDateString()}`)}
       </>
     );
   }
@@ -367,7 +366,7 @@ export default function LeftPane(p) {
           'Show the contents of this folder',
           p.revealContents,
         )}
-        {taskRow(remove, 'Add or remove programs')}
+        {taskRow(addRemoveIcon, 'Add or remove programs')}
         {taskRow(search, 'Search for files or folders')}
       </>,
     );
@@ -381,8 +380,8 @@ export default function LeftPane(p) {
           'View system information',
           p.onShellOpen ? () => p.onShellOpen(EXE_PATHS.SYSDM_CPL) : undefined,
         )}
-        {taskRow(remove, 'Add or remove programs')}
-        {taskRow(control, 'Change a setting', () =>
+        {taskRow(addRemoveIcon, 'Add or remove programs')}
+        {taskRow(controlPanelIcon, 'Change a setting', () =>
           p.navigateTo(CONTROL_PANEL),
         )}
       </>,

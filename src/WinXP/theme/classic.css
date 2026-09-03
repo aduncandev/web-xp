@@ -12,9 +12,9 @@ html[data-xp-style='classic'] .xp-window {
     inset 2px 2px var(--xp-face-light), inset -2px -2px var(--xp-face-shadow);
 }
 html[data-xp-style='classic'] .xp-window .header__bg {
-  left: 4px;
-  right: 4px;
-  top: 4px;
+  left: var(--xp-frame-w, 4px);
+  right: var(--xp-frame-w, 4px);
+  top: var(--xp-frame-w, 4px);
   height: var(--xp-caption-h, 18px);
   border-radius: 0;
   border-image: none;
@@ -29,7 +29,7 @@ html[data-xp-style='classic'] .xp-window .header__bg:after {
   display: none;
 }
 html[data-xp-style='classic'] .app__header {
-  top: 4px;
+  top: var(--xp-frame-w, 4px);
 }
 html[data-xp-style='classic'] .app__header__title {
   padding-left: 2px;
@@ -141,9 +141,9 @@ html[data-xp-style='classic'] .xpdlg {
     inset 2px 2px var(--xp-face-light), inset -2px -2px var(--xp-face-shadow);
 }
 html[data-xp-style='classic'] .xpdlg .xpdlg-header-bg {
-  left: 4px;
-  right: 4px;
-  top: 4px;
+  left: var(--xp-frame-w, 4px);
+  right: var(--xp-frame-w, 4px);
+  top: var(--xp-frame-w, 4px);
   height: var(--xp-caption-h, 18px);
   border-radius: 0;
   border-image: none;
@@ -216,8 +216,9 @@ html[data-xp-style='classic'] .xp-taskbar .footer__start {
 /* --- Start menu --- */
 html[data-xp-style='classic'] .xp-startmenu {
   position: relative;
+  margin-left: 2px;
   border-radius: 0;
-  background: transparent;
+  background: var(--xp-face);
   box-shadow: 4px 4px 3px rgba(0, 0, 0, 0.35);
   padding: 0 0 2px;
 }
@@ -333,16 +334,21 @@ html[data-xp-style='classic'] input[type='radio'] {
 html[data-xp-style='classic'] input[type='radio'] {
   border-radius: 50%;
 }
+/* the tick is XP's own 7x7 pixels, three in from the box's corner */
 html[data-xp-style='classic'] input[type='checkbox']:checked:after {
   content: '';
   position: absolute;
-  left: 3px;
-  top: 0;
-  width: 3px;
+  left: 2px;
+  top: 2px;
+  width: 7px;
   height: 7px;
-  border: solid #000;
-  border-width: 0 2px 2px 0;
-  transform: rotate(45deg);
+  background: var(--xp-window-text, #000);
+  -webkit-mask: url('../../assets/xp/classic/glyph-check.png') no-repeat;
+  mask: url('../../assets/xp/classic/glyph-check.png') no-repeat;
+  image-rendering: pixelated;
+}
+html[data-xp-style='classic'] input[type='checkbox']:disabled:checked:after {
+  background: var(--xp-gray-text, #808080);
 }
 html[data-xp-style='classic'] input[type='radio']:checked:after {
   content: '';
@@ -453,14 +459,14 @@ html[data-xp-style='classic'] .xp-startmenu header {
   box-sizing: border-box;
   height: 43px;
   margin: 0;
-  padding: 3px 3px 0 5px;
+  padding: 3px 3px 0 3px;
   background-image: var(--xp-start-header, none), none;
   background-clip: content-box, border-box;
   background-origin: content-box, border-box;
   background-color: var(--xp-face);
   box-shadow: inset 1px 1px var(--xp-face), inset 2px 2px var(--xp-face-light),
-    inset 3px 3px var(--xp-face), inset 4px 3px var(--xp-face-light),
-    inset -1px 0 var(--xp-face-dk-shadow), inset -2px 0 var(--xp-face-shadow);
+    inset 3px 3px var(--xp-face), inset -1px 0 var(--xp-face-dk-shadow),
+    inset -2px 0 var(--xp-face-shadow);
 }
 html[data-xp-style='classic'] .xp-startmenu .header__img,
 html[data-xp-style='classic'] .xp-startmenu .header__tile {
@@ -476,8 +482,8 @@ html[data-xp-style='classic'] .xp-startmenu .header__text {
 html[data-xp-style='classic'] .xp-startmenu footer {
   box-sizing: border-box;
   height: 35px;
-  margin-left: 2px;
-  width: calc(100% - 2px);
+  margin-left: 0;
+  width: 100%;
   padding: 3px 0 0 0;
   align-items: flex-start;
   border-top: 1px solid var(--xp-face-shadow);
@@ -571,9 +577,6 @@ html[data-xp-style='classic'] .com__content__left__card__text.link:hover {
 html[data-xp-style='classic'] .xp-startmenu header {
   justify-content: flex-start;
 }
-html[data-xp-style='classic'] .xp-startmenu .menu {
-  margin-left: 2px;
-}
 html[data-xp-style='classic'] .xp-startmenu .menu__left {
   width: 193px;
   padding-top: 4px;
@@ -619,7 +622,7 @@ html[data-xp-style='classic'] .xp-startmenu .menu__item:hover .menu__item__subte
 }
 html[data-xp-style='classic'] .xp-startmenu .menu__left .menu__item--allprograms {
   justify-content: flex-start;
-  padding-left: 40px;
+  padding-left: 0;
 }
 html[data-xp-style='classic'] .xp-startmenu .menu__item--allprograms .menu__item__text {
   font-weight: 400;
@@ -628,7 +631,7 @@ html[data-xp-style='classic'] .xp-startmenu .menu__moreprog-arrow,
 html[data-xp-style='classic'] .xp-startmenu .menu__item:hover .menu__moreprog-arrow {
   width: 4px;
   height: 7px;
-  margin-left: 14px;
+  margin-left: 11px;
   background: var(--xp-window-text, #000);
   -webkit-mask: url('../../assets/xp/classic/glyph-menu-arrow.png') center no-repeat;
   mask: url('../../assets/xp/classic/glyph-menu-arrow.png') center no-repeat;
@@ -669,13 +672,15 @@ html[data-xp-style='classic'] .csm__tab,
 html[data-xp-style='classic'] .fo__tab,
 html[data-xp-style='classic'] .rb__tab,
 html[data-xp-style='classic'] .tp__tab,
-html[data-xp-style='classic'] .pr-tab {
+html[data-xp-style='classic'] .pr-tab,
+html[data-xp-style='classic'] .wmp-opt__tab {
   box-sizing: border-box;
   height: 18px;
   line-height: 17px;
   margin-top: 2px;
-  margin-right: 2px;
-  padding: 0 6px;
+  margin-right: 0;
+  padding: 0 4px 0 6px;
+  min-width: 42px;
   border: 1px solid;
   border-color: var(--xp-face-light) var(--xp-face-dk-shadow) transparent var(--xp-face-light);
   border-bottom: none;
@@ -693,7 +698,8 @@ html[data-xp-style='classic'] .csm__tab:hover,
 html[data-xp-style='classic'] .fo__tab:hover,
 html[data-xp-style='classic'] .rb__tab:hover,
 html[data-xp-style='classic'] .tp__tab:hover,
-html[data-xp-style='classic'] .pr-tab:hover {
+html[data-xp-style='classic'] .pr-tab:hover,
+html[data-xp-style='classic'] .wmp-opt__tab:hover {
   border-image: none;
   background: var(--xp-face);
 }
@@ -705,6 +711,7 @@ html[data-xp-style='classic'] .fo__tab--active,
 html[data-xp-style='classic'] .rb__tab--active,
 html[data-xp-style='classic'] .tp__tab--active,
 html[data-xp-style='classic'] .pr-tab.active,
+html[data-xp-style='classic'] .wmp-opt__tab--active,
 html[data-xp-style='classic'] .dp__tab--active:hover,
 html[data-xp-style='classic'] .sp__tab--active:hover,
 html[data-xp-style='classic'] .tm__tab--active:hover,
@@ -712,13 +719,15 @@ html[data-xp-style='classic'] .csm__tab--active:hover,
 html[data-xp-style='classic'] .fo__tab--active:hover,
 html[data-xp-style='classic'] .rb__tab--active:hover,
 html[data-xp-style='classic'] .tp__tab--active:hover,
-html[data-xp-style='classic'] .pr-tab.active:hover {
+html[data-xp-style='classic'] .pr-tab.active:hover,
+html[data-xp-style='classic'] .wmp-opt__tab--active:hover {
   position: relative;
   z-index: 2;
   height: 20px;
   line-height: 19px;
-  margin: 0 0 -1px 0;
+  margin: 0 -2px -1px;
   padding: 0 8px;
+  min-width: 46px;
   border-image: none;
   background: var(--xp-face);
 }
@@ -729,7 +738,8 @@ html[data-xp-style='classic'] .csm__page,
 html[data-xp-style='classic'] .fo__page,
 html[data-xp-style='classic'] .rb__page,
 html[data-xp-style='classic'] .tp__page,
-html[data-xp-style='classic'] .pr-page {
+html[data-xp-style='classic'] .pr-page,
+html[data-xp-style='classic'] .wmp-opt__page {
   border: 1px solid;
   border-color: var(--xp-face-light) var(--xp-face-dk-shadow) var(--xp-face-dk-shadow) var(--xp-face-light);
   border-radius: 0;
@@ -800,4 +810,91 @@ html[data-xp-style='classic'] .com__content {
 html[data-xp-style='classic'] .com__status_bar__section {
   border: 1px solid;
   border-color: var(--xp-face-shadow) var(--xp-face-light) var(--xp-face-light) var(--xp-face-shadow);
+}
+
+/* --- Explorer's address list button: a raised face with the triangle --- */
+html[data-xp-style='classic'] .com__address_bar__content__dropdown {
+  width: 16px;
+  height: 17px;
+  right: 0;
+  top: 0;
+  background: var(--xp-face);
+  box-shadow: inset -1px -1px var(--xp-face-dk-shadow), inset 1px 1px var(--xp-face-light),
+    inset -2px -2px var(--xp-face-shadow);
+}
+html[data-xp-style='classic'] .com__address_bar__content__dropdown::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: var(--xp-button-text, #000);
+  -webkit-mask: url('../../assets/xp/classic/glyph-combo-arrow.png') 4px 6px no-repeat;
+  mask: url('../../assets/xp/classic/glyph-combo-arrow.png') 4px 6px no-repeat;
+}
+html[data-xp-style='classic'] .com__address_bar__content__dropdown:hover {
+  filter: none;
+}
+
+/* Display Properties: the classic trackbar, a sunken 4px channel with a pointer thumb */
+html[data-xp-style='classic'] .dp__slider::-webkit-slider-runnable-track {
+  height: 4px;
+  border: 0;
+  border-image: none;
+  background: var(--xp-face);
+  box-shadow:
+    inset 1px 1px var(--xp-face-shadow),
+    inset -1px -1px var(--xp-face-light),
+    inset 2px 2px var(--xp-face-dk-shadow),
+    inset -2px -2px var(--xp-face);
+}
+html[data-xp-style='classic'] .dp__slider::-webkit-slider-thumb,
+html[data-xp-style='classic'] .dp__slider:hover::-webkit-slider-thumb,
+html[data-xp-style='classic'] .dp__slider:active::-webkit-slider-thumb {
+  margin-top: -7px;
+  background: url('../../assets/xp/classic/slider-thumb.png') no-repeat center;
+}
+html[data-xp-style='classic'] .dp__ticks span {
+  background: var(--xp-button-text, #000);
+}
+html[data-xp-style='classic'] .dp__ticks span:first-child,
+html[data-xp-style='classic'] .dp__ticks span:last-child {
+  height: 4px;
+}
+
+/* Explorer's Details view: raised header buttons, the sort arrow in shadow grey */
+html[data-xp-style='classic'] .com__view--details {
+  background-image: none;
+}
+html[data-xp-style='classic'] .com__th {
+  border-image: none;
+  background: var(--xp-face);
+  box-shadow:
+    inset 1px 1px var(--xp-face-light),
+    inset -1px -1px var(--xp-face-dk-shadow),
+    inset -2px -2px var(--xp-face-shadow);
+}
+html[data-xp-style='classic'] .com__th:hover,
+html[data-xp-style='classic'] .com__th:active {
+  border-image: none;
+}
+html[data-xp-style='classic'] .com__sort {
+  background: var(--xp-face-shadow);
+}
+
+/* group boxes: the etched frame, legend in the window text colour */
+html[data-xp-style='classic'] .xp-group {
+  border: 1px solid var(--xp-face-shadow);
+  border-radius: 0;
+  box-shadow:
+    1px 1px 0 var(--xp-face-light),
+    inset 1px 1px 0 var(--xp-face-light);
+}
+html[data-xp-style='classic'] .xp-group > legend {
+  color: var(--xp-window-text, #000);
+}
+
+/* Classic tab strips start at the page's edge, two pixels left of Luna's */
+html[data-xp-style='classic'] .dp__tabs,
+html[data-xp-style='classic'] .tp__tabs,
+html[data-xp-style='classic'] .fo__tabs {
+  margin-left: -2px;
 }

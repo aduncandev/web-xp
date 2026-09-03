@@ -2,6 +2,7 @@ import React, { useMemo, useState } from 'react';
 import styled from 'styled-components';
 
 import XPDialogFrame from '../XPDialogFrame';
+import { dialogAt, dialogClient } from '../XPDialogFrame/layout';
 import XPButton from '../XPButton';
 import OpenWithDialog from '../OpenWithDialog';
 import { useVFS } from '../../context/VFSContext';
@@ -12,6 +13,14 @@ import { EXT_TYPE_LABELS } from '../../WinXP/shell/fileTypes';
 
 import folderIcon from 'assets/windowsIcons/318(16x16).png';
 import documentIcon from 'assets/windowsIcons/308(16x16).png';
+// the General tab's pictures and the Offline Files icon, from the XP sheet
+import tasksPicture from 'assets/xp/folderoptions/tasks.png';
+import browsePicture from 'assets/xp/folderoptions/browse.png';
+import clickPicture from 'assets/xp/folderoptions/click.png';
+import offlineIcon from 'assets/xp/folderoptions/offline.png';
+
+const WIDTH = 386;
+const HEIGHT = 475;
 
 /**
  * XP Folder Options (Tools > Folder Options... / Control Panel applet).
@@ -59,6 +68,11 @@ export default function FolderOptions({ onClose }) {
   const [tasksStyle, setTasksStyle] = useState('common');
   const [browseStyle, setBrowseStyle] = useState('same');
   const [clickStyle, setClickStyle] = useState('double');
+  const restoreGeneral = () => {
+    setTasksStyle('common');
+    setBrowseStyle('same');
+    setClickStyle('double');
+  };
   const [inert, setInert] = useState({
     netFolders: false,
     sizeTips: true,
@@ -154,9 +168,26 @@ export default function FolderOptions({ onClose }) {
     }
   };
 
-  const radio = (checked, onChange, label, name) => (
+  // the View tab's tree rows sit in flow layout
+  const radioRow = (checked, onChange, label, name) => (
     <label className="fo__row">
       <input type="radio" name={name} checked={checked} onChange={onChange} />
+      <span>{label}</span>
+    </label>
+  );
+  // the General tab is laid out at the sheet's own pixel positions
+  const radio = (x, y, checked, onChange, label, name, disabled = false) => (
+    <label
+      className={`fo__check${disabled ? ' fo__check--disabled' : ''}`}
+      style={dialogAt(x, y)}
+    >
+      <input
+        type="radio"
+        name={name}
+        checked={checked}
+        onChange={onChange}
+        disabled={disabled}
+      />
       <span>{label}</span>
     </label>
   );
@@ -174,16 +205,17 @@ export default function FolderOptions({ onClose }) {
   return (
     <XPDialogFrame
       title="Folder Options"
-      width={372}
+      width={WIDTH}
       onClose={onClose}
       zIndex={99975}
     >
-      <Body>
-        <div className="fo__tabs">
+      <Body style={dialogClient(WIDTH, HEIGHT)}>
+        <div className="fo__tabs" style={dialogAt(11, 36)}>
           {[
             { key: 'general', label: 'General' },
             { key: 'view', label: 'View' },
             { key: 'filetypes', label: 'File Types' },
+            { key: 'offline', label: 'Offline Files' },
           ].map(t => (
             <div
               key={t.key}
@@ -194,56 +226,8 @@ export default function FolderOptions({ onClose }) {
             </div>
           ))}
         </div>
-        <div className="fo__page">
-          {tab === 'general' ? (
-            <>
-              <fieldset className="fo__group">
-                <legend>Tasks</legend>
-                {radio(
-                  tasksStyle === 'common',
-                  () => setTasksStyle('common'),
-                  'Show common tasks in folders',
-                  'fo-tasks',
-                )}
-                {radio(
-                  tasksStyle === 'classic',
-                  () => setTasksStyle('classic'),
-                  'Use Windows classic folders',
-                  'fo-tasks',
-                )}
-              </fieldset>
-              <fieldset className="fo__group">
-                <legend>Browse folders</legend>
-                {radio(
-                  browseStyle === 'same',
-                  () => setBrowseStyle('same'),
-                  'Open each folder in the same window',
-                  'fo-browse',
-                )}
-                {radio(
-                  browseStyle === 'own',
-                  () => setBrowseStyle('own'),
-                  'Open each folder in its own window',
-                  'fo-browse',
-                )}
-              </fieldset>
-              <fieldset className="fo__group">
-                <legend>Click items as follows</legend>
-                {radio(
-                  clickStyle === 'single',
-                  () => setClickStyle('single'),
-                  'Single-click to open an item (point to select)',
-                  'fo-click',
-                )}
-                {radio(
-                  clickStyle === 'double',
-                  () => setClickStyle('double'),
-                  'Double-click to open an item (single-click to select)',
-                  'fo-click',
-                )}
-              </fieldset>
-            </>
-          ) : tab === 'view' ? (
+        <div className="fo__page" style={dialogAt(9, 56, 368, 380)}>
+          {tab === 'view' ? (
             <>
               <div className="fo__adv-label">Advanced settings:</div>
               <div className="fo__adv">
@@ -273,7 +257,7 @@ export default function FolderOptions({ onClose }) {
                     Hidden files and folders
                   </div>
                   <div className="fo__indent">
-                    {radio(
+                    {radioRow(
                       !showHidden,
                       () => {
                         setShowHidden(false);
@@ -282,7 +266,7 @@ export default function FolderOptions({ onClose }) {
                       'Do not show hidden files and folders',
                       'fo-hidden',
                     )}
-                    {radio(
+                    {radioRow(
                       showHidden,
                       () => {
                         setShowHidden(true);
@@ -341,7 +325,7 @@ export default function FolderOptions({ onClose }) {
                 <XPButton onClick={restoreDefaults}>Restore Defaults</XPButton>
               </div>
             </>
-          ) : (
+          ) : tab === 'filetypes' ? (
             <>
               <div className="fo__adv-label">Registered file types:</div>
               <div className="fo__types">
@@ -412,9 +396,136 @@ export default function FolderOptions({ onClose }) {
                 </div>
               </fieldset>
             </>
-          )}
+          ) : null}
         </div>
-        <div className="fo__buttons">
+        {tab === 'general' && (
+          <>
+            <fieldset className="xp-group" style={dialogAt(24, 69, 339, 60)}>
+              <legend>Tasks</legend>
+            </fieldset>
+            <img
+              className="fo__picture"
+              style={dialogAt(34, 89, 32, 28)}
+              src={tasksPicture}
+              alt=""
+              draggable={false}
+            />
+            {radio(
+              75,
+              88,
+              tasksStyle === 'common',
+              () => setTasksStyle('common'),
+              'Show common tasks in folders',
+              'fo-tasks',
+            )}
+            {radio(
+              75,
+              106,
+              tasksStyle === 'classic',
+              () => setTasksStyle('classic'),
+              'Use Windows classic folders',
+              'fo-tasks',
+            )}
+            <fieldset className="xp-group" style={dialogAt(24, 141, 339, 62)}>
+              <legend>Browse folders</legend>
+            </fieldset>
+            <img
+              className="fo__picture"
+              style={dialogAt(34, 162, 32, 28)}
+              src={browsePicture}
+              alt=""
+              draggable={false}
+            />
+            {radio(
+              75,
+              161,
+              browseStyle === 'same',
+              () => setBrowseStyle('same'),
+              'Open each folder in the same window',
+              'fo-browse',
+            )}
+            {radio(
+              75,
+              179,
+              browseStyle === 'own',
+              () => setBrowseStyle('own'),
+              'Open each folder in its own window',
+              'fo-browse',
+            )}
+            <fieldset className="xp-group" style={dialogAt(24, 214, 339, 98)}>
+              <legend>Click items as follows</legend>
+            </fieldset>
+            <img
+              className="fo__picture"
+              style={dialogAt(37, 234, 25, 30)}
+              src={clickPicture}
+              alt=""
+              draggable={false}
+            />
+            {radio(
+              75,
+              235,
+              clickStyle === 'single',
+              () => setClickStyle('single'),
+              'Single-click to open an item (point to select)',
+              'fo-click',
+            )}
+            {radio(
+              93,
+              253,
+              false,
+              () => {},
+              'Underline icon titles consistent with my browser',
+              'fo-underline',
+              true,
+            )}
+            {radio(
+              93,
+              271,
+              false,
+              () => {},
+              'Underline icon titles only when I point at them',
+              'fo-underline',
+              true,
+            )}
+            {radio(
+              75,
+              289,
+              clickStyle === 'double',
+              () => setClickStyle('double'),
+              'Double-click to open an item (single-click to select)',
+              'fo-click',
+            )}
+            <div className="fo__abs" style={dialogAt(255, 325, 108, 23)}>
+              <XPButton onClick={restoreGeneral}>Restore Defaults</XPButton>
+            </div>
+          </>
+        )}
+        {tab === 'offline' && (
+          <>
+            <img
+              className="fo__picture"
+              style={dialogAt(24, 71, 31, 27)}
+              src={offlineIcon}
+              alt=""
+              draggable={false}
+            />
+            <div className="fo__text" style={dialogAt(67, 69, 300)}>
+              Use Offline Files to work with files and programs stored on the
+              network even when you are not connected.
+            </div>
+            <div className="fo__text" style={dialogAt(63, 128, 300)}>
+              Fast User Switching is enabled on this computer. Offline Files
+              cannot be enabled while Fast User Switching is enabled.
+            </div>
+            <div className="fo__text" style={dialogAt(63, 167, 300)}>
+              To change your Fast User Switching setting, open User Accounts in
+              Control Panel and select &quot;Change the way users log on or
+              off.&quot;
+            </div>
+          </>
+        )}
+        <div className="fo__abs" style={dialogAt(140, 442, 75, 23)}>
           <XPButton
             onClick={() => {
               apply();
@@ -423,7 +534,11 @@ export default function FolderOptions({ onClose }) {
           >
             OK
           </XPButton>
+        </div>
+        <div className="fo__abs" style={dialogAt(221, 442, 75, 23)}>
           <XPButton onClick={onClose}>Cancel</XPButton>
+        </div>
+        <div className="fo__abs" style={dialogAt(302, 442, 75, 23)}>
           <XPButton disabled={!dirty} onClick={apply}>
             Apply
           </XPButton>
@@ -446,47 +561,81 @@ export default function FolderOptions({ onClose }) {
 }
 
 const Body = styled.div`
-  padding: 8px 8px 10px;
+  position: relative;
+  box-sizing: border-box;
   font-size: 11px;
   font-family: Tahoma, 'Noto Sans', sans-serif;
+  color: #000;
 
   .fo__tabs {
+    position: absolute;
     display: flex;
-    margin-left: 2px;
+    align-items: flex-end;
   }
   .fo__tab {
-    padding: 3px 12px 4px;
-    border: 1px solid #919b9c;
-    border-bottom: none;
-    border-radius: 3px 3px 0 0;
-    background: linear-gradient(to bottom, #fff, #f0efe4);
-    margin-right: 2px;
     cursor: default;
-    position: relative;
-    top: 1px;
-  }
-  .fo__tab--active {
-    background: #fcfcfe;
-    padding-top: 4px;
-    top: 0;
-    border-top: 2px solid #e68b2c;
-    z-index: 1;
   }
   .fo__page {
-    border: 1px solid #919b9c;
-    background: #fcfcfe;
+    position: absolute;
+    box-sizing: border-box;
     padding: 12px 10px;
-    min-height: 330px;
   }
-  .fo__group {
-    border: 1px solid #d0d0bf;
-    border-radius: 3px;
-    margin: 0 0 10px;
-    padding: 6px 10px 8px;
-    legend {
-      color: #0046d5;
-      padding: 0 2px;
+  .fo__abs {
+    position: absolute;
+    box-sizing: border-box;
+    z-index: 1;
+  }
+  .fo__abs > .xp-button {
+    width: 100%;
+    height: 100%;
+    min-width: 0;
+    padding: 0 2px;
+  }
+  .xp-group {
+    position: absolute;
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    min-width: 0;
+    z-index: 1;
+    pointer-events: none;
+  }
+  .xp-group > legend {
+    box-sizing: border-box;
+    height: 13px;
+    margin-left: 8px;
+    padding: 0 2px;
+    line-height: 13px;
+    color: var(--xp-group-box-text, #0046d5);
+  }
+  .fo__picture {
+    position: absolute;
+    display: block;
+    image-rendering: pixelated;
+    z-index: 1;
+  }
+  .fo__check {
+    position: absolute;
+    display: flex;
+    align-items: flex-start;
+    gap: 3px;
+    height: 13px;
+    line-height: 13px;
+    white-space: nowrap;
+    cursor: default;
+    z-index: 1;
+    input {
+      margin: 0;
+      flex-shrink: 0;
     }
+  }
+  .fo__check--disabled span {
+    color: var(--xp-gray-text, #aca899);
+  }
+  .fo__text {
+    position: absolute;
+    line-height: 13px;
+    z-index: 1;
   }
   .fo__row {
     display: flex;
@@ -608,11 +757,5 @@ const Body = styled.div`
   .fo__details-note {
     line-height: 15px;
     color: #000;
-  }
-  .fo__buttons {
-    display: flex;
-    justify-content: flex-end;
-    gap: 6px;
-    margin-top: 10px;
   }
 `;

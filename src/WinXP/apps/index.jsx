@@ -463,10 +463,11 @@ export const PROGRAMS = {
       title: 'Display Properties',
       buttons: ['help', 'close'],
       noIcon: true,
+      dialogFrame: true,
     },
     component: DisplayProperties,
-    // XP's sheet: 402 by 454 with the Luna frame
-    defaultSize: { width: 402, height: 454 },
+    // XP's sheet: 404 by 455 with the Luna frame
+    defaultSize: { width: 404, height: 455 },
     resizable: false,
     maximized: false,
     multiInstance: false,

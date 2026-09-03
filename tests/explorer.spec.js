@@ -59,10 +59,10 @@ test('the Views button switches to Details and the headers sort', async ({
   // name; a second click flips the whole order, tiebreak included
   const names = page.locator('.com__td--name .com__item-name');
   await headers.nth(1).click();
-  await expect(headers.nth(1)).toContainText('▲');
+  await expect(headers.nth(1).locator('.com__sort')).toHaveCount(1);
   await expect(names.first()).toHaveText('My Music');
   await headers.nth(1).click();
-  await expect(headers.nth(1)).toContainText('▼');
+  await expect(headers.nth(1).locator('.com__sort--desc')).toHaveCount(1);
   await expect(names.first()).toHaveText('My Videos');
   expect(page.__errors).toEqual([]);
 });

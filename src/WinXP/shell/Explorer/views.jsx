@@ -204,7 +204,10 @@ function DetailsView({
                 className={`com__th${col.num ? ' com__th--size' : ''}`}
                 onClick={() => onHeaderSort(col.sort)}
               >
-                {col.label} {sortBy === col.sort ? (sortAsc ? '▲' : '▼') : ''}
+                {col.label}
+                {sortBy === col.sort && (
+                  <i className={`com__sort${sortAsc ? '' : ' com__sort--desc'}`} />
+                )}
                 <ColumnDivider
                   columnId={col.id}
                   onResize={cols.beginResize}
@@ -225,7 +228,7 @@ function DetailsView({
                 col.id === 'name' ? (
                   <td
                     key="name"
-                    className="com__td com__td--name"
+                    className={`com__td com__td--name${sortBy === col.sort ? ' com__td--sorted' : ''}`}
                     data-col="name"
                   >
                     <ItemIcon node={node} src={node.icon} />
@@ -234,7 +237,7 @@ function DetailsView({
                 ) : (
                   <td
                     key={col.id}
-                    className={`com__td${col.num ? ' com__td--size' : ''}`}
+                    className={`com__td${col.num ? ' com__td--size' : ''}${sortBy === col.sort ? ' com__td--sorted' : ''}`}
                     data-col={col.id}
                   >
                     {detailCellValue(col.id, node)}

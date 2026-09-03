@@ -141,6 +141,8 @@ const IMAGES = [
   ['ExplorerBar.SpecialGroupCollapse', 'imagefile'],
   ['ExplorerBar.SpecialGroupExpand', 'imagefile'],
   ['Header.HeaderItem', 'imagefile'],
+  ['Header', 'imagefile'],
+  ['TrackBar.ThumbBottom', 'imagefile1'],
 ];
 
 // parts whose middle is painted separately (see --xp-pn-)
@@ -227,6 +229,10 @@ export function lunaTokens(scheme) {
     // the caption is a bitmap; these stay for text and for Classic's gradient
     captionActive: 'none',
     buttonText: '#000',
+    tabPage: '#fdfdfa',
+    groupBorder: rgb(
+      (part('button.groupbox').bordercolorhint || '208 208 191').trim(),
+    ),
     captionInactive: 'none',
     captionEdgeActive: 'transparent',
     captionEdgeInactive: 'transparent',
@@ -333,6 +339,8 @@ export function classicTokens(scheme) {
     taskbtnActive: k.ButtonHilight,
     taskbtnText: k.ButtonText,
     buttonText: k.ButtonText,
+    tabPage: k.ButtonFace,
+    groupBorder: k.ButtonShadow,
     startText: k.ButtonText,
     startTextShadow: 'transparent',
     startHeader: `linear-gradient(to right, ${k.ActiveTitle}, ${k.GradientActiveTitle})`,
@@ -398,6 +406,31 @@ export function themeVars(appearance) {
   vars['--xp-caption-total'] = `${(classic
     ? font.classicCaption
     : font.lunaCaption) + 4}px`;
+  // dialogs wear the fixed 3px frame; Luna's caption bitmap already holds
+  // its top edge, Classic's caption sits 3px down
+  vars['--xp-dlg-frame-w'] = '3px';
+  vars['--xp-dlg-caption-total'] = `${
+    classic ? font.classicCaption + 3 : font.lunaCaption + 4
+  }px`;
+  if (!classic) {
+    for (const st of [1, 2]) {
+      const l = lunaImage(scheme, 'frameLeft-dlg', st);
+      const r = lunaImage(scheme, 'frameRight-dlg', st);
+      const b = lunaImage(scheme, 'frameBottom', st);
+      if (l)
+        vars[
+          `--xp-p-window-frameleft-dlg-${st}`
+        ] = `url(${l}) 0 0 0 3 fill / 0 0 0 3px stretch`;
+      if (r)
+        vars[
+          `--xp-p-window-frameright-dlg-${st}`
+        ] = `url(${r}) 0 3 0 0 fill / 0 3px 0 0 stretch`;
+      if (b)
+        vars[
+          `--xp-p-window-framebottom-dlg-${st}`
+        ] = `url(${b}) 1 5 2 5 fill / 1px 5px 2px 5px stretch`;
+    }
+  }
   vars['--xp-caption-font'] = classic
     ? "Tahoma, 'Noto Sans', sans-serif"
     : "'Trebuchet MS', Tahoma, sans-serif";

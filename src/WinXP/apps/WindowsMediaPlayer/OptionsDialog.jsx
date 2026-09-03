@@ -17,28 +17,16 @@ const Body = styled.div`
   font-size: 11px;
   color: #000;
 
+  /* the tab strip and page are drawn by the theme's shared tab rules */
   .wmp-opt__tabs {
     display: flex;
-    gap: 2px;
-    margin-bottom: -1px;
+    align-items: flex-end;
+    padding-left: 2px;
   }
   .wmp-opt__tab {
-    padding: 3px 12px 4px;
-    border: 1px solid #919b9c;
-    border-bottom: none;
-    border-radius: 3px 3px 0 0;
-    background: linear-gradient(to bottom, #fff 0, var(--xp-face, #ece9d8) 100%);
     cursor: default;
   }
-  .wmp-opt__tab--on {
-    background: #fff;
-    padding-bottom: 5px;
-    position: relative;
-    z-index: 1;
-  }
   .wmp-opt__page {
-    border: 1px solid #919b9c;
-    background: #fff;
     padding: 12px;
     min-height: 150px;
   }
@@ -94,7 +82,7 @@ export default function OptionsDialog({ options, onChange, onClose }) {
             <div
               key={name}
               className={`wmp-opt__tab${
-                tab === name ? ' wmp-opt__tab--on' : ''
+                tab === name ? ' wmp-opt__tab--active' : ''
               }`}
               onClick={() => setTab(name)}
             >

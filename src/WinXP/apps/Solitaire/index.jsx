@@ -14,7 +14,6 @@ import {
   CARD_H,
   IS_RED,
   DECK_BACKS,
-  DEFAULT_BACK,
   buildDeck,
   shuffle,
   drawCardOnCanvas,
@@ -38,7 +37,7 @@ const DEFAULT_OPTS = {
   drawThree: true,
   scoring: 'standard',
   timed: true,
-  backIdx: DEFAULT_BACK,
+  backIdx: 0,
 };
 
 function newGame(opts) {
@@ -566,7 +565,7 @@ export default function Solitaire({ onClose, isFocus }) {
 
   // --- Rendering ----------------------------------------------------------
 
-  const back = DECK_BACKS[opts.backIdx] || DECK_BACKS[DEFAULT_BACK];
+  const back = DECK_BACKS[opts.backIdx] || DECK_BACKS[0];
   const g = game;
   const noMorePasses =
     g.stock.length === 0 &&
@@ -802,7 +801,14 @@ function DeckDialog({ current, onOk, onCancel }) {
                 onClick={() => setSel(i)}
                 onDoubleClick={() => onOk(i)}
               >
-                <img className="deck__back" src={b.url} alt="" />
+                <div
+                  className="deck__back"
+                  style={{
+                    backgroundColor: b.base,
+                    backgroundImage: b.pattern,
+                    backgroundSize: b.patternSize || 'auto',
+                  }}
+                />
               </div>
             </XPTooltip>
           ))}
@@ -924,17 +930,13 @@ const Root = styled.div`
     top: 0;
     z-index: 900;
   }
-  /* an empty pile: XP's black outline over a lattice of black dots, two per
-     4x4 cell, on the green */
   .sol__slot {
     position: absolute;
     width: ${CARD_W}px;
     height: ${CARD_H}px;
-    border: 1px solid #000;
+    border: 1px solid rgba(0, 70, 0, 0.9);
     border-radius: 5px;
-    background: radial-gradient(circle, #000 0.6px, transparent 0.7px) 1px 0 /
-        4px 4px,
-      radial-gradient(circle, #000 0.6px, transparent 0.7px) 3px 2px / 4px 4px;
+    background: rgba(0, 0, 0, 0.06);
     box-sizing: border-box;
   }
   .sol__stock-hit {

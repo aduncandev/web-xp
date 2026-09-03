@@ -1,4 +1,10 @@
-import React, { useState, useRef, useEffect, useCallback } from 'react';
+import React, {
+  useState,
+  useRef,
+  useEffect,
+  useCallback,
+  useLayoutEffect,
+} from 'react';
 import { createPortal } from 'react-dom';
 import styled from 'styled-components';
 
@@ -41,6 +47,17 @@ export default function XPDialogFrame({
   const [pos, setPos] = useState(null);
   const [dragging, setDragging] = useState(false);
   const [flashKey, setFlashKey] = useState(0);
+
+  // pin the centred position to whole pixels, or the bitmaps blur
+  useLayoutEffect(() => {
+    if (pos || !frameRef.current) return;
+    const rect = frameRef.current.getBoundingClientRect();
+    setPos({
+      x: Math.round(toLogicalX(rect.left)),
+      y: Math.round(toLogicalY(rect.top)),
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const onHeaderMouseDown = e => {
     if (e.button !== 0 || !frameRef.current) return;
@@ -131,6 +148,12 @@ const Overlay = styled.div`
 `;
 
 const Frame = styled.div.attrs({ className: 'xpdlg' })`
+  /* the fixed dialog frame: 3px sides, and Luna's frame bitmaps cut for it */
+  --xp-frame-w: var(--xp-dlg-frame-w, 4px);
+  --xp-caption-total: var(--xp-dlg-caption-total, 29px);
+  --xp-p-window-frameleft-1: var(--xp-p-window-frameleft-dlg-1, none);
+  --xp-p-window-frameright-1: var(--xp-p-window-frameright-dlg-1, none);
+  --xp-p-window-framebottom-1: var(--xp-p-window-framebottom-dlg-1, none);
   position: fixed;
   image-rendering: pixelated;
   display: flex;

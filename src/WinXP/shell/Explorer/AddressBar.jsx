@@ -19,7 +19,6 @@ import go from 'assets/windowsIcons/290.png';
 import control from 'assets/windowsIcons/300(16x16).png';
 import network from 'assets/windowsIcons/693(16x16).png';
 import documentIcon from 'assets/windowsIcons/308(16x16).png';
-import dropdown from 'assets/windowsIcons/dropdown.png';
 import desktopIconSvg from 'assets/windowsIcons/desktop.svg';
 
 /**
@@ -164,9 +163,9 @@ export default function AddressBar({ address, icon, onNavigate }) {
           }}
           spellCheck={false}
         />
-        <img
-          src={dropdown}
-          alt="dropdown"
+        <span
+          role="button"
+          aria-label="dropdown"
           className="com__address_bar__content__dropdown"
           onClick={e => {
             e.stopPropagation();

@@ -486,7 +486,11 @@ all, and headless Chromium hides scrollbars unless launched with
 Windows Classic was checked against a real Windows XP SP3 in QEMU; the
 1:1 captures of both styles (Display Properties' tabs and dialogs, the
 Start menu, Explorer, Notepad, Run, a message box, caption button states)
-are in `refkit/vm/`. The Classic glyphs in `src/assets/xp/classic/`
+are in `refkit/vm/`, with every stock program's window, menus and dialogs
+from a tour of the VM and the notes from comparing them in
+`refkit/vm/TOUR.md`. `image-rendering: pixelated` inherits, so `index.css`
+sets `img` back to `auto`: icons scale smoothly, the chrome stays pixel
+for pixel. The Classic glyphs in `src/assets/xp/classic/`
 (caption buttons, Help, the task pane chevrons, the combo and scrollbar
 arrows, the menu arrow) are cut from those captures as black-on-transparent
 masks and drawn with `mask-image` in the button-text colour, so every
@@ -505,6 +509,46 @@ XP's Effects dialog; its settings ride on the appearance as `effects` and
 reach the document as `data-xp-menu-fade`, `data-xp-menu-shadow` and
 `data-xp-underlines` (see `index.css`), which the menus and the Start menu
 read.
+
+### Dialog frames and sheet layout
+
+- XP draws dialogs with a fixed 3px frame (SM_CXFIXEDFRAME), sizable windows
+  with 4px. Luna's frameLeft/frameRight bitmaps are 5 columns with 2px
+  sizing margins; a dialog shows columns 1, 3 and 4 of them (checked
+  against captures), the bottom frame rows 0, 3 and 4. `tools/luna-export.py`
+  writes the cut `frameLeft-dlg-N.png` / `frameRight-dlg-N.png`, and
+  `tokens.js` exposes them as `--xp-p-window-frame{left,right,bottom}-dlg-N`
+  with `--xp-dlg-frame-w` (3px) and `--xp-dlg-caption-total` (Luna 29,
+  Classic 21). `XPDialogFrame` redefines the window vars from those; an app
+  window does the same when its header config has `dialogFrame: true`
+  (Display Properties). A Luna dialog measured in the VM is 404x455 with
+  its client at (3,29).
+- `src/components/XPDialogFrame/layout.js` holds `dialogAt(x, y, w, h)`:
+  positions typed straight from a capture, relative to the dialog's outer
+  top-left corner. Taskbar Properties, Folder Options and Display
+  Properties (`rootAt`, corrected for its older measurement origin) use it.
+  Push buttons are 75x23 boxes: the bitmap's outline sits one pixel inside
+  them, on the rows the real 73x21 button occupies.
+- Tab strips share the rules in `luna.css`/`classic.css`: unselected tabs
+  18px with 6px padding and a 38px minimum width, the selected one 2px
+  taller and wider with negative side margins so it overlaps its neighbours
+  instead of pushing them. Luna strips start at dialog x 11, Classic at 9.
+  Group boxes are `fieldset.xp-group` so the border breaks around the
+  legend as the control does; the legend is pinned to 13px or its border
+  lands on a half pixel.
+- Taskbar Properties' previews are captures, not explorer.exe's bitmaps:
+  XP SP2 paints its Media Player icon out of them. `taskbar-146..153.png`
+  index as 146 + unlocked + 2*ungrouped + 4*noQuickLaunch,
+  `tray-180..183.png` as 180 + noClock + 2*showAllIcons.
+- Explorer's Details header: the row is the `Header` part's background
+  (1x17, stretched to 20px), each column the `Header.HeaderItem` part, and
+  the sort arrow a 9x5 triangle 10px past the label in the gray text
+  colour (`.com__sort`); Classic draws raised 20px buttons with the arrow
+  in the shadow colour. The sorted column's cells are tinted #f7f7f7.
+- `scratchpad/xp/icons.py` must ask Pillow for the deepest frame of a size:
+  its default is the 4-bit one, which is where the "Windows 98" looking task
+  pane icons came from. The task pane icons now match the VM's pixels
+  exactly (shell32 319, 244, 267, 35, 4, 16, 18, 22, 235, 1007; appwiz 1500).
 
 ## The screen
 
