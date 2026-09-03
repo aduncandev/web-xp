@@ -553,32 +553,34 @@ read.
 ### Display scaling and seams
 
 Windows at 125% or 150% display scaling gives the browser a device pixel
-ratio of 1.25 or 1.5; a macOS retina display gives 2, and 1x gives 1. On the
-fractional ratios an element at an integer CSS position lands on a half
-device pixel, so adjacent chrome elements leave hairlines and nine-sliced
-bitmaps resample unevenly: seams around caption buttons, window frames and
-bands that nobody sees on a Mac.
+ratio of 1.25 or 1.5; a macOS retina display gives 2, and an unscaled
+monitor gives 1. On the fractional ratios the browser rounds each nine-slice
+rectangle on its own, so hairlines appear between the slices and read as
+seams across the chrome's gradients. Reproduce with Playwright's
+`deviceScaleFactor` at 1.25 and 1.5; nothing shows at 1 or 2.
 
-- `screen.js` snaps the stage's scale so one stage pixel always covers a
-  whole number of device pixels (`snapScale`), for both the window-sized
-  stage and a chosen resolution. At ratio 1.25 the stage is the window's
-  size in real pixels and the scale 0.8; at 2 nothing changes. It only
-  gives up when the window is smaller than the stage in device pixels,
-  where there is nothing to snap to. The Large DPI setting is a scale of
-  its own and stays out of the snapping. `tests/scaling.spec.js` pins the
-  invariant, the letterboxed case, and that dragging still lands where it
-  is put.
-- Parts drawn at their natural size are painted as plain background images,
-  never nine-sliced: the caption buttons (21x21 from CaptionButton.bmp and
-  CloseButton.bmp, exposed as `--xp-i-window-*button-N`), the scrollbar
-  arrows, check boxes and radio buttons. Slicing a bitmap that is never
-  stretched costs fidelity and gains nothing. Classic's own rules blank
+- The desktop keeps its size at every ratio. Aligning stage pixels to whole
+  device pixels would fix the seams outright, but at 1.25 the only aligned
+  scales are 0.8 and 1.6, and shrinking the desktop by a fifth is worse than
+  the seams. `tests/scaling.spec.js` pins the size, the letterboxed case and
+  the pointer maths.
+- The cure is an underlay: `UNDERLAY_PARTS` in `theme/tokens.js` exposes a
+  part's whole bitmap as `--xp-u-<slug>-<n>`, and the sites that draw those
+  parts paint it at `100% 100%` under the nine slices, so a hairline shows
+  the part's own colours instead of a gap. It covers the Start button, the
+  taskbar and tray backgrounds, the task buttons, the Start menu's user pane
+  and log-off bands, and Explorer's task pane cards. `tools/seamscan.py`
+  finds the rest: it reports one-pixel rows and columns that differ from
+  both neighbours, run it on a crop taken at 1.25 and again at 1.
+- Parts drawn at their natural size are painted as plain background images
+  and never sliced: the caption buttons (21x21, `--xp-i-window-*button-N`),
+  the scrollbar arrows, check boxes and radio buttons. Classic blanks
   `background-image` on those buttons in every state so Luna's art cannot
   leak in on hover.
 - Luna's `--xp-frame-active` / `--xp-frame-inactive` are the frame bitmap's
   inner column (`frameEdge` in parts.json, written by `tools/luna-export.py`),
   so a hairline between the window's four frame pieces shows the frame's own
-  colour instead of the desktop.
+  colour rather than the desktop.
 
 ## The screen
 

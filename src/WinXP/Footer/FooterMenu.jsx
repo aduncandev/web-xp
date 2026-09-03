@@ -482,7 +482,10 @@ export default styled(FooterMenu)`
     /* the style's user pane bitmap; the gradient is the fallback */
     border: 0 solid transparent;
     border-image: var(--xp-p-startpanel-userpane-1, none);
-    background: var(
+    background-size: 100% 100%, auto;
+    background-repeat: no-repeat, repeat;
+    background-image: var(--xp-u-startpanel-userpane-1, none),
+      var(
       --xp-start-header,
       linear-gradient(
         to bottom,
@@ -539,7 +542,10 @@ export default styled(FooterMenu)`
     width: 100%;
     border: 0 solid transparent;
     border-image: var(--xp-p-startpanel-logoff-1, none);
-    background: var(
+    background-size: 100% 100%, auto;
+    background-repeat: no-repeat, repeat;
+    background-image: var(--xp-u-startpanel-logoff-1, none),
+      var(
       --xp-start-footer,
       linear-gradient(
         to bottom,

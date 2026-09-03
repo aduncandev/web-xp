@@ -160,6 +160,27 @@ const IMAGES = [
 // parts whose middle is painted separately (see --xp-pn-)
 const NO_FILL_PARTS = ['Scrollbar.ThumbBtnVert', 'Scrollbar.ThumbBtnHorz'];
 
+/*
+ * Parts that also get their whole bitmap stretched under the nine slices,
+ * as `--xp-u-<slug>-<n>`: a plain url, drawn at `100% 100%` by the site
+ * that uses it. A browser at a fractional device pixel ratio
+ * (Windows at 125% or 150%) rounds each slice's rectangle on its own and
+ * leaves hairlines between them, which read as seams across a gradient.
+ * The stretched copy underneath fills those with the part's own colours.
+ */
+const UNDERLAY_PARTS = [
+  'Start::Button',
+  'TaskBand::Toolbar.Button',
+  'TaskBar.BackgroundBottom',
+  'TrayNotifyHoriz.TrayNotify.Background',
+  'StartPanel.UserPane',
+  'StartPanel.Logoff',
+  'ExplorerBar.NormalGroupHead',
+  'ExplorerBar.NormalGroupBackground',
+  'ExplorerBar.SpecialGroupHead',
+  'ExplorerBar.SpecialGroupBackground',
+];
+
 /** "Window.CloseButton" -> "window-closebutton", the variable's middle. */
 export const partSlug = section =>
   section
@@ -471,6 +492,15 @@ export function themeVars(appearance) {
       imageStates(scheme, section, key, suffix).forEach((url, i) => {
         vars[`--xp-i-${partSlug(section)}-${tag}${i + 1}`] = `url(${url})`;
       });
+    }
+    for (const section of UNDERLAY_PARTS) {
+      const p = lunaPart(scheme, section);
+      if (!p || !p.name) continue;
+      const slug = partSlug(section);
+      for (let st = 1; st <= p.states; st++) {
+        const url = lunaImage(scheme, p.name, p.states > 1 ? st : 0);
+        if (url) vars[`--xp-u-${slug}-${st}`] = `url(${url})`;
+      }
     }
     // edges only, so a background can show through the middle
     for (const section of NO_FILL_PARTS) {
