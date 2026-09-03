@@ -160,27 +160,6 @@ const IMAGES = [
 // parts whose middle is painted separately (see --xp-pn-)
 const NO_FILL_PARTS = ['Scrollbar.ThumbBtnVert', 'Scrollbar.ThumbBtnHorz'];
 
-/*
- * Parts that also get their whole bitmap stretched under the nine slices,
- * as `--xp-u-<slug>-<n>`: a plain url, drawn at `100% 100%` by the site
- * that uses it. A browser at a fractional device pixel ratio
- * (Windows at 125% or 150%) rounds each slice's rectangle on its own and
- * leaves hairlines between them, which read as seams across a gradient.
- * The stretched copy underneath fills those with the part's own colours.
- */
-const UNDERLAY_PARTS = [
-  'Start::Button',
-  'TaskBand::Toolbar.Button',
-  'TaskBar.BackgroundBottom',
-  'TrayNotifyHoriz.TrayNotify.Background',
-  'StartPanel.UserPane',
-  'StartPanel.Logoff',
-  'ExplorerBar.NormalGroupHead',
-  'ExplorerBar.NormalGroupBackground',
-  'ExplorerBar.SpecialGroupHead',
-  'ExplorerBar.SpecialGroupBackground',
-];
-
 /** "Window.CloseButton" -> "window-closebutton", the variable's middle. */
 export const partSlug = section =>
   section
@@ -272,7 +251,9 @@ export function lunaTokens(scheme) {
     captionEdgeInactive: 'transparent',
     captionText: c(m, 'captiontext', '#ffffff'),
     captionTextInactive: c(m, 'inactivecaptiontext', '#ffffff'),
-    captionShadow: '#000000',
+    // the Window section's text shadow: dark blue under Blue's white text,
+    // a pale lilac under Silver's near-black
+    captionShadow: rgb((part('Window').textshadowcolor || '0 0 0').trim()),
     // behind the frame's four pieces: a browser that lands an edge on a
     // half device pixel (Windows at 125% or 150%) leaves a hairline, and
     // it should show the frame's own colour, never the desktop
@@ -496,15 +477,6 @@ export function themeVars(appearance) {
       imageStates(scheme, section, key, suffix).forEach((url, i) => {
         vars[`--xp-i-${partSlug(section)}-${tag}${i + 1}`] = `url(${url})`;
       });
-    }
-    for (const section of UNDERLAY_PARTS) {
-      const p = lunaPart(scheme, section);
-      if (!p || !p.name) continue;
-      const slug = partSlug(section);
-      for (let st = 1; st <= p.states; st++) {
-        const url = lunaImage(scheme, p.name, p.states > 1 ? st : 0);
-        if (url) vars[`--xp-u-${slug}-${st}`] = `url(${url})`;
-      }
     }
     // edges only, so a background can show through the middle
     for (const section of NO_FILL_PARTS) {

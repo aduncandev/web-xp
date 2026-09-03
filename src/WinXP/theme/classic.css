@@ -908,3 +908,13 @@ html[data-xp-style='classic'] .tp__tabs,
 html[data-xp-style='classic'] .fo__tabs {
   margin-left: -2px;
 }
+
+/* Display Properties: the samples' sunken frame in the scheme's colours */
+html[data-xp-style='classic'] .dp__frame {
+  padding: 2px;
+  box-shadow:
+    inset 1px 1px var(--xp-face-shadow),
+    inset -1px -1px var(--xp-face-light),
+    inset 2px 2px var(--xp-face-dk-shadow),
+    inset -2px -2px var(--xp-face);
+}

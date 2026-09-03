@@ -16,6 +16,8 @@
  */
 import { useEffect, useState } from 'react';
 
+import { syncSliceCompositor } from './theme/sliceCompositor';
+
 const KEY = 'xpDisplay';
 export const STAGE_ID = 'xp-stage';
 export const PORTAL_ID = 'xp-portal';
@@ -100,6 +102,8 @@ function markRatio() {
 
 function paint() {
   markRatio();
+  // on a fractional ratio the nine-slice parts become single textures
+  syncSliceCompositor(stage());
   geometry = active
     ? layoutFor(current)
     : {

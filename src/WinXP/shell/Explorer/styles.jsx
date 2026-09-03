@@ -110,10 +110,7 @@ export const taskPaneCss = css`
     /* the style's group head: rounded top corners, a soft gradient */
     border: 0 solid transparent;
     border-image: var(--xp-p-explorerbar-normalgrouphead-1, none);
-    background-size: 100% 100%, auto;
-    background-repeat: no-repeat, repeat;
-    background-image: var(--xp-u-explorerbar-normalgrouphead-1, none),
-      var(--xp-group-head-bg, none);
+    background: var(--xp-group-head-bg, none);
   }
   .com__content__left__card__header:hover {
     & .com__content__left__card__header__text {
@@ -160,10 +157,7 @@ export const taskPaneCss = css`
     padding: 8px 10px 10px;
     border: 0 solid transparent;
     border-image: var(--xp-p-explorerbar-normalgroupbackground-1, none);
-    background-size: 100% 100%, auto;
-    background-repeat: no-repeat, repeat;
-    background-image: var(--xp-u-explorerbar-normalgroupbackground-1, none),
-      var(--xp-group-bg, none);
+    background: var(--xp-group-bg, none);
     color: var(--xp-group-text, #215dc6);
   }
   .com__content__left__card__row {

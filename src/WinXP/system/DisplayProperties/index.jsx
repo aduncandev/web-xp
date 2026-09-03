@@ -1102,16 +1102,16 @@ const MonitorReal = styled.div`
 // the sample's window rectangles, measured off XP at 1024x768 for each style
 const SAMPLE_RECTS = {
   luna: {
-    inactive: { left: 7, top: 7, width: 314, height: 100 },
-    active: { left: 98, top: 36, width: 240, height: 128 },
+    inactive: { left: 8, top: 8, width: 314, height: 137 },
+    active: { left: 18, top: 30, width: 321, height: 135 },
     themes: { left: 29, top: 15, width: 204, height: 146 },
-    msg: { left: 97, top: 86, width: 150, height: 72 },
+    msg: { left: 98, top: 58, width: 150, height: 100 },
   },
   classic: {
-    inactive: { left: 16, top: 4, width: 305, height: 139 },
-    active: { left: 20, top: 27, width: 323, height: 121 },
+    inactive: { left: 17, top: 5, width: 305, height: 139 },
+    active: { left: 21, top: 28, width: 323, height: 121 },
     themes: { left: 29, top: 15, width: 204, height: 146 },
-    msg: { left: 28, top: 106, width: 207, height: 57 },
+    msg: { left: 29, top: 107, width: 207, height: 57 },
   },
 };
 
@@ -1267,11 +1267,13 @@ const Root = styled.div`
   }
   /* the sunken 3D frame around a sample (SS_SUNKEN): two dark lines outside
      a light one, its content inset 3px */
+  /* the sunken frame around the samples: two rings at the top and left,
+     one at the bottom and right, as the VM draws it */
   .dp__frame {
-    padding: 3px;
+    padding: 2px 1px 1px 2px;
     background: var(--xp-face, #ece9d8);
     box-shadow: inset 1px 1px #aca899, inset -1px -1px #ffffff,
-      inset 2px 2px #716f64, inset -2px -2px var(--xp-face, #ece9d8);
+      inset 2px 2px #716f64;
   }
   .dp__frame > * {
     width: 100%;
@@ -1665,6 +1667,10 @@ const Mini = styled.div`
     white-space: nowrap;
     overflow: hidden;
   }
+  /* the message box has one button, so its title runs further right */
+  .mw--msg .mw__title {
+    right: 28px;
+  }
   .mw--inactive .mw__title {
     color: var(--xp-caption-text-inactive, #d8e4f8);
     text-shadow: 1px 1px var(--xp-caption-shadow-inactive, #4a72b0);
@@ -1775,8 +1781,8 @@ const Mini = styled.div`
       var(--xp-i-scrollbar-arrowbtn-5, none);
   }
   .mw__scroll__thumb {
-    height: 34px;
-    margin-top: 2px;
+    height: 16px;
+    margin-top: 0;
     border-image: var(--xp-pn-scrollbar-thumbbtnvert-1, none);
     background: var(--xp-i-scrollbar-grippervert-1, none) center no-repeat,
       var(--xp-i-scrollbar-thumbbtnvert-mid-1, none) center / 100% 100%
@@ -1797,10 +1803,10 @@ const Mini = styled.div`
   .mw__btn {
     position: absolute;
     left: 50%;
-    top: 5px;
-    width: 75px;
+    top: 20px;
+    width: 78px;
     height: 23px;
-    margin-left: -37px;
+    margin-left: -39px;
     box-sizing: border-box;
     border: 0 solid transparent;
     border-image: var(--xp-p-button-pushbutton-1, none);

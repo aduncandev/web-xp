@@ -5,9 +5,9 @@ import { test, expect, bootToDesktop, startMenu } from './fixtures';
  * 1.25 or 1.5, where a macOS retina display reports 2. On the fractional
  * ratios the browser rounds each nine-slice rectangle on its own and leaves
  * hairlines between them, which read as seams across the chrome's
- * gradients. The desktop keeps its size at every ratio, so the cure is the
- * stretched underlay behind those parts (UNDERLAY_PARTS in theme/tokens.js)
- * rather than a scale that would shrink the whole desktop.
+ * gradients. The desktop keeps its size at every ratio; on a fractional one
+ * the slice compositor (theme/sliceCompositor.js) draws each part as a
+ * single texture instead, which cannot seam.
  */
 
 const geometry = page =>
@@ -45,32 +45,34 @@ for (const dpr of [1, 1.25, 1.5, 2]) {
       expect(page.__errors).toEqual([]);
     });
 
-    test('the parts that would seam carry their stretched underlay', async ({
+    test('nine-slice parts become single textures on a fractional ratio', async ({
       page,
     }) => {
       await bootToDesktop(page);
       // a task button only exists once something is running
       await startMenu(page, 'My Documents');
       await expect(page.locator('.footer__window')).toBeVisible();
-      const layers = await page.evaluate(() => {
+      await page.waitForTimeout(300);
+      const drawn = await page.evaluate(() => {
         const of = sel => {
-          const el = document.querySelector(sel);
-          if (!el) return null;
-          const cs = getComputedStyle(el);
-          return {
-            image: cs.backgroundImage,
-            size: cs.backgroundSize,
-            slice: cs.borderImageSource,
-          };
+          const cs = getComputedStyle(document.querySelector(sel));
+          return { slice: cs.borderImageSource, image: cs.backgroundImage };
         };
-        return { start: of('.footer__start'), task: of('.footer__window') };
+        return {
+          start: of('.footer__start'),
+          task: of('.footer__window'),
+          caption: of('.xp-window .header__bg'),
+        };
       });
-      for (const [name, l] of Object.entries(layers)) {
-        expect(l, name).not.toBeNull();
-        // the part's own bitmap, stretched under its nine slices
-        expect(l.image, name).toContain('url(');
-        expect(l.size, name).toContain('100%');
-        expect(l.slice, name).toContain('url(');
+      for (const [name, d] of Object.entries(drawn)) {
+        if (Number.isInteger(dpr)) {
+          // whole ratios draw the style's nine slices directly
+          expect(d.slice, name).toContain('url(');
+        } else {
+          // fractional ones get one composed texture per element
+          expect(d.slice, name).toBe('none');
+          expect(d.image, name).toContain('data:image');
+        }
       }
       expect(page.__errors).toEqual([]);
     });

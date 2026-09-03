@@ -554,42 +554,48 @@ read.
 
 Windows at 125% or 150% display scaling gives the browser a device pixel
 ratio of 1.25 or 1.5; a macOS retina display gives 2, and an unscaled
-monitor gives 1. On the fractional ratios the browser rounds each nine-slice
-rectangle on its own, so hairlines appear between the slices and read as
-seams across the chrome's gradients. Reproduce with Playwright's
-`deviceScaleFactor` at 1.25 and 1.5; nothing shows at 1 or 2.
+monitor gives 1. On the fractional ratios the browser rounds each of a
+border-image's nine rectangles on its own, so a slice edge that falls on a
+half pixel is drawn half covered and reads as a seam across the part's
+gradient. Reproduce with Playwright's `deviceScaleFactor` at 1.25 and 1.5;
+nothing shows at 1 or 2.
 
 - The desktop keeps its size at every ratio. Aligning stage pixels to whole
-  device pixels would fix the seams outright, but at 1.25 the only aligned
-  scales are 0.8 and 1.6, and shrinking the desktop by a fifth is worse than
-  the seams. `tests/scaling.spec.js` pins the size, the letterboxed case and
-  the pointer maths.
-- The cure is an underlay: `UNDERLAY_PARTS` in `theme/tokens.js` exposes a
-  part's whole bitmap as `--xp-u-<slug>-<n>`, and the sites that draw those
-  parts paint it at `100% 100%` under the nine slices, so a hairline shows
-  the part's own colours instead of a gap. It covers the Start button, the
-  taskbar and tray backgrounds, the task buttons, the Start menu's user pane
-  and log-off bands, and Explorer's task pane cards. `tools/seamscan.py`
-  finds the rest: it reports one-pixel rows and columns that differ from
-  both neighbours, run it on a crop taken at 1.25 and again at 1.
-- Parts drawn at their natural size are painted as plain background images
-  and never sliced: the caption buttons (21x21, `--xp-i-window-*button-N`),
-  the scrollbar arrows, check boxes and radio buttons. Classic blanks
-  `background-image` on those buttons in every state so Luna's art cannot
-  leak in on hover.
+  device pixels would remove the seams outright, but at 1.25 the only
+  aligned scales are 0.8 and 1.6, and a desktop a fifth smaller was rejected.
+- `theme/sliceCompositor.js` is the fix. On a fractional ratio it finds every
+  element in the stage whose computed `border-image-source` is a bitmap,
+  composes the nine slices itself into a canvas at device resolution with
+  whole-pixel slice edges, and paints that one texture as the element's
+  background with the border-image turned off inline. One image cannot
+  seam. The stylesheets keep describing every state with border-image as
+  before; the compositor reads the computed value back and recomposes on
+  resize, on class and style changes, and on hover, press and focus (the
+  events are delegated on the stage). It is idle on whole ratios and stands
+  down again if the ratio becomes whole. `screen.js` calls it from `paint`.
+  `tests/scaling.spec.js` pins the size, the letterboxed case, the pointer
+  maths, and that parts are textures on fractional ratios and border-images
+  on whole ones. `tools/seamscan.py` finds seams objectively: it reports
+  one-pixel rows and columns that differ from both neighbours.
+- Parts drawn at their natural size are plain background images and never
+  sliced: the caption buttons (`--xp-i-window-*button-N`), scrollbar arrows,
+  check boxes and radio buttons. Classic blanks `background-image` on those
+  buttons in every state so Luna's art cannot leak in on hover.
+- On a fractional ratio `screen.js` also sets `data-xp-fractional="1"` and
+  `index.css` switches every bitmap but canvases to `image-rendering: auto`:
+  nearest-neighbour cannot put a 21px button into 26.25 device pixels
+  without tearing its outline. The exporter bleeds each bitmap's edge colours
+  into its keyed-out pixels (`alpha_bleed`) so that interpolation never
+  blends the key magenta into an edge.
 - Luna's `--xp-frame-active` / `--xp-frame-inactive` are the frame bitmap's
-  inner column (`frameEdge` in parts.json, written by `tools/luna-export.py`),
-  so a hairline between the window's four frame pieces shows the frame's own
-  colour rather than the desktop. It is painted as a gradient that stays
-  transparent for the top `--xp-frame-corner` rows (Luna 6px, Classic 0),
-  because the caption bitmap's rounded corners are transparent pixels that
-  must keep showing the desktop; a flat colour there squares the window off.
-- On a fractional ratio `screen.js` sets `data-xp-fractional="1"` on the
-  root and `index.css` switches every bitmap but canvases to
-  `image-rendering: auto`. Nearest-neighbour cannot draw a 21px button into
-  26.25 device pixels without doubling some rows and not others, which tears
-  the close button's outline; interpolation is even. Integer ratios keep
-  drawing pixel for pixel.
+  inner column (`frameEdge` in parts.json) painted as a gradient that stays
+  transparent for the top `--xp-frame-corner` rows (Luna 6px, Classic 0):
+  a hairline between the window's four frame pieces shows the frame's own
+  colour, and the caption's rounded corners keep showing the desktop.
+- The caption text shadow is the scheme's own (`Window` section,
+  `textshadowcolor`): dark blue under Blue's white titles, a pale lilac under
+  Silver's near-black ones. A hardcoded black shadow made Silver's titles
+  look smeared.
 
 ## The screen
 

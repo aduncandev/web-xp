@@ -482,28 +482,25 @@ export default styled(FooterMenu)`
     /* the style's user pane bitmap; the gradient is the fallback */
     border: 0 solid transparent;
     border-image: var(--xp-p-startpanel-userpane-1, none);
-    background-size: 100% 100%, auto;
-    background-repeat: no-repeat, repeat;
-    background-image: var(--xp-u-startpanel-userpane-1, none),
-      var(
-      --xp-start-header,
-      linear-gradient(
-        to bottom,
-        #1868ce 0%,
-        #0e60cb 12%,
-        #0e60cb 20%,
-        #1164cf 32%,
-        #1667cf 33%,
-        #1b6cd3 47%,
-        #1e70d9 54%,
-        #2476dc 60%,
-        #297ae0 65%,
-        #3482e3 77%,
-        #3786e5 79%,
-        #428ee9 90%,
-        #4791eb 100%
-      )
-    );
+    background: var(
+        --xp-start-header,
+        linear-gradient(
+          to bottom,
+          #1868ce 0%,
+          #0e60cb 12%,
+          #0e60cb 20%,
+          #1164cf 32%,
+          #1667cf 33%,
+          #1b6cd3 47%,
+          #1e70d9 54%,
+          #2476dc 60%,
+          #297ae0 65%,
+          #3482e3 77%,
+          #3786e5 79%,
+          #428ee9 90%,
+          #4791eb 100%
+        )
+      );
     overflow: hidden;
   }
   /* the picture in the style's tile: 48px inside its frame */
@@ -542,30 +539,27 @@ export default styled(FooterMenu)`
     width: 100%;
     border: 0 solid transparent;
     border-image: var(--xp-p-startpanel-logoff-1, none);
-    background-size: 100% 100%, auto;
-    background-repeat: no-repeat, repeat;
-    background-image: var(--xp-u-startpanel-logoff-1, none),
-      var(
-      --xp-start-footer,
-      linear-gradient(
-        to bottom,
-        #4282d6 0%,
-        #3b85e0 3%,
-        #418ae3 5%,
-        #418ae3 17%,
-        #3c87e2 21%,
-        #3786e4 26%,
-        #3482e3 29%,
-        #2e7ee1 39%,
-        #2374df 49%,
-        #2072db 57%,
-        #196edb 62%,
-        #176bd8 72%,
-        #1468d5 75%,
-        #1165d2 83%,
-        #0f61cb 88%
-      )
-    );
+    background: var(
+        --xp-start-footer,
+        linear-gradient(
+          to bottom,
+          #4282d6 0%,
+          #3b85e0 3%,
+          #418ae3 5%,
+          #418ae3 17%,
+          #3c87e2 21%,
+          #3786e4 26%,
+          #3482e3 29%,
+          #2e7ee1 39%,
+          #2374df 49%,
+          #2072db 57%,
+          #196edb 62%,
+          #176bd8 72%,
+          #1468d5 75%,
+          #1165d2 83%,
+          #0f61cb 88%
+        )
+      );
   }
 
   .footer__item {

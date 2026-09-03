@@ -4,36 +4,31 @@ import { TASKBAR_HEIGHT } from '../constants';
 export const Container = styled.footer`
   height: ${TASKBAR_HEIGHT}px;
   image-rendering: pixelated;
-  /* the style's TaskBar.BackgroundBottom bitmap; the gradient is the fallback.
-     The same bitmap stretched underneath fills the hairlines a fractional
-     device pixel ratio leaves between the slices (see UNDERLAY_PARTS) */
+  /* the style's TaskBar.BackgroundBottom bitmap; the gradient is the fallback */
   border: 0 solid transparent;
   border-image: var(--xp-p-taskbar-backgroundbottom-1, none);
-  background-size: 100% 100%, auto;
-  background-repeat: no-repeat, repeat;
-  background-image: var(--xp-u-taskbar-backgroundbottom-1, none),
-    var(
-      --xp-taskbar,
-      linear-gradient(
-        to bottom,
-        #1f2f86 0,
-        #3165c4 3%,
-        #3682e5 6%,
-        #4490e6 10%,
-        #3883e5 12%,
-        #2b71e0 15%,
-        #2663da 18%,
-        #235bd6 20%,
-        #2258d5 23%,
-        #2157d6 38%,
-        #245ddb 54%,
-        #2562df 86%,
-        #245fdc 89%,
-        #2158d4 92%,
-        #1d4ec0 95%,
-        #1941a5 98%
-      )
-    );
+  background: var(
+    --xp-taskbar,
+    linear-gradient(
+      to bottom,
+      #1f2f86 0,
+      #3165c4 3%,
+      #3682e5 6%,
+      #4490e6 10%,
+      #3883e5 12%,
+      #2b71e0 15%,
+      #2663da 18%,
+      #235bd6 20%,
+      #2258d5 23%,
+      #2157d6 38%,
+      #245ddb 54%,
+      #2562df 86%,
+      #245fdc 89%,
+      #2158d4 92%,
+      #1d4ec0 95%,
+      #1941a5 98%
+    )
+  );
   position: absolute;
   bottom: 0;
   right: 0;
@@ -68,9 +63,6 @@ export const Container = styled.footer`
     /* the tray's own bitmap fades in from the left over 34px */
     border: 0 solid transparent;
     border-image: var(--xp-p-traynotifyhoriz-traynotify-background-1, none);
-    background-image: var(--xp-u-traynotifyhoriz-traynotify-background-1, none);
-    background-size: 100% 100%;
-    background-repeat: no-repeat;
     border-left: 1px solid var(--xp-tray-border, transparent);
     box-shadow: inset 1px 0 1px var(--xp-tray-inset, transparent);
     padding: 0 8px 0 19px;
@@ -138,9 +130,7 @@ export const Container = styled.footer`
     padding: 2px 20px 4px 10px;
     border: 0 solid transparent;
     border-image: var(--xp-p-start-button-1, none);
-    background-image: var(--xp-u-start-button-1, none);
-    background-size: 100% 100%;
-    background-repeat: no-repeat;
+    background: none;
     image-rendering: pixelated;
     color: var(--xp-start-text, #fff);
     /* 97px wide on XP: the flag, the word in Franklin Gothic Medium */
@@ -152,11 +142,9 @@ export const Container = styled.footer`
   }
   .footer__start:hover {
     border-image: var(--xp-p-start-button-2, none);
-    background-image: var(--xp-u-start-button-2, none);
   }
   .footer__start.active {
     border-image: var(--xp-p-start-button-3, none);
-    background-image: var(--xp-u-start-button-3, none);
   }
   .footer__start__flag {
     width: 25px;
@@ -174,8 +162,6 @@ export const Container = styled.footer`
   /* the bitmap has three clear rows above its edge and two below, so a
      button the bar's full 30px puts the visible face at 3px, 25 tall, as XP */
   .footer__window {
-    background-size: 100% 100%;
-    background-repeat: no-repeat;
     flex: 1;
     max-width: 162px;
     color: var(--xp-taskbtn-text, #fff);
@@ -186,7 +172,6 @@ export const Container = styled.footer`
     background-color: var(--xp-taskbtn, transparent);
     border: 0 solid transparent;
     border-image: var(--xp-p-taskband-toolbar-button-1, none);
-    background-image: var(--xp-u-taskband-toolbar-button-1, none);
     position: relative;
     image-rendering: pixelated;
     display: flex;
@@ -207,26 +192,21 @@ export const Container = styled.footer`
   .footer__window.cover:hover {
     background-color: var(--xp-taskbtn-hover, transparent);
     border-image: var(--xp-p-taskband-toolbar-button-2, none);
-    background-image: var(--xp-u-taskband-toolbar-button-2, none);
   }
   .footer__window.cover:hover:active {
     background-color: var(--xp-taskbtn-active, transparent);
     border-image: var(--xp-p-taskband-toolbar-button-3, none);
-    background-image: var(--xp-u-taskband-toolbar-button-3, none);
   }
   .footer__window.focus {
     background-color: var(--xp-taskbtn-active, transparent);
     border-image: var(--xp-p-taskband-toolbar-button-5, none);
-    background-image: var(--xp-u-taskband-toolbar-button-5, none);
   }
   .footer__window.focus:hover {
     background-color: var(--xp-taskbtn-active, transparent);
     border-image: var(--xp-p-taskband-toolbar-button-6, none);
-    background-image: var(--xp-u-taskband-toolbar-button-6, none);
   }
   .footer__window.focus:hover:active {
     border-image: var(--xp-p-taskband-toolbar-button-3, none);
-    background-image: var(--xp-u-taskband-toolbar-button-3, none);
   }
   .footer__time {
     margin: 0 5px;

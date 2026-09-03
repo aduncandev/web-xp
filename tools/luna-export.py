@@ -33,6 +33,25 @@ SCHEMES = {
 }
 
 
+def alpha_bleed(im):
+    """Give every fully transparent pixel the colour of its nearest opaque neighbour."""
+    im = im.convert('RGBA'); W, H = im.size; px = im.load()
+    pending = {(x, y) for y in range(H) for x in range(W) if px[x, y][3] == 0}
+    filled = {}
+    for _ in range(64):
+        if not pending: break
+        done = set()
+        for (x, y) in pending:
+            for dx, dy in ((-1, 0), (1, 0), (0, -1), (0, 1), (-1, -1), (1, 1), (-1, 1), (1, -1)):
+                nx, ny = x + dx, y + dy
+                if not (0 <= nx < W and 0 <= ny < H): continue
+                if (nx, ny) in filled: filled[(x, y)] = filled[(nx, ny)]; done.add((x, y)); break
+                if (nx, ny) not in pending: filled[(x, y)] = px[nx, ny][:3]; done.add((x, y)); break
+        for (x, y) in done: px[x, y] = filled[(x, y)] + (0,)
+        pending -= done
+    return im
+
+
 def read_resources(pe):
     """{name: bytes} for the bitmaps and the text files."""
     out = {}
@@ -143,6 +162,10 @@ def export_scheme(res, scheme, ini_name, out):
             transparent = props.get('transparent', props.get('glyphtransparent', '')).lower() == 'true'
             if bpp < 32 and (transparent or key.startswith('glyph') or 'glyph' in base.lower()):
                 im = key_color(im, triple(props.get('transparentcolor', ''), (255, 0, 255)))
+                # a keyed pixel keeps its colour under the alpha; a browser that
+                # interpolates (a fractional device pixel ratio) would blend that
+                # magenta into the edge, so bleed the edge colours outward instead
+                im = alpha_bleed(im)
             im.save(os.path.join(out, base + '.png'))
             count = int(props.get('imagecount', '1') or 1)
             layout = props.get('imagelayout', 'vertical').lower()
