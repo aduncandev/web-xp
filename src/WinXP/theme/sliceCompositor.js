@@ -108,7 +108,6 @@ function compose(img, slice, widths, cssW, cssH, dpr, repeat) {
   canvas.width = W;
   canvas.height = H;
   const ctx = canvas.getContext('2d');
-  ctx.imageSmoothingEnabled = true;
   ctx.imageSmoothingQuality = 'high';
   const sMidW = sw - slice.l - slice.r;
   const sMidH = sh - slice.t - slice.b;
@@ -116,6 +115,14 @@ function compose(img, slice, widths, cssW, cssH, dpr, repeat) {
   const dMidH = H - T - B;
   const draw = (sx, sy, sWidth, sHeight, dx, dy, dWidth, dHeight) => {
     if (sWidth <= 0 || sHeight <= 0 || dWidth <= 0 || dHeight <= 0) return;
+    // A slice drawn near its own size is interpolated, which keeps a one
+    // pixel outline even on a fractional ratio. A slice being stretched is
+    // replicated instead, as border-image does: interpolating a one-row
+    // middle across its span would smear it into a gradient (the Start
+    // menu's orange line under the user pane).
+    const stretch =
+      dWidth / (sWidth * dpr) > 1.5 || dHeight / (sHeight * dpr) > 1.5;
+    ctx.imageSmoothingEnabled = !stretch;
     ctx.drawImage(img, sx, sy, sWidth, sHeight, dx, dy, dWidth, dHeight);
   };
   // an edge that repeats is tiled at the source size, scaled to the ratio
