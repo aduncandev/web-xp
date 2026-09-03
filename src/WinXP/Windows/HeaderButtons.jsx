@@ -62,34 +62,25 @@ function HeaderButtons({
 // State strips run normal, hot, pressed, disabled for an active window,
 // then the same four for an inactive one
 const state = (isFocus, n) => (isFocus ? n : n + 4);
-const part = (kind, n) => `var(--xp-p-window-${kind}-${n}, none)`;
-const glyph = (kind, n) => `var(--xp-g-window-${kind}-${n}, none)`;
+// The face and the glyph are both plain images at their natural 21x21, one
+// background layer each: nine-slicing a button that is never stretched
+// breaks its outline wherever the browser lands an edge on a half device
+// pixel, which is what Windows does at 125% and 150% scaling.
+const face = (kind, n) =>
+  `var(--xp-g-window-${kind}-${n}, none), var(--xp-i-window-${kind}-${n}, none)`;
 const button = (cls, kind, isFocus) => `
   .header__button--${cls} {
-    border-image: ${part(kind, state(isFocus, 1))};
-  }
-  .header__button--${cls}::after {
-    background-image: ${glyph(kind, state(isFocus, 1))};
+    background-image: ${face(kind, state(isFocus, 1))};
   }
   .header__button--${cls}:hover {
-    border-image: ${part(kind, state(isFocus, 2))};
-  }
-  .header__button--${cls}:hover::after {
-    background-image: ${glyph(kind, state(isFocus, 2))};
+    background-image: ${face(kind, state(isFocus, 2))};
   }
   .header__button--${cls}:hover:active {
-    border-image: ${part(kind, state(isFocus, 3))};
-  }
-  .header__button--${cls}:hover:active::after {
-    background-image: ${glyph(kind, state(isFocus, 3))};
+    background-image: ${face(kind, state(isFocus, 3))};
   }
   .header__button--${cls}.header__button--disable,
   .header__button--${cls}.header__button--disable:hover {
-    border-image: ${part(kind, state(isFocus, 4))};
-  }
-  .header__button--${cls}.header__button--disable::after,
-  .header__button--${cls}.header__button--disable:hover::after {
-    background-image: ${glyph(kind, state(isFocus, 4))};
+    background-image: ${face(kind, state(isFocus, 4))};
   }
 `;
 
@@ -107,20 +98,12 @@ export default styled(HeaderButtons)`
     width: 21px;
     height: 21px;
     padding: 0;
-    border: 0 solid transparent;
-    background: transparent;
+    border: 0;
+    background-color: transparent;
+    background-repeat: no-repeat, no-repeat;
+    background-position: center, center;
     image-rendering: pixelated;
     cursor: default;
-  }
-  /* the glyph sits above the face: a border-image paints over any background */
-  .header__button::after {
-    content: '';
-    position: absolute;
-    inset: 0;
-    background-repeat: no-repeat;
-    background-position: center;
-    image-rendering: pixelated;
-    pointer-events: none;
   }
   .header__button--disable {
     outline: none;

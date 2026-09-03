@@ -3839,5 +3839,17 @@
    "layout": "vertical",
    "bpp": 24
   }
+ },
+ "frameEdge": {
+  "active": [
+   102,
+   102,
+   126
+  ],
+  "inactive": [
+   201,
+   201,
+   215
+  ]
  }
 }

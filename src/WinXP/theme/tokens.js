@@ -14,7 +14,13 @@
  * falls back to the colours.
  */
 import { classicSchemeById, rgb } from './classicSchemes';
-import { lunaImage, lunaMetrics, lunaPart, LUNA_SCHEMES } from './lunaArt';
+import {
+  lunaFrameEdge,
+  lunaImage,
+  lunaMetrics,
+  lunaPart,
+  LUNA_SCHEMES,
+} from './lunaArt';
 
 export { LUNA_SCHEMES };
 export const STYLE = { LUNA: 'luna', CLASSIC: 'classic' };
@@ -142,6 +148,12 @@ const IMAGES = [
   ['ExplorerBar.SpecialGroupExpand', 'imagefile'],
   ['Header.HeaderItem', 'imagefile'],
   ['Header', 'imagefile'],
+  ['Window.MinButton', 'imagefile'],
+  ['Window.MaxButton', 'imagefile'],
+  ['Window.RestoreButton', 'imagefile'],
+  ['Window.CloseButton', 'imagefile'],
+  ['Window.HelpButton', 'imagefile'],
+  ['Window.SmallCloseButton', 'imagefile'],
   ['TrackBar.ThumbBottom', 'imagefile1'],
 ];
 
@@ -200,6 +212,7 @@ const c = (metrics, key, fallback) => {
 /** Luna: the scheme's system colours from [SysMetrics] and its bitmaps. */
 export function lunaTokens(scheme) {
   const m = lunaMetrics(scheme);
+  const edge = lunaFrameEdge(scheme);
   const part = section => (lunaPart(scheme, section) || {}).props || {};
   const startBtn = part('Start::Button');
   const userPane = part('StartPanel.UserPane');
@@ -239,8 +252,11 @@ export function lunaTokens(scheme) {
     captionText: c(m, 'captiontext', '#ffffff'),
     captionTextInactive: c(m, 'inactivecaptiontext', '#ffffff'),
     captionShadow: '#000000',
-    frameActive: 'transparent',
-    frameInactive: 'transparent',
+    // behind the frame's four pieces: a browser that lands an edge on a
+    // half device pixel (Windows at 125% or 150%) leaves a hairline, and
+    // it should show the frame's own colour, never the desktop
+    frameActive: edge.active || 'transparent',
+    frameInactive: edge.inactive || 'transparent',
     frameRadius: '0px',
     taskbar: 'none',
     tray: 'none',

@@ -28,6 +28,13 @@ export function lunaImage(scheme, name, state) {
   return urls[`${scheme}/${name}${state ? `-${state}` : ''}`] || null;
 }
 
+/** The frame's inner colour, for hairlines between the frame's pieces. */
+export function lunaFrameEdge(scheme) {
+  const e = (PARTS[scheme] || {}).frameEdge || {};
+  const css = v => (Array.isArray(v) ? `rgb(${v.join(',')})` : null);
+  return { active: css(e.active), inactive: css(e.inactive) };
+}
+
 /** "l, r, t, b" from the INI to numbers. */
 const margins = s => (s || '0,0,0,0').split(',').map(v => parseInt(v, 10) || 0);
 

@@ -50,15 +50,48 @@ export function readDisplay() {
 export const getDisplay = () => current;
 export const getGeometry = () => geometry;
 
+/**
+ * One stage pixel has to cover a whole number of device pixels, or the
+ * browser lands element edges and bitmap slices on half pixels and the
+ * chrome shows seams: Windows at 125% or 150% display scaling reports a
+ * device pixel ratio of 1.25 or 1.5, where a macOS retina display reports
+ * 2 and never shows them. Snapping down keeps the desktop crisp; it only
+ * gives up when the window is smaller than the stage in device pixels,
+ * where there is nothing to snap to.
+ */
+function snapScale(raw, dpr) {
+  const steps = Math.floor(raw * dpr + 1e-6);
+  return steps >= 1 ? steps / dpr : raw;
+}
+
+const ratio = () =>
+  (typeof window !== 'undefined' && window.devicePixelRatio) || 1;
+
 /** Where a setting puts the stage on the current browser window. */
-export function layoutFor(d, vw = window.innerWidth, vh = window.innerHeight) {
+export function layoutFor(
+  d,
+  vw = window.innerWidth,
+  vh = window.innerHeight,
+  dpr = ratio(),
+) {
+  // Large DPI draws fewer, bigger logical pixels, which is a scale of its
+  // own and stays out of the snapping
   const dpi = (d.dpi || 96) / 96;
-  const [mw, mh] = d.mode || [vw, vh];
-  // Large DPI: the same stage, fewer and bigger logical pixels
+  if (!d.mode) {
+    const scale = snapScale(1, dpr) * dpi;
+    return {
+      width: Math.round(vw / scale),
+      height: Math.round(vh / scale),
+      scale,
+      x: 0,
+      y: 0,
+    };
+  }
+  const [mw, mh] = d.mode;
   const width = Math.round(mw / dpi);
   const height = Math.round(mh / dpi);
   const fit = Math.min(vw / mw, vh / mh, 1);
-  const scale = fit * dpi;
+  const scale = snapScale(fit, dpr) * dpi;
   return {
     width,
     height,
@@ -147,6 +180,19 @@ export function subscribeScreen(fn) {
 
 if (typeof window !== 'undefined') {
   window.addEventListener('resize', paint);
+  // moving the window to a display with another scaling factor changes the
+  // device pixel ratio without always resizing the window
+  let watch = null;
+  const watchRatio = () => {
+    if (watch) watch.removeEventListener('change', onRatio);
+    watch = window.matchMedia(`(resolution: ${ratio()}dppx)`);
+    watch.addEventListener('change', onRatio);
+  };
+  const onRatio = () => {
+    paint();
+    watchRatio();
+  };
+  watchRatio();
 }
 
 export function useScreenSize() {

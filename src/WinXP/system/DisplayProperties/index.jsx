@@ -1681,52 +1681,35 @@ const Mini = styled.div`
     position: relative;
     width: 21px;
     height: 21px;
-    border: 0 solid transparent;
+    border: 0;
     box-sizing: border-box;
-  }
-  .mw__cb::after {
-    content: '';
-    position: absolute;
-    inset: 0;
-    background-repeat: no-repeat;
-    background-position: center;
+    background-repeat: no-repeat, no-repeat;
+    background-position: center, center;
     image-rendering: pixelated;
   }
   .mw__cb--min {
-    border-image: var(--xp-p-window-minbutton-1, none);
-  }
-  .mw__cb--min::after {
-    background-image: var(--xp-g-window-minbutton-1, none);
+    background-image: var(--xp-g-window-minbutton-1, none),
+      var(--xp-i-window-minbutton-1, none);
   }
   .mw__cb--max {
-    border-image: var(--xp-p-window-maxbutton-1, none);
-  }
-  .mw__cb--max::after {
-    background-image: var(--xp-g-window-maxbutton-1, none);
+    background-image: var(--xp-g-window-maxbutton-1, none),
+      var(--xp-i-window-maxbutton-1, none);
   }
   .mw__cb--close {
-    border-image: var(--xp-p-window-closebutton-1, none);
-  }
-  .mw__cb--close::after {
-    background-image: var(--xp-g-window-closebutton-1, none);
+    background-image: var(--xp-g-window-closebutton-1, none),
+      var(--xp-i-window-closebutton-1, none);
   }
   .mw__cb--min[data-state='5'] {
-    border-image: var(--xp-p-window-minbutton-5, none);
-  }
-  .mw__cb--min[data-state='5']::after {
-    background-image: var(--xp-g-window-minbutton-5, none);
+    background-image: var(--xp-g-window-minbutton-5, none),
+      var(--xp-i-window-minbutton-5, none);
   }
   .mw__cb--max[data-state='5'] {
-    border-image: var(--xp-p-window-maxbutton-5, none);
-  }
-  .mw__cb--max[data-state='5']::after {
-    background-image: var(--xp-g-window-maxbutton-5, none);
+    background-image: var(--xp-g-window-maxbutton-5, none),
+      var(--xp-i-window-maxbutton-5, none);
   }
   .mw__cb--close[data-state='5'] {
-    border-image: var(--xp-p-window-closebutton-5, none);
-  }
-  .mw__cb--close[data-state='5']::after {
-    background-image: var(--xp-g-window-closebutton-5, none);
+    background-image: var(--xp-g-window-closebutton-5, none),
+      var(--xp-i-window-closebutton-5, none);
   }
   .mw__inner {
     position: relative;
@@ -1902,7 +1885,13 @@ const Mini = styled.div`
     .mw--msg .mw__cb--close {
       margin-left: 0;
     }
+    .mw__cb {
+      background-image: none;
+    }
     .mw__cb::after {
+      content: '';
+      position: absolute;
+      inset: 0;
       background: var(--xp-button-text, #000);
       -webkit-mask: var(--glyph) var(--glyph-pos) no-repeat;
       mask: var(--glyph) var(--glyph-pos) no-repeat;

@@ -171,7 +171,15 @@ def export_scheme(res, scheme, ini_name, out):
                         sw, sh = state.size
                         state.crop((l, t, sw - r, sh - b)).save(os.path.join(out, f'{base}-{i + 1}-mid.png'))
             written[base] = {'size': im.size, 'states': count, 'layout': layout, 'bpp': bpp}
-    json.dump({'scheme': scheme, 'parts': ini, 'images': written}, open(os.path.join(out, 'parts.json'), 'w'), indent=1)
+    # the frame's inner column: what a hairline between the window's frame
+    # pieces should show when the browser lands an edge on a half pixel
+    edge = {}
+    for state, name in ((1, 'active'), (2, 'inactive')):
+        f = os.path.join(out, f'frameLeft-{state}.png')
+        if os.path.exists(f):
+            im = Image.open(f).convert('RGB')
+            edge[name] = list(im.getpixel((im.width - 1, im.height // 2)))
+    json.dump({'scheme': scheme, 'parts': ini, 'images': written, 'frameEdge': edge}, open(os.path.join(out, 'parts.json'), 'w'), indent=1)
     print(f'{scheme}: {len(written)} bitmaps, {len(ini)} sections')
 
 

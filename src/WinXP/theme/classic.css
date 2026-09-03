@@ -46,6 +46,16 @@ html[data-xp-style='classic'] .header__buttons {
   margin-right: 2px;
   gap: 0;
 }
+/* the style's own buttons: never the Luna bitmaps, in any state */
+html[data-xp-style='classic'] .header__button,
+html[data-xp-style='classic'] .header__button:hover,
+html[data-xp-style='classic'] .header__button:hover:active,
+html[data-xp-style='classic'] .header__button.header__button--disable,
+html[data-xp-style='classic'] .xpdlg-close,
+html[data-xp-style='classic'] .xpdlg-close:hover,
+html[data-xp-style='classic'] .xpdlg-close:hover:active {
+  background-image: none;
+}
 html[data-xp-style='classic'] .header__button {
   width: 16px;
   height: 14px;

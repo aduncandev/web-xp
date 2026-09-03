@@ -254,49 +254,35 @@ const Frame = styled.div.attrs({ className: 'xpdlg' })`
     cursor: default;
     padding: 0;
     flex-shrink: 0;
-    border: 0 solid transparent;
-    border-image: var(--xp-p-window-closebutton-1, none);
-    background: transparent;
+    border: 0;
+    /* glyph over face, both at their natural 21x21: see HeaderButtons */
+    background-color: transparent;
+    background-image: var(--xp-g-window-closebutton-1, none),
+      var(--xp-i-window-closebutton-1, none);
+    background-repeat: no-repeat, no-repeat;
+    background-position: center, center;
     image-rendering: pixelated;
-    &::after {
-      content: '';
-      position: absolute;
-      inset: 0;
-      background: var(--xp-g-window-closebutton-1, none) center no-repeat;
-      image-rendering: pixelated;
-      pointer-events: none;
-    }
     &:hover {
-      border-image: var(--xp-p-window-closebutton-2, none);
-    }
-    &:hover::after {
-      background-image: var(--xp-g-window-closebutton-2, none);
+      background-image: var(--xp-g-window-closebutton-2, none),
+        var(--xp-i-window-closebutton-2, none);
     }
     &:hover:active {
-      border-image: var(--xp-p-window-closebutton-3, none);
-    }
-    &:hover:active::after {
-      background-image: var(--xp-g-window-closebutton-3, none);
+      background-image: var(--xp-g-window-closebutton-3, none),
+        var(--xp-i-window-closebutton-3, none);
     }
   }
   .xpdlg-help {
     margin-right: 2px;
-    border-image: var(--xp-p-window-helpbutton-1, none);
-  }
-  .xpdlg-help::after {
-    background-image: var(--xp-g-window-helpbutton-1, none);
+    background-image: var(--xp-g-window-helpbutton-1, none),
+      var(--xp-i-window-helpbutton-1, none);
   }
   .xpdlg-help:hover {
-    border-image: var(--xp-p-window-helpbutton-2, none);
-  }
-  .xpdlg-help:hover::after {
-    background-image: var(--xp-g-window-helpbutton-2, none);
+    background-image: var(--xp-g-window-helpbutton-2, none),
+      var(--xp-i-window-helpbutton-2, none);
   }
   .xpdlg-help:hover:active {
-    border-image: var(--xp-p-window-helpbutton-3, none);
-  }
-  .xpdlg-help:hover:active::after {
-    background-image: var(--xp-g-window-helpbutton-3, none);
+    background-image: var(--xp-g-window-helpbutton-3, none),
+      var(--xp-i-window-helpbutton-3, none);
   }
   .xpdlg-content {
     flex: 1;
