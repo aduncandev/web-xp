@@ -564,15 +564,19 @@ nothing shows at 1 or 2.
   device pixels would remove the seams outright, but at 1.25 the only
   aligned scales are 0.8 and 1.6, and a desktop a fifth smaller was rejected.
 - `theme/sliceCompositor.js` is the fix. On a fractional ratio it finds every
-  element in the stage whose computed `border-image-source` is a bitmap,
-  composes the nine slices itself into a canvas at device resolution with
-  whole-pixel slice edges, and paints that one texture as the element's
-  background with the border-image turned off inline. One image cannot
-  seam. The stylesheets keep describing every state with border-image as
-  before; the compositor reads the computed value back and recomposes on
-  resize, on class and style changes, and on hover, press and focus (the
-  events are delegated on the stage). It is idle on whole ratios and stands
-  down again if the ratio becomes whole. `screen.js` calls it from `paint`.
+  element in the stage whose computed `border-image-source` is a bitmap, or
+  whose background is made only of the theme's small bitmaps (caption
+  buttons, check boxes), composes the slices or sprites itself into a canvas
+  at device resolution with whole-pixel edges and no interpolation, and
+  paints that one texture as the element's background at its device size,
+  shifted by the element's sub-pixel offset so each texture pixel lands on
+  one device pixel and is copied rather than resampled. One image cannot
+  seam, and nothing is soft. The stylesheets keep describing every state as
+  before; the compositor reads the computed values back and recomposes on
+  resize, on class and style changes (a window's transform included), and on
+  hover, press and focus, with the events delegated on the stage. It is idle
+  on whole ratios and stands down again if the ratio becomes whole.
+  `screen.js` calls it from `paint`.
   `tests/scaling.spec.js` pins the size, the letterboxed case, the pointer
   maths, and that parts are textures on fractional ratios and border-images
   on whole ones. `tools/seamscan.py` finds seams objectively: it reports
