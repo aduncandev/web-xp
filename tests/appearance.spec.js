@@ -38,11 +38,16 @@ const cssVar = (page, name) =>
   );
 const rootStyle = page =>
   page.evaluate(() => document.documentElement.dataset.xpStyle || '');
+// The frame's colour sits behind its pieces as a gradient (clear over the
+// caption's rounded corners), so read it out of that rather than the flat
+// background colour
 const frameColor = page =>
-  page.evaluate(
-    () =>
-      getComputedStyle(document.querySelector('.xp-window')).backgroundColor,
-  );
+  page.evaluate(() => {
+    const cs = getComputedStyle(document.querySelector('.xp-window'));
+    // the gradient runs transparent then the frame colour: take the last stop
+    const stops = [...cs.backgroundImage.matchAll(/rgba?\([^)]*\)/g)];
+    return stops.length ? stops[stops.length - 1][0] : cs.backgroundColor;
+  });
 /** The bitmap the caption band is drawn from, if the style uses one. */
 const captionImage = page =>
   page.evaluate(

@@ -139,3 +139,11 @@ img,
 .footer__item__img {
   image-rendering: auto;
 }
+
+/* On a fractional device pixel ratio (Windows at 125% or 150%) the chrome's
+   bitmaps interpolate instead of snapping to pixels: nearest-neighbour there
+   doubles some rows and not others and tears one-pixel outlines. Canvases
+   keep their own choice (Paint's zoom, the games). See screen.js. */
+html[data-xp-fractional='1'] :not(canvas) {
+  image-rendering: auto !important;
+}

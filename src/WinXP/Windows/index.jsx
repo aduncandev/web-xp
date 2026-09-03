@@ -343,10 +343,13 @@ const StyledWindow = styled(Window)`
     header.invisible
       ? 0
       : 'var(--xp-caption-total, 29px) var(--xp-frame-w, 4px) var(--xp-frame-w, 4px)'};
-  background-color: ${({ isFocus }) =>
+  /* the frame's own colour behind its four pieces, so a hairline between
+     them shows blue rather than the desktop; clear at the top, where the
+     caption's rounded corners let the desktop through */
+  background: ${({ isFocus }) =>
     isFocus
-      ? 'var(--xp-frame-active, transparent)'
-      : 'var(--xp-frame-inactive, transparent)'};
+      ? 'linear-gradient(to bottom, transparent var(--xp-frame-corner, 0px), var(--xp-frame-active, transparent) var(--xp-frame-corner, 0px))'
+      : 'linear-gradient(to bottom, transparent var(--xp-frame-corner, 0px), var(--xp-frame-inactive, transparent) var(--xp-frame-corner, 0px))'};
   flex-direction: column;
   /* Luna: the style's caption bitmap; Classic: the scheme's gradient */
   .header__bg {

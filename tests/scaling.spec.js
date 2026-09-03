@@ -35,6 +35,11 @@ for (const dpr of [1, 1.25, 1.5, 2]) {
       expect(g.dpr).toBeCloseTo(dpr, 3);
       // one stage pixel is one css pixel, whatever the display scaling is
       expect(g.scale).toBeCloseTo(1, 3);
+      // bitmaps interpolate only where pixels cannot be drawn one for one
+      const fractional = await page.evaluate(
+        () => document.documentElement.dataset.xpFractional,
+      );
+      expect(fractional).toBe(Number.isInteger(dpr) ? '' : '1');
       expect(g.width * g.scale).toBeCloseTo(g.inner[0], 0);
       expect(g.height * g.scale).toBeCloseTo(g.inner[1], 0);
       expect(page.__errors).toEqual([]);

@@ -86,7 +86,20 @@ export function screenSize() {
 
 const stage = () => document.getElementById(STAGE_ID);
 
+/*
+ * A fractional device pixel ratio (Windows at 125% or 150%) cannot draw a
+ * bitmap pixel for pixel: nearest-neighbour scaling doubles some rows and
+ * not others, and a one-pixel outline comes out ragged. Interpolation is
+ * the lesser evil there, and the stylesheet switches to it on this flag.
+ */
+function markRatio() {
+  const dpr = window.devicePixelRatio || 1;
+  document.documentElement.dataset.xpFractional =
+    Math.abs(dpr - Math.round(dpr)) > 0.001 ? '1' : '';
+}
+
 function paint() {
+  markRatio();
   geometry = active
     ? layoutFor(current)
     : {

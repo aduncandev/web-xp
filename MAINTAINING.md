@@ -580,7 +580,16 @@ seams across the chrome's gradients. Reproduce with Playwright's
 - Luna's `--xp-frame-active` / `--xp-frame-inactive` are the frame bitmap's
   inner column (`frameEdge` in parts.json, written by `tools/luna-export.py`),
   so a hairline between the window's four frame pieces shows the frame's own
-  colour rather than the desktop.
+  colour rather than the desktop. It is painted as a gradient that stays
+  transparent for the top `--xp-frame-corner` rows (Luna 6px, Classic 0),
+  because the caption bitmap's rounded corners are transparent pixels that
+  must keep showing the desktop; a flat colour there squares the window off.
+- On a fractional ratio `screen.js` sets `data-xp-fractional="1"` on the
+  root and `index.css` switches every bitmap but canvases to
+  `image-rendering: auto`. Nearest-neighbour cannot draw a 21px button into
+  26.25 device pixels without doubling some rows and not others, which tears
+  the close button's outline; interpolation is even. Integer ratios keep
+  drawing pixel for pixel.
 
 ## The screen
 

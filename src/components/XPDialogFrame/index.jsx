@@ -161,7 +161,11 @@ const Frame = styled.div.attrs({ className: 'xpdlg' })`
   box-sizing: border-box;
   padding: var(--xp-caption-total, 29px) var(--xp-frame-w, 4px)
     var(--xp-frame-w, 4px);
-  background-color: var(--xp-frame-active, transparent);
+  background: linear-gradient(
+    to bottom,
+    transparent var(--xp-frame-corner, 0px),
+    var(--xp-frame-active, transparent) var(--xp-frame-corner, 0px)
+  );
   box-shadow: 2px 4px 8px rgba(0, 0, 0, 0.5);
   font-family: Tahoma, 'Noto Sans', sans-serif;
   font-size: 11px;

@@ -278,6 +278,9 @@ export function lunaTokens(scheme) {
     // it should show the frame's own colour, never the desktop
     frameActive: edge.active || 'transparent',
     frameInactive: edge.inactive || 'transparent',
+    // the caption bitmap's top corners are rounded: this many rows at the
+    // top stay clear of that colour so the desktop shows through them
+    frameCorner: '6px',
     frameRadius: '0px',
     taskbar: 'none',
     tray: 'none',
@@ -366,6 +369,7 @@ export function classicTokens(scheme) {
     captionShadow: 'transparent',
     frameActive: k.ButtonFace,
     frameInactive: k.ButtonFace,
+    frameCorner: '0px',
     frameRadius: '0px',
     taskbar: `linear-gradient(to bottom, ${k.ButtonHilight} 0, ${k.ButtonHilight} 1px, ${k.ButtonFace} 1px)`,
     tray: k.ButtonFace,
